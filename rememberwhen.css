@@ -1,0 +1,279 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * Hearts implementation : © Gregory Isabelli <gisabelli@boardgamearena.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+  *
+ * Hearts stylesheet
+ *
+ */
+
+/*
+
+    This is the CSS stylesheet of your game User Interface.
+    
+    Styles defined on this file will be applied to the HTML elements you defined in your
+    HTML template (hearts_hearts.tpl), and to HTML elements you create dynamically
+    (in hearts.js).
+    
+    Usually, you are using CSS to:
+    
+    1°) define the overall layout of your game
+        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+
+    2°) create your CSS-sprites:
+        All images of your games should be gathered into a small number of image files. Then, using
+        background-image and background-position CSS properties, you create HTML blocks that can 
+        display these images correctly (see example below).
+    
+    3°) ... anything else:
+        This is really easy to add and remove CSS classes dynamically from your Javascript with
+        dojo.addClass and dojo.removeClass. This is also easy to check if an element has a class
+        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
+        very often, using CSS classes for the logic of your user interface allow you to do complex
+        thing easyly.
+        
+        
+     Note: on the production platform, this file will be compressed and comments will be remove.
+           Consequently, don't hesitate to put as many comments as necessary.
+*/
+@import url(../../../css/csslayer.css);
+
+/** Table layout **/
+/**
+#playertables {
+    position: relative;
+    width: 710px;
+    height: 340px;
+}
+
+.playertablename {
+    font-weight: bold;
+}
+
+.playertable {
+    position: absolute;
+    text-align: center;
+    width: 180px;
+    height: 130px;
+}
+
+.playertable_N {
+    left: 50%;
+    top: 0px;
+    margin-left: -90px; 
+}
+.playertable_S {
+    left: 50%;
+    bottom: 0px;
+    margin-left: -90px; 
+}
+.playertable_W {
+    left: 0px;
+    top: 50%;
+    margin-top: -55px; 
+}
+.playertable_E {
+    right: 0px;
+    top: 50%;
+    margin-top: -55px; 
+}
+.playertablecard {
+    display: inline-block;
+    position: relative;
+    margin-top: 5px;
+    width: 150px;
+    height: 150px;
+} **/
+.invisible {
+	opacity: 0;
+	width: 0px;
+	height: 0px;
+}
+
+.floatL {
+	float: left;
+	height: 500px;
+}
+
+/* Style the list */
+ul.tab {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Float the list items side by side */
+ul.tab li {float: left;}
+
+/* Style the links inside the list items */
+ul.tab li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of links on hover */
+ul.tab li a:hover {background-color: #ddd;}
+
+/* Create an active/current tablink class */
+ul.tab li a:focus, .active {background-color: #ccc;}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}	
+/*** sentence on table ***/
+.sentenceboard {
+	float: left;
+    width: 750px;
+    height: 380px; 
+   
+    /**height: 762px; **/
+	background-size: 750px 400px;
+ background-image: url('img/sentence.png'); 
+
+}
+.hand {
+	clear: both;
+}
+#spot_1 {
+	top: 140px;
+	left: 59px;
+}
+#spot_2 {
+	top: 140px;
+	left: 221px;
+}
+#spot_3 {
+	top: 140px;
+	left: 396px;
+}
+#spot_4 {
+	top: 140px;
+	left: 558px;
+}
+#spot_5 {
+	top: 302px;
+	left: 34px;
+}
+
+#spot_6 {
+	top: 302px;
+	left: 200px;
+}
+
+#spot_7 {
+	top: 302px;
+	left: 367px;
+}
+
+#spot_8 {
+	top: 302px;
+	left: 586px;
+}
+
+.spot  {
+    position: absolute;
+	border: 1px solid red;
+	width: 150px;
+    height: 150px;
+	/**background-color: blue; **/
+}
+
+	
+/*** cards on table ***/
+
+.cardontable {
+    display: inline-block;
+    position: relative;
+    width: 150px;
+    height: 150px;
+	background-color: blue;
+	border: 1px;
+	background-size: 1200px 150px ;
+    background-image: url('img/fronts-sm.png'); 
+}
+
+
+.text {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-size: 6pt
+}  
+
+
+.text_1 {
+	position: absolute;
+	border: 1px solid red;
+	left: -20%;
+	top: 40%;
+	width: 60%;
+	height: 18%;
+	line-height: 18%;
+	text-align: center;
+	transform: rotate(-90deg);
+}
+
+.text_2 {
+	position: absolute;
+	border: 1px solid red;
+	left: 20%;
+	top: -0%;
+	width: 60%;
+	height: 18%;
+	text-align: center;
+}
+
+.text_3 {
+	position: absolute;
+	border: 1px solid red;
+	left: 59%;
+	top: 40%;
+	width: 60%;
+	height: 18%;
+	line-height: 18%;
+	text-align: center;
+	transform: rotate(90deg);
+}
+
+.text_4 {
+	position: absolute;
+	border: 1px solid red;
+	left: 20%;
+	top:  80%;
+	width: 60%;
+	height: 18%;
+	text-align: center;
+	transform: rotate(180deg);
+}
+
+.pos_1 {
+	transform: rotate(90deg);
+}
+
+.pos_2 {
+	transform: rotate(0deg);
+}
+.pos_3 {
+	transform: rotate(-90deg);
+}
+.pos_4 {
+	transform: rotate(180deg);
+}
+

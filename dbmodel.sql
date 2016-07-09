@@ -33,3 +33,39 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
+-- add info about first player
+ALTER TABLE `player` ADD `player_first` BOOLEAN NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_1` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_2` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_3` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_4` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_5` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_6` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_7` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `sentence_8` int(10) unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `guess` int(10) unsigned DEFAULT '0';
+
+
+CREATE TABLE IF NOT EXISTS `card` (
+  `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `card_type` varchar(16) NOT NULL,
+  `card_type_arg` int(11) NOT NULL,
+  `card_location` varchar(16) NOT NULL,
+  `card_location_arg` int(11) NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `rw_card` (
+  `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `card_type` varchar(16) NOT NULL,
+  `card_type_arg` int(11) NOT NULL,
+  `card_word_1` varchar(50) NOT NULL,
+  `card_word_2` varchar(50) NOT NULL,
+  `card_word_3` varchar(50) NOT NULL,
+  `card_word_4` varchar(50) NOT NULL,
+  `card_rotation` int(4) NOT NULL,
+  `card_location` varchar(16) NOT NULL,
+  `card_location_arg` int(11) NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+

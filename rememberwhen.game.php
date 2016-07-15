@@ -198,6 +198,21 @@ class RememberWhen extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+	
+		function doesPlayerHaveCardType($playerId, $cardType)
+	{
+		$playerhand = $this->cards->getPlayerHand( $playerId );
+		// look at each card and check
+		foreach ($this->cards->getPlayerHand($playerId) as $card)
+		{
+			if ($card['type'] == $cardType) 
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
     /*
         populateCard: 
         
@@ -330,7 +345,7 @@ class RememberWhen extends Table
 		
         foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
         {
-			self::notifyAllPlayers('points', 'Dealing cards from deck-'.$color_id, array(
+			self::notifyAllPlayers('points', 'Dealing cards from deck-'+$color_id, array(
                     'player_id' => '',
                     'player_name' => ''
                 ) );
@@ -338,7 +353,7 @@ class RememberWhen extends Table
 			{
 				if (!$this->doesPlayerHaveCardType($player_id, $color_id)) 
 				{
-					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
+					$cards = $this->cards->pickCards( 1, 'deck-'+$color_id, $player_id );
 				}
             
 				// Notify player about his cards

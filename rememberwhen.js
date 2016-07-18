@@ -61,8 +61,7 @@ function (dojo, declare) {
             }
 			player_id = this.player_id;
 			
-				
-            console.log( "Build player hand" );
+			
 
             // Player hand
             this.playerHand = new ebg.stock();
@@ -71,7 +70,8 @@ function (dojo, declare) {
 			this.playerHand.setSelectionMode(1);
             dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 			
-            console.log( "Build sentences" );
+            /*
+			console.log( "Build sentences" );
 			
              // Sentence board
             this.sentence = new ebg.stock();
@@ -86,7 +86,8 @@ function (dojo, declare) {
             //this.top_sentence.image_items_per_row = 8;
 			//this.top_sentence.setSelectionMode(1);
             //dojo.connect( this.top_sentence, 'onmouseclick', this, 'onCardClick' );
-
+			*/
+			/*
             console.log( "Add interactions to cards" );
 			
 			dojo.addOnLoad( function() {
@@ -96,26 +97,7 @@ function (dojo, declare) {
 				var el = this; 
 				
 				console.log('onClick ' + this.id + this.classes ); 
-				/**
-				// The following code to determine the transform style property name
-				// is adapted from:
-				// http://www.zachstronaut.com/posts/2009/02/17/animate-css-transforms-firefox-webkit.html
-				var transform;
-				dojo.forEach(
-					['transform', 'WebkitTransform', 'msTransform',
-					'MozTransform', 'OTransform'],
-					function (name) {
-						if (typeof dojo.body().style[name] != 'undefined') {
-							transform = name;
-						}
-					});
-				var animation = new dojo.Animation({
-					curve: [0, 360],
-					onAnimate: function (v) {
-					this.style[transform] = 'rotate(' + v + 'deg)';
-					}
-				}).play();
-				**/
+
 				
 				if (dojo.hasClass(this.id, 'pos_1')) {
 					dojo.replaceClass(this.id, 'pos_2', 'pos_1');
@@ -128,23 +110,22 @@ function (dojo, declare) {
 				} 
 			  });
 			});
-			
+			*/
             console.log( "Create card types" );
 
             // Create cards types:
             for( var color=1;color<=8;color++ )
             {
-                for( var value=2;value<=14;value++ )
-                {
-                    // Build card type id
-                    var card_type_id = this.getCardUniqueId( color, value );
-                    this.playerHand.addItemType( card_type_id, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
+                
+                    // Build card type
+					this.playerHand.addItemType( color, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
 					//this.sentence.addItemType( card_type_id, color, g_gamethemeurl+'img/fronts.png', color - 1 );
 					//console.log('Card[id:'+card_type_id+ ', color: ' + color + ', value=' + value + '] Calculated details [color/type=' + this.getCardType(card_type_id) + ', value='+ this.getCardValue(card_type_id)+']');
-                }
+                
             } 
 			//console.log('this.getCardType(13)=' + this.getCardType(13));
 			//console.log('this.getCardValue(13)=' + this.getCardValue(13));
+			/*
             console.log( "Hide hand of sentence builder" );
 			// Hide hand of sentence builder
 			console.log('Sentence builder: ' + gamedatas.sentence_builder + ', Me: ' + player_id);
@@ -152,17 +133,19 @@ function (dojo, declare) {
 				console.log('I am building this sentence.');
 				dojo.style( 'myhand', 'display', 'none' );
 			}
-
-
+			*/
+			
             // Cards in player's hand 
             for( var i in this.gamedatas.hand )
             {
                 var card = this.gamedatas.hand[i];
                 var color = card.type;
                 var value = card.type_arg;
-                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), this.getCardUniqueId( color, value ) );
+                this.playerHand.addToStockWithId( color, this.getCardUniqueId( color, value ) );
             }
-            
+			
+			
+            /*
             // Cards in top sentence
             for( i in this.gamedatas.top_sentence )
             {
@@ -185,10 +168,10 @@ function (dojo, declare) {
                 //this.hideCardsOfType(color);
             }
 			dojo.query("div[id^='sentence_item']").connect( 'onmouseclick', this, 'onCardClick' );
-
+			
             
             this.addTooltipToClass( "playertablecard", _("Card played on the table"), '' );
-
+			*/
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
             
@@ -263,12 +246,14 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
+					/*
                 case 'chooseRandomObject':
                     this.addActionButton( 'chooseRandomObject_button1', _('1'), 'onChooseRandomObject' ); 
                     this.addActionButton( 'chooseRandomObject_button2', _('2'), 'onChooseRandomObject' ); 
                     this.addActionButton( 'chooseRandomObject_button3', _('3'), 'onChooseRandomObject' ); 
                     this.addActionButton( 'chooseRandomObject_button4', _('4'), 'onChooseRandomObject' ); 
                     break;
+					*/
                 case 'chooseAction':
 					console.log( 'There are '+this.gamedatas.cardsontable.length + ' cards on the table.' );
 

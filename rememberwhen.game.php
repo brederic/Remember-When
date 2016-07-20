@@ -40,6 +40,38 @@ class RememberWhen extends Table
             //    "my_second_game_variant" => 101,
             //      ...
         ) );
+		
+		// Create the eight card decks
+		
+		$this->cards = self::getNew( "module.common.deck" );
+        $this->cards->init( "card" );
+		// These should be in material.inc.php, but I can't get it to load from there in the studio.  Will this work when it goes live?
+		$this->colors = array(
+			1 => array( 'name' => clienttranslate('When'),
+						'nametr' => self::_('When'),
+						'num_cards' => 200/4),
+			2 => array( 'name' => clienttranslate('Where'),
+						'nametr' => self::_('Where'),
+						'num_cards' => 408/4),
+			3 => array( 'name' => clienttranslate('How'),
+						'nametr' => self::_('How') ,
+						'num_cards' => 204/4),
+			4 => array( 'name' => clienttranslate('Did What'),
+						'nametr' => self::_('Did What') ,
+						'num_cards' => 412/4),
+			5 => array( 'name' => clienttranslate('Whose'),
+						'nametr' => self::_('Whose'),
+						'num_cards' => 212/4),
+			6 => array( 'name' => clienttranslate('What Kind'),
+						'nametr' => self::_('What Kind'),
+						'num_cards' => 404/4),
+			7 => array( 'name' => clienttranslate('To What'),
+						'nametr' => self::_('To What'),
+						'num_cards' => 508/4 ),
+			8 => array( 'name' => clienttranslate('Why'),
+						'nametr' => self::_('Why'),
+						'num_cards' => 414/4 )
+		);
         
 	}
 	
@@ -90,6 +122,20 @@ class RememberWhen extends Table
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
         // TODO: setup the initial game situation here
+        // Create cards
+        $start_cards = array(); // these will form the first sentence
+        foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
+        {
+			$cards = array();
+			
+            for( $value=2; $value<=$color['num_cards']+2; $value++ )   //  2, 3, 4, ... K, A
+            {
+                $cards[] = array( 'type' => $color_id, 'type_arg' => $value, 'nbr' => 1);
+            }
+			$this->cards->createCards( $cards, 'deck-'+$color_id );
+			$this->cards->shuffle( 'deck-'.$color_id );
+			$start_cards[] = $this->cards->pickCardForLocation('deck-'+$color_id, 'top_sentence', rand(1,4) );
+		}
        
 
         // Activate first player (which is in general a good idea :) )
@@ -119,6 +165,10 @@ class RememberWhen extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
+		
+		// Cards in player hand      
+        $result['hand'] = $this->populateCards($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+
   
         return $result;
     }
@@ -148,7 +198,57 @@ class RememberWhen extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+	
+		function doesPlayerHaveCardType($playerId, $cardType)
+	{
+		$playerhand = $this->cards->getPlayerHand( $playerId );
+		// look at each card and check
+		foreach ($this->cards->getPlayerHand($playerId) as $card)
+		{
+			if ($card['type'] == $cardType) 
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
+    /*
+        populateCard: 
+        
+        Add card text to card object
+        
+     
+    */
+    protected function populateCard($card)
+    {
+		//$startIndex = $card['value']-2*4+2;
+		//$endIndex = $card['value']-2*4+5;
+		//if ($startIndex >=2 && $endIndex < 
+/**		$card['text_1'] = $this->values_label[ $card['type'] ]['2'];//[strval(($card['value']-1)*4+2)];
+		$card['text_2'] = $this->values_label[ $card['type'] ]['3'];//[strval(($card['value']-1)*4+3)];
+		$card['text_3'] = $this->values_label[ $card['type'] ]['4'];//[strval(($card['value']-1)*4+4)];
+		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
+		**/
+		$card['text_1'] = 'text_1';
+		$card['text_2'] = 'text_2';
+		$card['text_3'] = 'text_3';
+		$card['text_4'] = 'text_4';
+	}
+	/*
+        populateCard: 
+        
+        Add card text to card object
+        
+     
+    */
+    protected function populateCards($cards)
+    {
+		foreach($cards as $card) {
+			$this->populateCard($card);
+		}
+		return $cards;
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -235,6 +335,40 @@ class RememberWhen extends Table
         $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
+	    function stNewHand()
+    {
+        //self::incStat( 1, "handNbr" );
+    
+    
+        // Make sure each player has one card  of each card type
+        $players = self::loadPlayersBasicInfos();	
+		
+        foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
+        {
+			self::notifyAllPlayers('points', 'Dealing cards from deck-'+$color_id, array(
+                    'player_id' => '',
+                    'player_name' => ''
+                ) );
+			foreach( $players as $player_id => $player )
+			{
+				if (!$this->doesPlayerHaveCardType($player_id, $color_id)) 
+				{
+					$cards = $this->cards->pickCards( 1, 'deck-'+$color_id, $player_id );
+				}
+            
+				// Notify player about his cards
+				self::notifyPlayer( $player_id, 'newCard', '', array( 
+					'cards' => $cards
+				) );
+			}
+
+		}        
+        
+        //self::setGameStateValue( 'alreadyPlayedHearts', 0 );
+
+        $this->gamestate->nextState( "" );
+    } 
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

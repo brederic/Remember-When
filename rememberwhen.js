@@ -16,18 +16,23 @@
  */
 
 define([
-    "dojo","dojo/_base/declare",
+    "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
-    "ebg/counter"
+    "ebg/counter",
+    "ebg/stock"
 ],
-function (dojo, declare) {
-    return declare("bgagame.rememberwhen", ebg.core.gamegui, {
-        constructor: function(){
-            console.log('rememberwhen constructor');
-              
-            // Here, you can init the global variables of your user interface
-            // Example:
-            // this.myGlobalValue = 0;
+    function (dojo, declare) {
+        return declare("bgagame.rememberwhen", ebg.core.gamegui, {
+            constructor: function() {
+                console.log('rememberwhen constructor');
+
+                // Here, you can init the global variables of your user interface
+                // Example:
+                // this.myGlobalValue = 0;
+                this.playerHand = null;
+                this.cardwidth = 150;
+                this.cardheight = 150;
+                this.currentState = '';
 
         },
         
@@ -48,19 +53,129 @@ function (dojo, declare) {
         {
             console.log( "Starting game setup" );
             
-            // Setting up player boards
+             console.log( "start creating player boards" );
             for( var player_id in gamedatas.players )
             {
                 var player = gamedatas.players[player_id];
-                         
-                // TODO: Setting up players boards if needed
+            
             }
+			player_id = this.player_id;
+			
+			
+
+            // Player hand
+            this.playerHand = new ebg.stock();
+            this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
+            this.playerHand.image_items_per_row = 13;
+			this.playerHand.setSelectionMode(1);
+            dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+			
+            /*
+			console.log( "Build sentences" );
+			
+             // Sentence board
+            this.sentence = new ebg.stock();
+            this.sentence.create( this, $('sentence'));
+            //this.sentence.image_items_per_row = 8;
+			//this.sentence.setSelectionMode(1);
+            //dojo.connect( this.sentence, 'onmouseclick', this, 'onCardClick' );
             
-            // TODO: Set up your game interface here, according to "gamedatas"
+			// Sentence board
+            this.top_sentence = new ebg.stock();
+            this.top_sentence.create( this, $('top_sentence'));
+            //this.top_sentence.image_items_per_row = 8;
+			//this.top_sentence.setSelectionMode(1);
+            //dojo.connect( this.top_sentence, 'onmouseclick', this, 'onCardClick' );
+			*/
+			/*
+            console.log( "Add interactions to cards" );
+			
+			dojo.addOnLoad( function() {
+			  // attach on click to id="textDiv"
+			  dojo.query('div[id^="cardontable_"]').onclick( function(evt) { 
+				// 'this' is now the element clicked on (e.g. id="textDiv")
+				var el = this; 
+				
+				console.log('onClick ' + this.id + this.classes ); 
+
+				
+				if (dojo.hasClass(this.id, 'pos_1')) {
+					dojo.replaceClass(this.id, 'pos_2', 'pos_1');
+				} else if (dojo.hasClass(this.id, 'pos_2')) {
+					dojo.replaceClass(this.id, 'pos_3', 'pos_2');
+				} else if (dojo.hasClass(this.id, 'pos_3')) {
+					dojo.replaceClass(this.id, 'pos_4', 'pos_3');
+				} else if (dojo.hasClass(this.id, 'pos_4')) {
+					dojo.replaceClass(this.id, 'pos_1', 'pos_4');
+				} 
+			  });
+			});
+			*/
+            console.log( "Create card types" );
+
+            // Create cards types:
+            for( var color=1;color<=8;color++ )
+            {
+                
+                    // Build card type
+					this.playerHand.addItemType( color, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
+					//this.sentence.addItemType( card_type_id, color, g_gamethemeurl+'img/fronts.png', color - 1 );
+					//console.log('Card[id:'+card_type_id+ ', color: ' + color + ', value=' + value + '] Calculated details [color/type=' + this.getCardType(card_type_id) + ', value='+ this.getCardValue(card_type_id)+']');
+                
+            } 
+			//console.log('this.getCardType(13)=' + this.getCardType(13));
+			//console.log('this.getCardValue(13)=' + this.getCardValue(13));
+			/*
+            console.log( "Hide hand of sentence builder" );
+			// Hide hand of sentence builder
+			console.log('Sentence builder: ' + gamedatas.sentence_builder + ', Me: ' + player_id);
+			if (gamedatas.sentence_builder == player_id) {
+				console.log('I am building this sentence.');
+				dojo.style( 'myhand', 'display', 'none' );
+			}
+			*/
+			
+            // Cards in player's hand 
+            for( var i in this.gamedatas.hand )
+            {
+                var card = this.gamedatas.hand[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( color, this.getCardUniqueId( color, value ) );
+            }
+			
+			
+            /*
+            // Cards in top sentence
+            for( i in this.gamedatas.top_sentence )
+            {
+                var card = this.gamedatas.top_sentence[i];
+                var color = card.type;
+                var value = card.type_arg;
+                var player_id = 'game_' + this.getCardUniqueId( color, value );
+				this.playCardOnTable(player_id, color, value, this.getCardUniqueId( color, value ), 'top_sentence', card.location_arg, card);
+                //this.hideCardsOfType(color);
+            }  
+			
+            // Cards played on table
+            for( i in this.gamedatas.cardsontable )
+            {
+                var card = this.gamedatas.cardsontable[i];
+                var color = card.type;
+                var value = card.type_arg;
+                var player_id = card.location_arg;
+				this.playCardOnTable(player_id, color, value, this.getCardUniqueId( color, value ), 'cardontable', 1, card);
+                //this.hideCardsOfType(color);
+            }
+			dojo.query("div[id^='sentence_item']").connect( 'onmouseclick', this, 'onCardClick' );
+			
             
- 
+            this.addTooltipToClass( "playertablecard", _("Card played on the table"), '' );
+			*/
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
+            
+            this.ensureSpecificImageLoading( ['../common/point.png'] );
 
             console.log( "Ending game setup" );
         },
@@ -78,16 +193,15 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
+            case 'playerTurn':
+                this.addTooltip( 'myhand', _('Cards in my hand'), _('Play a card') );
                 break;
-           */
+
+            case 'giveCards':
+                this.addTooltip( 'myhand', _('Cards in my hand'), _('Select a card') );
+                break;
+
+ 
            
            
             case 'dummmy':
@@ -132,18 +246,37 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
-                    
-                    // Add 3 action buttons in the action status bar:
-                    
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
+					/*
+                case 'chooseRandomObject':
+                    this.addActionButton( 'chooseRandomObject_button1', _('1'), 'onChooseRandomObject' ); 
+                    this.addActionButton( 'chooseRandomObject_button2', _('2'), 'onChooseRandomObject' ); 
+                    this.addActionButton( 'chooseRandomObject_button3', _('3'), 'onChooseRandomObject' ); 
+                    this.addActionButton( 'chooseRandomObject_button4', _('4'), 'onChooseRandomObject' ); 
                     break;
-*/
+					*/
+                case 'chooseAction':
+					console.log( 'There are '+this.gamedatas.cardsontable.length + ' cards on the table.' );
+
+					for( i in this.gamedatas.cardsontable )
+					{
+						var card = this.gamedatas.cardsontable[i];
+						var id = card.id
+						var color = card.type;
+						var value = card.type_arg;
+						var player_id = card.location_arg;
+						this.playCardOnTable( player_id, color, value, card.id, 'sentence' );
+						this.addActionButton( 'chooseAction_button_'+id+'_1', _(color+'_'+value+'_1'), 'onChooseAction' ); 
+						this.addActionButton( 'chooseAction_button_'+id+'_2', _(color+'_'+value+'_2'), 'onChooseAction' ); 
+						this.addActionButton( 'chooseAction_button_'+id+'_3', _(color+'_'+value+'_3'), 'onChooseAction' ); 
+						this.addActionButton( 'chooseAction_button_'+id+'_4', _(color+'_'+value+'_4'), 'onChooseAction' ); 						
+						
+					}
+
+                    break;
+				case 'giveCards':
+                    //this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' ); 
+                    break;
+
                 }
             }
         },        
@@ -157,6 +290,25 @@ function (dojo, declare) {
             script.
         
         */
+        
+        // Get card unique identifier based on its color and value
+        getCardUniqueId: function( color, value )
+        {
+            return (color-1)*13+(value-1);  
+
+        },
+		
+		getCardType: function(id) 
+		{
+			value = this.getCardValue(id);
+			return Math.floor((id - value + 14)/13);
+		},
+		
+		getCardValue: function(id )
+        {
+            return (id-1)%13 + 2;
+		},
+		
 
 
         ///////////////////////////////////////////////////
@@ -172,6 +324,52 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+        onPlayerHandSelectionChanged: function(  )
+        {
+			//require(["dojo/query"], function(query){
+			//	console.log(query(query));
+			//});
+
+            var items = this.playerHand.getSelectedItems();
+
+            if( items.length > 0 )
+            {
+                if( this.checkAction( 'playCard', true ) )
+                {
+                    // Can play a card
+                    
+                    var card_id = items[0].id;
+                    
+                    this.ajaxcall( "/bphearts/bphearts/playCard.html", { 
+                            id: card_id,
+                            lock: true 
+                            }, this, function( result ) {  }, function( is_error) { } );                        
+
+                    this.playerHand.unselectAll();
+                }
+                else if( this.checkAction( 'giveCards' ) )
+                {
+                    // Can give cards => let the player select some cards
+					
+					var id = items[0]['id'];
+					var color = items[0]['type'];
+					var value = this.getCardValue(id);
+					console.log('Destroying previous buttons');
+					dojo.query('a[id^="giveCard"]').forEach(dojo.destroy);
+					this.addActionButton( 'giveCard_button_'+id+'_1', _(color+'_'+value+'_1'), 'onGiveCard' ); 
+					this.addActionButton( 'giveCard_button_'+id+'_2', _(color+'_'+value+'_2'), 'onGiveCard' ); 
+					this.addActionButton( 'giveCard_button_'+id+'_3', _(color+'_'+value+'_3'), 'onGiveCard' ); 
+					this.addActionButton( 'giveCard_button_'+id+'_4', _(color+'_'+value+'_4'), 'onGiveCard' ); 
+					
+                }
+                else
+                {
+                    this.playerHand.unselectAll();
+                }                
+            }
+        },
+        
+
         
         /* Example:
         
@@ -224,18 +422,134 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
             
-            // TODO: here, associate your game notifications with local methods
+            dojo.subscribe( 'newCard', this, "notif_newCard" );
+            dojo.subscribe( 'considerActions', this, "notif_considerActions" );
+            dojo.subscribe( 'playCard', this, "notif_playCard" );
+            dojo.subscribe( 'trickWin', this, "notif_trickWin" );
+            this.notifqueue.setSynchronous( 'trickWin', 1000 );
+            dojo.subscribe( 'giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer" );
+            dojo.subscribe( 'newScores', this, "notif_newScores" );
+            dojo.subscribe( 'giveCards', this, "notif_giveCards" );
+            dojo.subscribe( 'takeCards', this, "notif_takeCards" );
+            dojo.subscribe( 'addCardToSentence', this, "notif_addCardToSentence" );
+
             
-            // Example 1: standard notification handling
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
+        },
+        
+        // TODO: from this point and below, you can write your game notifications handling methods
+                
+        notif_newCard: function( notif )
+        {
             
-            // Example 2: standard notification handling + tell the user interface to wait
-            //            during 3 seconds after calling the method in order to let the players
-            //            see what is happening in the game.
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-            // 
-        },  
+			console.log( 'notifications new card' );
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }            
+        },
+        notif_considerActions: function( notif )
+        {
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playCardOnTable( notif.args.player_id,  color, value , card.id, 'sentence' );
+            }            // Play a card on the table
+            //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+        },       
+        notif_playCard: function( notif )
+        {
+            // Play a card on the table
+            this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence', 1 );
+        },
+        notif_trickWin: function( notif )
+        {
+            // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
+        },
+        notif_giveAllCardsToPlayer: function( notif )
+        {
+            // Move all cards on table to given table, then destroy them
+            var winner_id = notif.args.player_id;
+            for( var player_id in this.gamedatas.players )
+            {
+                var anim = this.slideToObject( 'cardontable_'+player_id, 'overall_player_board_'+winner_id );
+                dojo.connect( anim, 'onEnd', function( node ) { dojo.destroy(node);  } );
+                anim.play();
+            }
+        },
+        notif_newScores: function( notif )
+        {
+            // Update players' scores
+            
+            for( var player_id in notif.args.newScores )
+            {
+                this.scoreCtrl[ player_id ].toValue( notif.args.newScores[ player_id ] );
+            }
+        },
+        notif_giveCards: function( notif )
+        {
+            // Remove cards from the hand (they have been given)
+            for( var i in notif.args.cards )
+            {
+                var card_id = notif.args.cards[i];
+                this.playerHand.removeFromStockById( card_id );
+            }
+        },
+        notif_takeCards: function( notif )
+        {
+            // Cards taken from some opponent
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }
+        },
+        notif_addCardToSentence: function( notif )
+        {
+			stateName = this.currentState;
+			// Play a card on the table
+            this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+
+            // Cards taken from some opponent
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }
+			
+			
+			
+			// TODO:  If we are giving cards and this player is still active, make cards in hand that are no longer valid invisible or unselectable
+            if( this.isCurrentPlayerActive() )
+            {            
+                switch( stateName )
+                {
+                
+				case 'giveCards':
+					var playedCardType = notif.args.color;
+					
+					
+					console.log( 'Making cards invisible of type:' + playedCardType );
+                    //this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' ); 
+					//find matching card in my hand
+					
+   
+
+					
+                    break;
+
+                }
+            }			
+        }
+         
         
         // TODO: from this point and below, you can write your game notifications handling methods
         

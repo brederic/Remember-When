@@ -57,19 +57,19 @@ $machinestates = array(
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array( "" => 20 )
     ),
     
     // Note: ID=2 => your first state
 
-    2 => array(
+   /* 2 => array(
     		"name" => "playerTurn",
     		"description" => clienttranslate('${actplayer} must play a card or pass'),
     		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
     		"type" => "activeplayer",
     		"possibleactions" => array( "playCard", "pass" ),
     		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
+    ), */
     
 /*
     Examples:
@@ -93,6 +93,68 @@ $machinestates = array(
     ), 
 
 */    
+    /// New hand
+    20 => array(
+        "name" => "newHand",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNewHand",
+        "updateGameProgression" => true,   
+        "transitions" => array( "" => 21 )
+    ),  
+	
+	21 => array(
+        "name" => "chooseRandomObject",
+        "description" => clienttranslate('${actplayer} must choose a random object'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a random object'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "chooseRandomObject" ),
+        "transitions" => array( "chooseRandomObject" => 28 )
+    ), 	 
+    28 => array(
+        "name" => "drawActions",
+        "description" => "",
+        "type" => "game",
+        "action" => "stDrawActions",
+        "updateGameProgression" => true,   
+        "transitions" => array( "" => 29 )
+    ),  	
+	29 => array(
+        "name" => "chooseAction",
+        "description" => clienttranslate('${actplayer} must choose an action.'),
+        "descriptionmyturn" => clienttranslate('${you} must choose an action.'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "chooseAction" ),
+        "transitions" => array( "chooseAction" => 22 )
+    ), 	
+
+    22 => array(       
+        "name" => "giveCards",
+        "description" => clienttranslate('Some players must choose a card to give to ${direction}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a card to give to ${direction}'),
+        "type" => "multipleactiveplayer",
+        "action" => "stGiveCards",
+        "args" => "argGiveCards",
+        "possibleactions" => array( "giveCards" ),
+        "transitions" => array( "giveCards" => 23 )        
+    ), 
+	23 => array(
+        "name" => "arrangeSentence",
+        "description" => clienttranslate('${actplayer} must arrange the cards into a completed memory.'),
+        "descriptionmyturn" => clienttranslate('${you} must arrange the cards into a completed memory.'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "completeSentence" ),
+        "transitions" => array( "completeSentence" => 26 )
+    ), 	
+
+    
+    26 => array(
+        "name" => "scoreSentence",
+        "description" => "",
+        "type" => "game",
+        "action" => "stScoreSentence",
+        "transitions" => array( "startHand" => 27  )
+    ),        
    
     // Final state.
     // Please do not modify.

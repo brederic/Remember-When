@@ -16,23 +16,23 @@
  */
 
 define([
-    "dojo","dojo/_base/declare",
+    "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
     "ebg/counter",
     "ebg/stock"
 ],
-function (dojo, declare) {
-    return declare("bgagame.rememberwhen", ebg.core.gamegui, {
-        constructor: function(){
-            console.log('rememberwhen constructor');
-              
-            // Here, you can init the global variables of your user interface
-            // Example:
-            // this.myGlobalValue = 0;
-            this.playerHand = null;
-            this.cardwidth = 150;
-            this.cardheight = 150;
-			this.currentState = '';
+    function (dojo, declare) {
+        return declare("bgagame.rememberwhen", ebg.core.gamegui, {
+            constructor: function() {
+                console.log('rememberwhen constructor');
+
+                // Here, you can init the global variables of your user interface
+                // Example:
+                // this.myGlobalValue = 0;
+                this.playerHand = null;
+                this.cardwidth = 150;
+                this.cardheight = 150;
+                this.currentState = '';
 
         },
         
@@ -422,18 +422,134 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
             
-            // TODO: here, associate your game notifications with local methods
+            dojo.subscribe( 'newCard', this, "notif_newCard" );
+            dojo.subscribe( 'considerActions', this, "notif_considerActions" );
+            dojo.subscribe( 'playCard', this, "notif_playCard" );
+            dojo.subscribe( 'trickWin', this, "notif_trickWin" );
+            this.notifqueue.setSynchronous( 'trickWin', 1000 );
+            dojo.subscribe( 'giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer" );
+            dojo.subscribe( 'newScores', this, "notif_newScores" );
+            dojo.subscribe( 'giveCards', this, "notif_giveCards" );
+            dojo.subscribe( 'takeCards', this, "notif_takeCards" );
+            dojo.subscribe( 'addCardToSentence', this, "notif_addCardToSentence" );
+
             
-            // Example 1: standard notification handling
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
+        },
+        
+        // TODO: from this point and below, you can write your game notifications handling methods
+                
+        notif_newCard: function( notif )
+        {
             
-            // Example 2: standard notification handling + tell the user interface to wait
-            //            during 3 seconds after calling the method in order to let the players
-            //            see what is happening in the game.
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-            // 
-        },  
+			console.log( 'notifications new card' );
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }            
+        },
+        notif_considerActions: function( notif )
+        {
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playCardOnTable( notif.args.player_id,  color, value , card.id, 'sentence' );
+            }            // Play a card on the table
+            //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+        },       
+        notif_playCard: function( notif )
+        {
+            // Play a card on the table
+            this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence', 1 );
+        },
+        notif_trickWin: function( notif )
+        {
+            // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
+        },
+        notif_giveAllCardsToPlayer: function( notif )
+        {
+            // Move all cards on table to given table, then destroy them
+            var winner_id = notif.args.player_id;
+            for( var player_id in this.gamedatas.players )
+            {
+                var anim = this.slideToObject( 'cardontable_'+player_id, 'overall_player_board_'+winner_id );
+                dojo.connect( anim, 'onEnd', function( node ) { dojo.destroy(node);  } );
+                anim.play();
+            }
+        },
+        notif_newScores: function( notif )
+        {
+            // Update players' scores
+            
+            for( var player_id in notif.args.newScores )
+            {
+                this.scoreCtrl[ player_id ].toValue( notif.args.newScores[ player_id ] );
+            }
+        },
+        notif_giveCards: function( notif )
+        {
+            // Remove cards from the hand (they have been given)
+            for( var i in notif.args.cards )
+            {
+                var card_id = notif.args.cards[i];
+                this.playerHand.removeFromStockById( card_id );
+            }
+        },
+        notif_takeCards: function( notif )
+        {
+            // Cards taken from some opponent
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }
+        },
+        notif_addCardToSentence: function( notif )
+        {
+			stateName = this.currentState;
+			// Play a card on the table
+            this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+
+            // Cards taken from some opponent
+            for( var i in notif.args.cards )
+            {
+                var card = notif.args.cards[i];
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            }
+			
+			
+			
+			// TODO:  If we are giving cards and this player is still active, make cards in hand that are no longer valid invisible or unselectable
+            if( this.isCurrentPlayerActive() )
+            {            
+                switch( stateName )
+                {
+                
+				case 'giveCards':
+					var playedCardType = notif.args.color;
+					
+					
+					console.log( 'Making cards invisible of type:' + playedCardType );
+                    //this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' ); 
+					//find matching card in my hand
+					
+   
+
+					
+                    break;
+
+                }
+            }			
+        }
+         
         
         // TODO: from this point and below, you can write your game notifications handling methods
         

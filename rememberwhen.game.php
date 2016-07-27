@@ -153,7 +153,7 @@ class RememberWhen extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
+    protected function getAllDatas() 
     {
         $result = array( 'players' => array() );
     
@@ -168,6 +168,11 @@ class RememberWhen extends Table
 		
 		// Cards in player hand      
         $result['hand'] = $this->populateCards($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+        
+          
+        // Cards in top sentence
+        $result['top_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'top_sentence' ));
+
 
   
         return $result;

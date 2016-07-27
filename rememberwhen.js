@@ -66,27 +66,28 @@ define([
             // Player hand
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
-            this.playerHand.image_items_per_row = 13;
+            this.playerHand.image_items_per_row = 8;
 			this.playerHand.setSelectionMode(1);
             dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 			
-            /*
+
 			console.log( "Build sentences" );
-			
+            /*			
              // Sentence board
             this.sentence = new ebg.stock();
             this.sentence.create( this, $('sentence'));
             //this.sentence.image_items_per_row = 8;
 			//this.sentence.setSelectionMode(1);
             //dojo.connect( this.sentence, 'onmouseclick', this, 'onCardClick' );
+            */
             
 			// Sentence board
-            this.top_sentence = new ebg.stock();
-            this.top_sentence.create( this, $('top_sentence'));
+            //this.top_sentence = new ebg.stock();
+            //this.top_sentence.create( this, $('top_sentence'), this.cardwidth, this.cardheight);
             //this.top_sentence.image_items_per_row = 8;
 			//this.top_sentence.setSelectionMode(1);
             //dojo.connect( this.top_sentence, 'onmouseclick', this, 'onCardClick' );
-			*/
+			
 			/*
             console.log( "Add interactions to cards" );
 			
@@ -119,6 +120,7 @@ define([
                 
                     // Build card type
 					this.playerHand.addItemType( color, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
+					//this.top_sentence.addItemType( color, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
 					//this.sentence.addItemType( card_type_id, color, g_gamethemeurl+'img/fronts.png', color - 1 );
 					//console.log('Card[id:'+card_type_id+ ', color: ' + color + ', value=' + value + '] Calculated details [color/type=' + this.getCardType(card_type_id) + ', value='+ this.getCardValue(card_type_id)+']');
                 
@@ -141,22 +143,26 @@ define([
                 var card = this.gamedatas.hand[i];
                 var color = card.type;
                 var value = card.type_arg;
+                console.log( 'Hand Card: '+card +'-'+ color +'-'+ value);
                 this.playerHand.addToStockWithId( color, this.getCardUniqueId( color, value ) );
             }
 			
 			
-            /*
+            console.log('Top Sentence:'+this.gamedatas.top_sentence)
             // Cards in top sentence
-            for( i in this.gamedatas.top_sentence )
+            for( var i in this.gamedatas.top_sentence )
             {
+ 
                 var card = this.gamedatas.top_sentence[i];
                 var color = card.type;
                 var value = card.type_arg;
+                console.log( 'Top Sentence Card: '+card +'-'+ color +'-'+ value);
                 var player_id = 'game_' + this.getCardUniqueId( color, value );
-				this.playCardOnTable(player_id, color, value, this.getCardUniqueId( color, value ), 'top_sentence', card.location_arg, card);
+				this.playCardOnTable(player_id, color, value,   this.getCardUniqueId( color, value ), 'top_sentence', card.location_arg, card);
+                
                 //this.hideCardsOfType(color);
             }  
-			
+            /*
             // Cards played on table
             for( i in this.gamedatas.cardsontable )
             {
@@ -308,6 +314,64 @@ define([
         {
             return (id-1)%13 + 2;
 		},
+            
+          
+		playCardOnTable: function( player_id, color, value, card_id, loc, rotation, card )
+        {
+			card_name = loc +'_'+player_id;
+			if (player_id == null) {
+				player_id = this.player_id;
+			}
+			console.log('playCardOnTable('+player_id+', '+ color + ', ' + card_id + ', '+ loc+ ')');
+			console.log('playCardOnTable('+card['text_1']+', '+ card.text_2 + ', ' + card.text_3 + ', '+ card.text_4+ ', '+ rotation+ ')');
+            // player_id => direction
+			card_block = this.format_block( 'jstpl_cardontable', {
+                    x: this.cardwidth*(color-1),
+                    y: 0,
+                    player_id: card_name,
+					text_1: 'text_1',
+					text_2: 'text_2',
+					text_3: 'text_3', 
+					text_4: 'text_4'
+					/*text_1: card.text_1,
+					text_2: card.text_2,
+					text_3: card.text_3, 
+					text_4: card.text_4*/
+                });
+            dojo.place( card_block, loc);//'overall_player_board_'+player_id );
+            
+			this.placeOnObject( card_name, loc );
+			dojo.addClass(card_name, 'pos_' + rotation);
+			//dojo.connect( card_block, 'onclick', this.onCardClick );
+            /*
+            if( player_id != this.player_id )
+            {
+                // Some opponent played a card
+                // Move card from player panel
+                this.placeOnObject( 'cardontable_'+player_id, 'overall_player_board_'+player_id );
+            }
+            else
+            {
+                // You played a card. If it exists in your hand, move card from there and remove
+                // corresponding item
+                
+                if( $('myhand_item_'+card_id) )
+                {
+                    //this.placeOnObject( 'cardontable_'+player_id, 'myhand_item_'+card_id );
+                    this.placeOnObject( 'cardontable_'+player_id,  'overall_player_board_'+player_id );
+                    //this.playerHand.removeFromStockById( card_id );
+                }
+            }
+			*/
+            // In any case: move it to its final destination
+			dest = 'spot_'+color;
+			console.log('Sliding to ' + dest);
+			dojo.addClass(card_name, dest);
+            this.slideToObject( card_name, dest).play();
+
+        },
+ 
+
 		
 
 

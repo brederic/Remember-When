@@ -338,9 +338,13 @@ define([
 					text_3: card.text_3, 
 					text_4: card.text_4*/
                 });
-            dojo.place( card_block, loc);//'overall_player_board_'+player_id );
+            dest = 'spot_'+color;
+			if (loc == 'top_sentence') {
+				dest = 'top_' + dest;
+			}
+			dojo.place( card_block, dest, "only");//'overall_player_board_'+player_id );
             
-			this.placeOnObject( card_name, loc );
+			this.placeOnObject( card_name, dest );
 			dojo.addClass(card_name, 'pos_' + rotation);
 			//dojo.connect( card_block, 'onclick', this.onCardClick );
             /*

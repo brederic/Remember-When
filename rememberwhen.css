@@ -187,6 +187,42 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 	left: 586px;
 }
 
+.spot_1 {
+	top: 140px;
+	left: 59px;
+}
+.spot_2 {
+	top: 140px;
+	left: 221px;
+}
+.spot_3 {
+	top: 140px;
+	left: 396px;
+}
+.spot_4 {
+	top: 140px;
+	left: 558px;
+}
+.spot_5 {
+	top: 302px;
+	left: 34px;
+}
+
+.spot_6 {
+	top: 302px;
+	left: 200px;
+}
+
+.spot_7 {
+	top: 302px;
+	left: 367px;
+}
+
+.spot_8 {
+	top: 302px;
+	left: 586px;
+}
+
 .spot  {
     position: absolute;
 	border: 1px solid red;

@@ -46,7 +46,7 @@ class RememberWhen extends Table
 		$this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
 		// These should be in material.inc.php, but I can't get it to load from there in the studio.  Will this work when it goes live?
-		$this->colors = array(
+		/*$this->colors = array(
 			1 => array( 'name' => clienttranslate('When'),
 						'nametr' => self::_('When'),
 						'num_cards' => 200/4),
@@ -72,7 +72,7 @@ class RememberWhen extends Table
 						'nametr' => self::_('Why'),
 						'num_cards' => 414/4 )
 		);
-        
+        */
 	}
 	
     protected function getGameName( )
@@ -167,11 +167,14 @@ class RememberWhen extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 		
 		// Cards in player hand      
-        $result['hand'] = $this->populateCards($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
         
           
         // Cards in top sentence
-        $result['top_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'top_sentence' ));
+        $result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
+		
+		// build card text
+		$result['card_text'] = $this->populateCards($result['top_sentence']);
 
 
   
@@ -225,7 +228,7 @@ class RememberWhen extends Table
         
      
     */
-    protected function populateCard($card)
+    protected function populateCard($id)
     {
 		//$startIndex = $card['value']-2*4+2;
 		//$endIndex = $card['value']-2*4+5;
@@ -235,10 +238,12 @@ class RememberWhen extends Table
 		$card['text_3'] = $this->values_label[ $card['type'] ]['4'];//[strval(($card['value']-1)*4+4)];
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
-		$card['text_1'] = 'text_1';
-		$card['text_2'] = 'text_2';
-		$card['text_3'] = 'text_3';
-		$card['text_4'] = 'text_4';
+		$result = array();
+		$result['text_1'] = $id.'_text_1';
+		$result['text_2'] = $id.'_text_2';
+		$result['text_3'] = $id.'_text_3';
+		$result['text_4'] = $id.'_text_4';
+		return $result;
 	}
 	/*
         populateCard: 
@@ -249,10 +254,12 @@ class RememberWhen extends Table
     */
     protected function populateCards($cards)
     {
+		$card_map = array();
 		foreach($cards as $card) {
-			$this->populateCard($card);
+			$id= $card['type'] . '_'. $card['type_arg'];
+			$card_map[$id] = $this->populateCard($id);
 		}
-		return $cards;
+		return $card_map;
 	}
 
 

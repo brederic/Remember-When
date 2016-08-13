@@ -148,7 +148,9 @@ define([
             }
 			
 			
-            console.log('Top Sentence:'+this.gamedatas.top_sentence)
+            console.log('Top Sentence:'+this.gamedatas.top_sentence);
+			console.log(this.gamedatas.card_text);
+			
             // Cards in top sentence
             for( var i in this.gamedatas.top_sentence )
             {
@@ -158,7 +160,9 @@ define([
                 var value = card.type_arg;
                 console.log( 'Top Sentence Card: '+card +'-'+ color +'-'+ value);
                 var player_id = 'game_' + this.getCardUniqueId( color, value );
-				this.playCardOnTable(player_id, color, value,   this.getCardUniqueId( color, value ), 'top_sentence', card.location_arg, card);
+				var card_id = color + "_" + value;
+				var card_text = this.gamedatas.card_text[card_id];
+                this.playCardOnTable(player_id, color, value, this.getCardUniqueId( color, value ), 'top_sentence', card.location_arg, card, card_text);
                 
                 //this.hideCardsOfType(color);
             }  
@@ -316,23 +320,23 @@ define([
 		},
             
           
-		playCardOnTable: function( player_id, color, value, card_id, loc, rotation, card )
+		playCardOnTable: function( player_id, color, value, card_id, loc, rotation, card, card_text )
         {
 			card_name = loc +'_'+player_id;
 			if (player_id == null) {
 				player_id = this.player_id;
 			}
-			console.log('playCardOnTable('+player_id+', '+ color + ', ' + card_id + ', '+ loc+ ')');
+			console.log('playCardOnTable('+player_id+', '+ color + ', ' + card_id + ', '+ loc+ ', ' + card_text +')');
 			console.log('playCardOnTable('+card['text_1']+', '+ card.text_2 + ', ' + card.text_3 + ', '+ card.text_4+ ', '+ rotation+ ')');
             // player_id => direction
 			card_block = this.format_block( 'jstpl_cardontable', {
                     x: this.cardwidth*(color-1),
                     y: 0,
                     player_id: card_name,
-					text_1: 'text_1',
-					text_2: 'text_2',
-					text_3: 'text_3', 
-					text_4: 'text_4'
+					text_1: card_text['text_1'],
+					text_2: card_text['text_2'],
+					text_3: card_text['text_3'], 
+					text_4: card_text['text_4']
 					/*text_1: card.text_1,
 					text_2: card.text_2,
 					text_3: card.text_3, 

@@ -132,9 +132,9 @@ class RememberWhen extends Table
             {
                 $cards[] = array( 'type' => $color_id, 'type_arg' => $value, 'nbr' => 1);
             }
-			$this->cards->createCards( $cards, 'deck-'+$color_id );
+			$this->cards->createCards( $cards, 'deck-'.$color_id );
 			$this->cards->shuffle( 'deck-'.$color_id );
-			$start_cards[] = $this->cards->pickCardForLocation('deck-'+$color_id, 'top_sentence', rand(1,4) );
+			$this->cards->pickCardForLocation('deck-'.$color_id, 'top_sentence', rand(1,4) );
 		}
        
 
@@ -228,8 +228,9 @@ class RememberWhen extends Table
         
      
     */
-    protected function populateCard($id)
+    protected function populateCard($card)
     {
+		$color = $this->colors[$card['type']]['name'];
 		//$startIndex = $card['value']-2*4+2;
 		//$endIndex = $card['value']-2*4+5;
 		//if ($startIndex >=2 && $endIndex < 
@@ -239,10 +240,10 @@ class RememberWhen extends Table
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
 		$result = array();
-		$result['text_1'] = $id.'_text_1';
-		$result['text_2'] = $id.'_text_2';
-		$result['text_3'] = $id.'_text_3';
-		$result['text_4'] = $id.'_text_4';
+		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
+		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
+		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
+		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
 		return $result;
 	}
 	/*
@@ -257,7 +258,7 @@ class RememberWhen extends Table
 		$card_map = array();
 		foreach($cards as $card) {
 			$id= $card['type'] . '_'. $card['type_arg'];
-			$card_map[$id] = $this->populateCard($id);
+			$card_map[$id] = $this->populateCard($card);
 		}
 		return $card_map;
 	}

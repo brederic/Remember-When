@@ -46,7 +46,7 @@ class RememberWhen extends Table
 		$this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
 		// These should be in material.inc.php, but I can't get it to load from there in the studio.  Will this work when it goes live?
-		$this->colors = array(
+		/*$this->colors = array(
 			1 => array( 'name' => clienttranslate('When'),
 						'nametr' => self::_('When'),
 						'num_cards' => 200/4),
@@ -72,7 +72,7 @@ class RememberWhen extends Table
 						'nametr' => self::_('Why'),
 						'num_cards' => 414/4 )
 		);
-        
+        */
 	}
 	
     protected function getGameName( )
@@ -132,9 +132,9 @@ class RememberWhen extends Table
             {
                 $cards[] = array( 'type' => $color_id, 'type_arg' => $value, 'nbr' => 1);
             }
-			$this->cards->createCards( $cards, 'deck-'+$color_id );
+			$this->cards->createCards( $cards, 'deck-'.$color_id );
 			$this->cards->shuffle( 'deck-'.$color_id );
-			$start_cards[] = $this->cards->pickCardForLocation('deck-'+$color_id, 'top_sentence', rand(1,4) );
+			$this->cards->pickCardForLocation('deck-'.$color_id, 'top_sentence', rand(1,4) );
 		}
        
 
@@ -153,7 +153,7 @@ class RememberWhen extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
+    protected function getAllDatas() 
     {
         $result = array( 'players' => array() );
     
@@ -167,7 +167,15 @@ class RememberWhen extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 		
 		// Cards in player hand      
-        $result['hand'] = $this->populateCards($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        
+          
+        // Cards in top sentence
+        $result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
+		
+		// build card text
+		$result['card_text'] = $this->populateCards($result['top_sentence']);
+
 
   
         return $result;
@@ -222,6 +230,7 @@ class RememberWhen extends Table
     */
     protected function populateCard($card)
     {
+		$color = $this->colors[$card['type']]['name'];
 		//$startIndex = $card['value']-2*4+2;
 		//$endIndex = $card['value']-2*4+5;
 		//if ($startIndex >=2 && $endIndex < 
@@ -230,10 +239,12 @@ class RememberWhen extends Table
 		$card['text_3'] = $this->values_label[ $card['type'] ]['4'];//[strval(($card['value']-1)*4+4)];
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
-		$card['text_1'] = 'text_1';
-		$card['text_2'] = 'text_2';
-		$card['text_3'] = 'text_3';
-		$card['text_4'] = 'text_4';
+		$result = array();
+		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
+		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
+		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
+		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
+		return $result;
 	}
 	/*
         populateCard: 
@@ -244,10 +255,12 @@ class RememberWhen extends Table
     */
     protected function populateCards($cards)
     {
+		$card_map = array();
 		foreach($cards as $card) {
-			$this->populateCard($card);
+			$id= $card['type'] . '_'. $card['type_arg'];
+			$card_map[$id] = $this->populateCard($card);
 		}
-		return $cards;
+		return $card_map;
 	}
 
 

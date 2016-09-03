@@ -239,18 +239,11 @@ class RememberWhen extends Table
 		$card['text_3'] = $this->values_label[ $card['type'] ]['4'];//[strval(($card['value']-1)*4+4)];
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
-		$result = array(); 
-		
-		$result['text_1'] = 'text_1'; //$this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
-		$result['text_2'] = 'text_2'; //$this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
-		$result['text_3'] = 'text_3'; //$this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
-		$result['text_4'] = 'text_4'; //$this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
-		/**
-		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-1)*4-3)];
-		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-1)*4-2)];
-		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-1)*4-1)];
-		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-1)*4)];
-		**/
+		$result = array();
+		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
+		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
+		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
+		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
 		return $result;
 	}
 	/*
@@ -362,19 +355,18 @@ class RememberWhen extends Table
     
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
-		$deck_index = 1;
 		
-        foreach( $this->colors as  $color_id => $name ) // spade, heart, diamond, club
+        foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
         {
-			self::notifyAllPlayers('points', 'Dealing cards from deck-'+$deck_index, array(
+			self::notifyAllPlayers('points', 'Dealing cards from deck-'+$color_id, array(
                     'player_id' => '',
                     'player_name' => ''
                 ) );
 			foreach( $players as $player_id => $player )
 			{
-				if (!$this->doesPlayerHaveCardType($player_id, $deck_index)) 
+				if (!$this->doesPlayerHaveCardType($player_id, $color_id)) 
 				{
-					$cards = $this->cards->pickCards( 1, 'deck-'+$deck_index, $player_id );
+					$cards = $this->cards->pickCards( 1, 'deck-'+$color_id, $player_id );
 				}
             
 				// Notify player about his cards
@@ -382,7 +374,6 @@ class RememberWhen extends Table
 					'cards' => $cards
 				) );
 			}
-			$deck_index = $deck_index + 1;
 
 		}        
         

@@ -136,8 +136,6 @@ define([
 				dojo.style( 'myhand', 'display', 'none' );
 			}
 			*/
-			console.log('Building hand');
-			console.log(this.gamedatas.hand);
 			
             // Cards in player's hand 
             for( var i in this.gamedatas.hand )
@@ -146,7 +144,6 @@ define([
                 var color = card.type;
                 var value = card.type_arg;
                 console.log( 'Hand Card: '+card +'-'+ color +'-'+ value);
-				console.log(card);
                 this.playerHand.addToStockWithId( color, this.getCardUniqueId( color, value ) );
             }
 			
@@ -517,9 +514,8 @@ define([
         {
             
 			console.log( 'notifications new card' );
-			console.log(cards);
             for( var i in notif.args.cards )
-            {	
+            {
                 var card = notif.args.cards[i];
                 var color = card.type;
                 var value = card.type_arg;

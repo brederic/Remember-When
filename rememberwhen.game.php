@@ -167,14 +167,14 @@ class RememberWhen extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 		
 		// Cards in player hand      
-        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        //$result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
         
           
         // Cards in top sentence
-        $result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
+        //$result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
 		
 		// build card text
-		$result['card_text'] = $this->populateCards($result['top_sentence']);
+		//$result['card_text'] = $this->populateCards($result['top_sentence']);
 
 
   
@@ -240,10 +240,10 @@ class RememberWhen extends Table
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
 		$result = array();
-		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
-		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
-		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
-		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
+		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+2)];
+		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+3)];
+		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+4)];
+		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+5)];
 		return $result;
 	}
 	/*
@@ -358,7 +358,7 @@ class RememberWhen extends Table
 		
         foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
         {
-			self::notifyAllPlayers('points', 'Dealing cards from deck-'+$color_id, array(
+			self::notifyAllPlayers('dealing', 'Dealing cards from deck-'+$color_id, array(
                     'player_id' => '',
                     'player_name' => ''
                 ) );

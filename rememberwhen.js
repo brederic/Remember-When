@@ -495,7 +495,7 @@ define([
             console.log( 'notifications subscriptions setup' );
             
             dojo.subscribe( 'dealing', this, "notif_deal" );
-            dojo.subscribe( 'newCard', this, "notif_newCard" );
+			dojo.subscribe( 'newCard', this, "notif_newCard" );
             dojo.subscribe( 'considerActions', this, "notif_considerActions" );
             dojo.subscribe( 'playCard', this, "notif_playCard" );
             dojo.subscribe( 'trickWin', this, "notif_trickWin" );
@@ -511,12 +511,12 @@ define([
         
         // TODO: from this point and below, you can write your game notifications handling methods
                 
-        notif_deal: function( notif )
+                notif_deal: function( notif )
         {
             
 			console.log( 'notifications deal' );
                        
-        }        
+        },  
 		notif_newCard: function( notif )
         {
             
@@ -648,4 +648,5 @@ define([
         */
    });             
 });
+
 

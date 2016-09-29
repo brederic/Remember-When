@@ -240,10 +240,10 @@ class RememberWhen extends Table
 		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
 		**/
 		$result = array();
-		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-3)];
-		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-2)];
-		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4-1)];
-		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)];
+		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+2)];
+		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+3)];
+		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+4)];
+		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)+5];
 		return $result;
 	}
 	/*

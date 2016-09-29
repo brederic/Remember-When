@@ -167,14 +167,14 @@ class RememberWhen extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 		
 		// Cards in player hand      
-        //$result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
         
           
         // Cards in top sentence
-        //$result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
+        $result['top_sentence'] = $this->cards->getCardsInLocation( 'top_sentence' );
 		
 		// build card text
-		//$result['card_text'] = $this->populateCards($result['top_sentence']);
+		$result['card_text'] = $this->populateCards($result['top_sentence']);
 
 
   
@@ -358,7 +358,7 @@ class RememberWhen extends Table
 		
         foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
         {
-			self::notifyAllPlayers('dealing', 'Dealing cards from deck-'+$color_id, array(
+			self::notifyAllPlayers('dealing', 'Dealing cards from deck-'.$color_id, array(
                     'player_id' => '',
                     'player_name' => ''
                 ) );
@@ -366,7 +366,7 @@ class RememberWhen extends Table
 			{
 				if (!$this->doesPlayerHaveCardType($player_id, $color_id)) 
 				{
-					$cards = $this->cards->pickCards( 1, 'deck-'+$color_id, $player_id );
+					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
 				}
             
 				// Notify player about his cards

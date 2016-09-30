@@ -363,7 +363,7 @@ class RememberWhen extends Table
                     'player_name' => ''
                 ) );
 			// Test deal
-			$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, 1001 );
+			//$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, 1001 );
 			// Normal deal
 			foreach( $players as $player_id => $player )
 			{

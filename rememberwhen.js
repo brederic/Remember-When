@@ -143,9 +143,14 @@ define([
                 var card = this.gamedatas.hand[i];
                 var color = card.type;
                 var value = card.type_arg;
-                console.log( 'Hand Card: '+card +'-'+ color +'-'+ value);
-                this.playerHand.addToStockWithId( color, this.getCardUniqueId( color, value ) );
+				var card_id = this.getCardUniqueId( color, value );
+                console.log( 'Hand Card: ');
+				console.log(card);
+                this.playerHand.addToStockWithId( color, card_id );
+				// add text to card
+				this.playCardInHand(card_id, color, 'hand_'+card_id				);
             }
+			console.log(this.playerHand);
 			
 			
             console.log('Top Sentence:'+this.gamedatas.top_sentence);
@@ -317,6 +322,24 @@ define([
 		getCardValue: function(id )
         {
             return (id-1)%13 + 2;
+		},
+		
+		playCardInHand: function(card_id, color, card_name)
+		{
+			// get card div
+			div_id = $('myhand_item_'+card_id);
+			// add card text
+			//'test';
+			card_block =  this.format_block( 'jstpl_cardontable', {
+                    x: this.cardwidth*(color-1),
+                    y: 0,
+                    player_id: card_name,
+					text_1: 'text_1',
+					text_2: 'text_2',
+					text_3: 'text_3', 
+					text_4: 'text_4'
+					});
+			dojo.place(card_block, div_id, "replace"); 
 		},
             
           

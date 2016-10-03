@@ -326,7 +326,7 @@ define([
 
 
             playCardOnTable: function (player_id, color, value, card_id, loc, rotation, card) {
-                card_name = loc + '_' + player_id;
+                card_name = loc + '_' + player_id; 
                 if (player_id == null) {
                     player_id = this.player_id;
                 }

@@ -144,7 +144,7 @@ define([
                     console.log(card);
                     this.playerHand.addToStockWithId(color, card_id);
                     // add text to card
-                    this.playCardInHand(card_id, color, 'hand_' + card_id);
+                    this.playCardInHand(card_id, card, 'hand_' + card_id);
                 }
                 console.log(this.playerHand);
 
@@ -308,19 +308,19 @@ define([
                 return (id - 1) % 13 + 2;
             },
 
-            playCardInHand: function (card_id, color, card_name) {
+            playCardInHand: function (card_id, card, card_name) {
                 // get card div
                 div_id = $('myhand_item_' + card_id);
                 // add card text
                 //'test';
                 card_block = this.format_block('jstpl_cardontable', {
-                    x: this.cardwidth * (color - 1),
+                    x: this.cardwidth * (card.type - 1),
                     y: 0,
                     player_id: card_name,
-                    text_1: 'text_1',
-                    text_2: 'text_2',
-                    text_3: 'text_3',
-                    text_4: 'text_4'
+                    text_1: card.text_1,
+                    text_2: card.text_2,
+                    text_3: card.text_3,
+                    text_4: card.text_4
                 });
                 dojo.place(card_block, div_id, "only");
             },

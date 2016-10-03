@@ -167,7 +167,7 @@ class RememberWhen extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 		
 		// Cards in player hand      
-        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        $result['hand'] = $this->populateHandCards($this->cards->getCardsInLocation( 'hand', $current_player_id ));
         
           
         // Cards in top sentence
@@ -261,6 +261,43 @@ class RememberWhen extends Table
 			$card_map[$id] = $this->populateCard($card);
 		}
 		return $card_map;
+	}
+
+    /*
+        populateCard: 
+        
+        Add card text to card object
+        
+     
+    */
+    protected function populateHandCard($card)
+    {
+		//$color = $this->colors[$card['type']]['name'];
+		//$startIndex = $card['value']-2*4+2;
+		//$endIndex = $card['value']-2*4+5;
+		//if ($startIndex >=2 && $endIndex < 
+		$card['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+2)];
+		$card['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+3)];
+		$card['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+4)];
+		$card['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+5)];
+        return $card;
+		
+
+	}
+	/*
+        populateHandCard: 
+        
+        Add card text to card object
+        
+     
+    */
+    protected function populateHandCards($cards)
+    {
+		$result = array();
+		foreach($cards as $card) {
+			$result[] = $this->populateHandCard($card);
+		}
+		return $result;
 	}
 
 

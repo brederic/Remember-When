@@ -230,19 +230,7 @@ class RememberWhen extends Table
 		//$startIndex = $card['value']-2*4+2;
 		//$endIndex = $card['value']-2*4+5;
 		//if ($startIndex >=2 && $endIndex < 
-<<<<<<< HEAD
-/**		$card['text_1'] = $this->values_label[ $card['type'] ]['2'];//[strval(($card['value']-1)*4+2)];
-		$card['text_2'] = $this->values_label[ $card['type'] ]['3'];//[strval(($card['value']-1)*4+3)];
-		$card['text_3'] = $this->values_label[ $card['type'] ]['4'];//[strval(($card['value']-1)*4+4)];
-		$card['text_4'] = $this->values_label[ $card['type'] ]['5'];//[strval(($card['value']-1)*4+5)];
-		**/
-		$result = array();
-		$result['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+2)];
-		$result['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+3)];
-		$result['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+4)];
-		$result['text_4'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4)+5];
-		return $result;
-=======
+
 		$card['text_1'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+2)];
 		$card['text_2'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+3)];
 		$card['text_3'] = $this->values_label[ $card['type'] ][strval(($card['type_arg']-2)*4+4)];
@@ -250,7 +238,6 @@ class RememberWhen extends Table
         return $card;
 		
 
->>>>>>> origin/master
 	}
 	/*
         populateCard: 

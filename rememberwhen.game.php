@@ -347,8 +347,21 @@ class RememberWhen extends Table
     
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
+
+        // Create deck list based on number of $players
+        $player_count = self::getPlayersNumber();
+        $deck_list = array(1, 2, 3, 6, 8);
+        if ($player_count >= 7) {
+            $deck_list[] = 4;
+        }
+        if ($player_count >= 8) {
+            $deck_list[] = 7;
+        }
+        if ($player_count == 9) {
+            $deck_list[] = 5;
+        }
 		
-        foreach( $this->colors as  $color_id => $color ) // spade, heart, diamond, club
+        foreach( $deck_list as  $color_id ) 
         {
 			self::notifyAllPlayers('dealing', 'Dealing cards from deck-'.$color_id, array(
                     'player_id' => '',

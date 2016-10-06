@@ -248,14 +248,14 @@ define([
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
-                        /*
+                        
                     case 'chooseRandomObject':
                         this.addActionButton( 'chooseRandomObject_button1', _('1'), 'onChooseRandomObject' ); 
                         this.addActionButton( 'chooseRandomObject_button2', _('2'), 'onChooseRandomObject' ); 
                         this.addActionButton( 'chooseRandomObject_button3', _('3'), 'onChooseRandomObject' ); 
                         this.addActionButton( 'chooseRandomObject_button4', _('4'), 'onChooseRandomObject' ); 
                         break;
-                        */
+                    
                         case 'chooseAction':
                             console.log('There are ' + this.gamedatas.cardsontable.length + ' cards on the table.');
 
@@ -395,6 +395,21 @@ define([
                 _ make a call to the game server
             
             */
+                    
+        onChooseRandomObject: function( evt)
+        {
+            console.log('onChooseRandomObject');
+            dojo.stopEvent( evt );
+            var choice = evt.currentTarget.id;
+			choice = choice[choice.length-1];
+            if( this.checkAction( 'chooseRandomObject' ) )
+            {
+
+                this.ajaxcall( "/rememberwhen/rememberwhen/chooseRandomObject.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
+            }        
+        },        
+
             onPlayerHandSelectionChanged: function () {
                 //require(["dojo/query"], function(query){
                 //	console.log(query(query));

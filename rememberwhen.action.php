@@ -62,6 +62,43 @@
     }
     
     */
+        public function playCard()
+    {
+        self::setAjaxMode();     
+        $card_id = self::getArg( "id", AT_posint, true );
+        $this->game->playCard( $card_id );
+        self::ajaxResponse( );
+    }
+    
+    public function giveCards()
+    {
+        self::setAjaxMode();     
+        $choice = self::getArg( "choice", AT_alphanum, true );
+        
+        $this->game->giveCards( $choice );
+        self::ajaxResponse( );  
+
+    }
+      
+    public function chooseRandomObject()
+    {
+        self::setAjaxMode();     
+        $choice = self::getArg( "choice", AT_posint, true );
+        
+        $this->game->chooseRandomObject( $choice );
+        self::ajaxResponse( );    
+    }
+       
+    public function chooseAction()
+    {
+        self::setAjaxMode();     
+        $choice = self::getArg( "choice", AT_alphanum, true );
+        
+        $this->game->chooseAction( $choice );
+        self::ajaxResponse( );    
+    }
+  
+
 
   }
   

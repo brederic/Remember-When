@@ -257,10 +257,10 @@ define([
                         break;
                     
                         case 'chooseAction':
-                            console.log('There are ' + this.gamedatas.cardsontable.length + ' cards on the table.');
+                            console.log('There are ' + this.gamedatas.working_area.length + ' cards to work with.');
 
                             for (i in this.gamedatas.cardsontable) {
-                                var card = this.gamedatas.cardsontable[i];
+                                var card = this.gamedatas.working_area[i];
                                 var id = card.id
                                 var color = card.type;
                                 var value = card.type_arg;

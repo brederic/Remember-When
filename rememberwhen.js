@@ -149,8 +149,8 @@ define([
                 console.log(this.playerHand);
 
 
-                console.log('Top Sentence:' + this.gamedatas.top_sentence);
-                console.log(this.gamedatas.card_text);
+                //console.log('Top Sentence:' + this.gamedatas.top_sentence);
+                //console.log(this.gamedatas.card_text);
 
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
@@ -158,10 +158,27 @@ define([
                     var card = this.gamedatas.top_sentence[i];
                     var color = card.type;
                     var value = card.type_arg;
-                    console.log('Top Sentence Card: ' + card + '-' + color + '-' + value);
+                    //console.log('Top Sentence Card: ' + card + '-' + color + '-' + value);
                     var player_id = 'game_' + this.getCardUniqueId(color, value);
                     var card_id = color + "_" + value;
                     this.playCardOnTable(player_id, color, value, this.getCardUniqueId(color, value), 'top_sentence', card.location_arg, card);
+
+                    //this.hideCardsOfType(color);
+                }
+
+                console.log('Current Sentence:');
+                console.log(this.gamedatas.current_sentence);
+
+                // Cards in current sentence
+                for (var i in this.gamedatas.current_sentence) {
+
+                    var card = this.gamedatas.current_sentence[i];
+                    var color = card.type;
+                    var value = card.type_arg;
+                    console.log('Current Sentence Card: ' + card + '-' + color + '-' + value);
+                    var player_id = 'game_' + this.getCardUniqueId(color, value);
+                    var card_id = color + "_" + value;
+                    this.playCardOnTable(player_id, color, value, this.getCardUniqueId(color, value), 'current_sentence', card.location_arg, card);
 
                     //this.hideCardsOfType(color);
                 }
@@ -345,7 +362,10 @@ define([
                 if (loc == 'top_sentence') {
                     dest = 'top_' + dest;
                 }
-                dojo.place(card_block, dest, "only");//'overall_player_board_'+player_id );
+                //if (loc == 'current_sentence') {
+                //    dest = 'current_' + dest;
+                //}
+                dojo.place(card_block, dest, "only"); //'overall_player_board_'+player_id );
 
                 this.placeOnObject(card_name, dest);
                 dojo.addClass(card_name, 'pos_' + rotation);
@@ -539,13 +559,13 @@ define([
                     var card = notif.args.cards[i];
                     var color = card.type;
                     var value = card.type_arg;
-                    this.playCardOnTable(notif.args.player_id, color, value, card.id, 'sentence');
+                    this.playCardOnTable(notif.args.player_id, color, value, card.id, 'current_sentence');
                 }            // Play a card on the table
                 //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
             },
             notif_playCard: function (notif) {
                 // Play a card on the table
-                this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence', 1);
+                this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'current_sentence', 1);
             },
             notif_trickWin: function (notif) {
                 // We do nothing here (just wait in order players can view the 4 cards played before they're gone.

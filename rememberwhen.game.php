@@ -175,6 +175,9 @@ class RememberWhen extends Table
         // Cards in top sentence
         $result['top_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'top_sentence' ));
 
+        // Cards in current sentence
+        $result['current_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'current_sentence' ));
+
         // Working cards
         $result['working_area'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
         
@@ -460,8 +463,9 @@ class RememberWhen extends Table
 		
 		
 		// get object card
-		$card = $this->cards->pickCardForLocation('deck-7', 'cardsontable', $player_id);
-        
+		$card = $this->cards->pickCardForLocation('deck-7', 'current_sentence', $player_id);
+        $card = $this->populateCard($card);
+
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
@@ -472,7 +476,7 @@ class RememberWhen extends Table
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
-				'value_displayed' => $this->values_label[ $card['type'] ] [$card['type_arg'] ],
+				'value_displayed' => $card['text_'.$choice],
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name']
 			) 

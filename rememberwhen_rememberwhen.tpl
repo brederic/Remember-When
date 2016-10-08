@@ -40,9 +40,9 @@
 <div id="sentence_board" class="floatL whiteblock ">
 	<ul class="tab">
 	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Sentence</a></li>
-	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'sentence')">Current Sentence</a></li>
+	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'current_sentence')">Current Sentence</a></li>
 	</ul>
-    <div id="sentence" class="sentenceboard whiteblock tabcontent"> 
+    <div id="current_sentence" class="sentenceboard whiteblock tabcontent"> 
 		<div class="spot" id="spot_1">1</div><div class="spot" id="spot_2">2</div><div class="spot" id="spot_3">3</div><div class="spot" id="spot_4">4</div>
 		<div class="spot" id="spot_5">5</div><div class="spot" id="spot_6">6</div><div class="spot" id="spot_7">7</div><div class="spot" id="spot_8">8</div>
 

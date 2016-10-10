@@ -478,7 +478,8 @@ class RememberWhen extends Table
 				'value' => $card['type_arg'],
 				'value_displayed' => $card['text_'.$choice],
 				'color' => $card['type'],
-				'color_displayed' => $this->colors[ $card['type'] ]['name']
+				'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                'card' => $card
 			) 
 		);
 

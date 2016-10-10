@@ -154,14 +154,12 @@ define([
 
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
-
                     var card = this.gamedatas.top_sentence[i];
-                    var color = card.type;
-                    var value = card.type_arg;
-                    //console.log('Top Sentence Card: ' + card + '-' + color + '-' + value);
+                    
+                
                     var player_id = 'game_' + this.getCardUniqueId(color, value);
-                    var card_id = color + "_" + value;
-                    this.playCardOnTable(player_id, color, value, this.getCardUniqueId(color, value), 'top_sentence', card.location_arg, card);
+                    
+                    this.playCardOnTable(card, 'top_sentence', card.location_arg, player_id);
 
                     //this.hideCardsOfType(color);
                 }
@@ -173,12 +171,8 @@ define([
                 for (var i in this.gamedatas.current_sentence) {
 
                     var card = this.gamedatas.current_sentence[i];
-                    var color = card.type;
-                    var value = card.type_arg;
-                    console.log('Current Sentence Card: ' + card + '-' + color + '-' + value);
                     var player_id = 'game_' + this.getCardUniqueId(color, value);
-                    var card_id = color + "_" + value;
-                    this.playCardOnTable(player_id, color, value, this.getCardUniqueId(color, value), 'current_sentence', card.location_arg, card);
+                    this.playCardOnTable(card, 'current_sentence', card.location_arg, player_id);
 
                     //this.hideCardsOfType(color);
                 }
@@ -282,7 +276,8 @@ define([
                                 var color = card.type;
                                 var value = card.type_arg;
                                 var player_id = card.location_arg;
-                                this.playCardOnTable(player_id, color, value, card.id, 'sentence');
+                                var rotation = 1; // ????
+                                this.playCardOnTable(card,  'current_sentence', rotation, player_id);
                                 this.addActionButton('chooseAction_button_' + id + '_1', _(color + '_' + value + '_1'), 'onChooseAction');
                                 this.addActionButton('chooseAction_button_' + id + '_2', _(color + '_' + value + '_2'), 'onChooseAction');
                                 this.addActionButton('chooseAction_button_' + id + '_3', _(color + '_' + value + '_3'), 'onChooseAction');
@@ -342,12 +337,17 @@ define([
             },
 
 
-            playCardOnTable: function (player_id, color, value, card_id, loc, rotation, card) {
+            playCardOnTable: function (card,  loc, rotation, player_id) {
+                var color = card.type;
+                var value = card.type_arg;
+                var card_id = color + "_" + value;
+                
                 card_name = loc + '_' + player_id; 
                 if (player_id == null) {
                     player_id = this.player_id;
                 }
                 console.log('playCardOnTable(' + player_id + ', ' + color + ', ' + card_id + ', ' + loc + ')');
+                console.log(card);
                 // player_id => direction
                 card_block = this.format_block('jstpl_cardontable', {
                     x: this.cardwidth * (color - 1),
@@ -559,13 +559,15 @@ define([
                     var card = notif.args.cards[i];
                     var color = card.type;
                     var value = card.type_arg;
-                    this.playCardOnTable(notif.args.player_id, color, value, card.id, 'current_sentence');
+                    var rotation = 1; //?????
+                    this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
                 }            // Play a card on the table
                 //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
             },
             notif_playCard: function (notif) {
                 // Play a card on the table
-                this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'current_sentence', 1);
+                var rotation = 1; //?????
+                this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
             },
             notif_trickWin: function (notif) {
                 // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
@@ -605,8 +607,10 @@ define([
             notif_addCardToSentence: function (notif) {
                 stateName = this.currentState;
                 // Play a card on the table
-                this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence');
-
+                var card = notif.args.card;
+                var rotation = 1; //?????
+                this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
+                
                 // Cards taken from some opponent
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];

@@ -130,7 +130,7 @@ class RememberWhen extends Table
         {
 			$cards = array();
 			
-            for( $value=2; $value<=$color['num_cards']+2; $value++ )   //  2, 3, 4, ... K, A
+            for( $value=2; $value<=$color['num_cards']+1; $value++ )   //  2, 3, 4, ... K, A
             {
                 $cards[] = array( 'type' => $color_id, 'type_arg' => $value, 'nbr' => 1);
             }
@@ -178,11 +178,15 @@ class RememberWhen extends Table
         // Cards in current sentence
         $result['current_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'current_sentence' ));
 
-        // Working cards
-        $result['working_area'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
-
+        
          // Active Player
         $result['sentence_builder'] = self::getGameStateValue( 'playerBuildingSentence' );
+
+        if ($current_player_id == self::getGameStateValue( 'playerBuildingSentence' )) {
+            // Working cards
+            $result['action_choice'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
+
+        }
         
 		
   
@@ -682,11 +686,14 @@ class RememberWhen extends Table
 				{
 					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
 				}
+                // only notify non-active players of their cards
+                if ($player != self::getGameStateValue( 'playerBuildingSentence' )) {
             
-				// Notify player about his cards
-				self::notifyPlayer( $player_id, 'newCard', '', array( 
-					'cards' => $cards
-				) );
+                    // Notify player about his cards
+                    self::notifyPlayer( $player_id, 'newCard', '', array( 
+                        'cards' => $cards
+                    ) );
+                }
 			}
 
 		}        
@@ -703,7 +710,7 @@ class RememberWhen extends Table
         $player_id = self::getGameStateValue( 'playerBuildingSentence' );
 		
 
-        $cards = $this->cards->pickCardsForLocation(2, 'deck-4', 'hand', $player_id);
+        $cards = $this->cards->pickCardsForLocation(2, 'deck-4', 'action_choice', $player_id);
 		 
 		
 		// Notify player about his cards

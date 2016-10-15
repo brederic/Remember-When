@@ -132,31 +132,39 @@ define([
                 */
 
                 // Cards in player's hand 
-                for (var i in this.gamedatas.hand) {
-                    var card = this.gamedatas.hand[i];
-                    var color = card.type;
-                    var value = card.type_arg;
-                    var card_id = this.getCardUniqueId(color, value);
-                    console.log('Hand Card: ');
-                    console.log(card);
-                    this.playerHand.addToStockWithId(color, card_id);
-                    // add text to card
-                    this.playCardInHand(card_id, card, 'hand_' + card_id);
-
-                }
+               
                 // Hide hand of sentence builder, except actions
                 if (gamedatas.sentence_builder == player_id) {
                      console.log("I am the sentence builder")
+                    for (var i in this.gamedatas.action_choice) {
+                        var card = this.gamedatas.action_choice[i];
+                        console.log(card);
+                        var color = card.type;
+                        var value = card.type_arg;
+                        var card_id = this.getCardUniqueId(color, value);
+                        //console.log('Hand Card: ');
+                        //console.log(card);
+                        this.playerHand.addToStockWithId(color, card_id);
+                        // add text to card
+                        this.playCardInHand(card_id, card, 'hand_' + card_id);
+
+                    }
+                      
+                    
                         
-                        this.hideCardsOfType(1);
-                        this.hideCardsOfType(2);
-                        this.hideCardsOfType(3);
-                        this.hideCardsOfType(5);
-                        this.hideCardsOfType(6);
-                        this.hideCardsOfType(7);
-                        this.hideCardsOfType(8);
-                        
-                    }                
+                } else {
+                    for (var i in this.gamedatas.hand) {
+                        var card = this.gamedatas.hand[i];
+                        var color = card.type;
+                        var value = card.type_arg;
+                        var card_id = this.getCardUniqueId(color, value);
+                        //console.log('Hand Card: ');
+                        //console.log(card);
+                        this.playerHand.addToStockWithId(color, card_id);
+                        // add text to card
+                        this.playCardInHand(card_id, card, 'hand_' + card_id);
+                    }
+                }             
                 
                 console.log(this.playerHand);
 
@@ -344,6 +352,7 @@ define([
                 card_block = this.format_block('jstpl_cardontable', {
                     x: this.cardwidth * (card.type - 1),
                     y: 0,
+                    type: card.type,
                     player_id: card_name,
                     text_1: card.text_1,
                     text_2: card.text_2,
@@ -369,6 +378,7 @@ define([
                 card_block = this.format_block('jstpl_cardontable', {
                     x: this.cardwidth * (color - 1),
                     y: 0,
+                    type: card.type,
                     player_id: card_name,
                     text_1: card.text_1,
                     text_2: card.text_2,
@@ -420,7 +430,13 @@ define([
 			for (var i in this.playerHand.getAllItems()) {
 				c = this.playerHand.getAllItems()[i]
 				//console.log(c);
-				type = this.getCardType(c['id']);
+                // get card hmtl
+                //console.log("Grabbing card block with id:" + 'hand_'+c['id'])
+                var card_html =  $('hand_'+c['id']);
+                //console.log(card_html);
+
+				var type = dojo.getAttr(card_html,'type'); //this.getCardType(c['id']);
+                //console.log(type);
 				
 				if (type == playedCardType) {
 					var matchingCard = c;
@@ -438,10 +454,12 @@ define([
 					});
 					require(["dojo"], function(dojo){
 						dojo.addClass(id, "invisible");
+                        dojo.addClass('hand_'+ matchingCard['id'], "invisible");
+                        dojo.removeClass('hand_'+ matchingCard['id'], "spot cardontable");
 					});
 
 				} else {
-					console.log( 'Keep visible card of id: '+ c['id']+ ', type: ' + type );
+					//console.log( 'Keep visible card of id: '+ c['id']+ ', type: ' + type );
 				}
 			}
 		},
@@ -592,6 +610,7 @@ define([
 
             },
             notif_newCard: function (notif) {
+            
 
                 console.log('notifications new card');
                 for (var i in notif.args.cards) {

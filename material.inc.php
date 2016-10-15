@@ -56,7 +56,7 @@ $this->colors = array(
 						'num_cards' => 508/4 ),
 			8 => array( 'name' => clienttranslate('Why'),
 						'nametr' => self::_('Why'),
-						'num_cards' => 414/4 )
+						'num_cards' => 412/4 )
 		);
 
 
@@ -672,6 +672,8 @@ $this->values_label = array(
 		406 => clienttranslate("at Hogwarts"),
 		407 => clienttranslate("in the lair of the beast"),
 		408 => clienttranslate("inside the TARDIS"),
+		409 => clienttranslate("inside Willy Wonka's chocolate factory"),
+
 
 		),
     3 => array( 

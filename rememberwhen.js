@@ -288,22 +288,19 @@ define([
                         break;
                     
                         case 'chooseAction':
-                            console.log('There are ' + this.gamedatas.working_area.length + ' cards to work with.');
+                            //console.log('There are ' + this.gamedatas.working_area.length + ' cards to work with.');
 
-                            for (i in this.gamedatas.cardsontable) {
+                            /*for (i in this.gamedatas.cardsontable) {
                                 var card = this.gamedatas.working_area[i];
                                 var id = card.id
                                 var color = card.type;
                                 var value = card.type_arg;
                                 var player_id = card.location_arg;
-                                var rotation = 1; // ????
-                                this.playCardOnTable(card,  'current_sentence', rotation, player_id);
-                                this.addActionButton('chooseAction_button_' + id + '_1', _(color + '_' + value + '_1'), 'onChooseAction');
-                                this.addActionButton('chooseAction_button_' + id + '_2', _(color + '_' + value + '_2'), 'onChooseAction');
-                                this.addActionButton('chooseAction_button_' + id + '_3', _(color + '_' + value + '_3'), 'onChooseAction');
-                                this.addActionButton('chooseAction_button_' + id + '_4', _(color + '_' + value + '_4'), 'onChooseAction');
+                                var rotation = 1; // ????*/
+                               // this.playCardOnTable(card,  'current_sentence', rotation, player_id);
+                                this.addActionButton('Select', 'Select', 'onChooseAction');
 
-                            }
+                           // }
 
                             break;
                         case 'giveCards':
@@ -493,7 +490,22 @@ define([
                 this.ajaxcall( "/rememberwhen/rememberwhen/chooseRandomObject.html", { choice: choice, lock: true }, this, function( result ) {
                 }, function( is_error) { } );                
             }        
-        },        
+        },    
+
+        onChooseAction: function( evt)
+        {
+            console.log('onChooseAction');
+            dojo.stopEvent( evt );
+            var choice = evt.currentTarget.id;
+			choice = choice.split('_button_')[1]
+            console.log('onChooseAction: button choice:' + choice);
+            if( this.checkAction( 'chooseAction' ) )
+            {
+
+                this.ajaxcall( "/bphearts/bphearts/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
+            }        
+        },    
 
             onPlayerHandSelectionChanged: function () {
                 //require(["dojo/query"], function(query){

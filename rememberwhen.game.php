@@ -459,12 +459,13 @@ class RememberWhen extends Table
 		
         self::setGameStateValue( 'playerBuildingSentence', $player_id );
 		
-		// TODO: save choice to player data
-		
 		
 		// get object card
-		$card = $this->cards->pickCardForLocation('deck-7', 'current_sentence', $player_id);
+		$card = $this->cards->pickCardForLocation('deck-7', 'current_sentence', $choice);
         $card = $this->populateCard($card);
+
+        // TODO: save choice to player data??
+	
 
         // And notify
         self::notifyAllPlayers( 
@@ -477,6 +478,7 @@ class RememberWhen extends Table
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
 				'value_displayed' => $card['text_'.$choice],
+                'choice' => $choice,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'card' => $card

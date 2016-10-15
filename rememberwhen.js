@@ -606,9 +606,15 @@ define([
             },
             notif_addCardToSentence: function (notif) {
                 stateName = this.currentState;
+                console.log(notif.args);
                 // Play a card on the table
                 var card = notif.args.card;
-                var rotation = 1; //?????
+                if (notif.args.choice != null) {
+                     var rotation = notif.args.choice;
+                } else {
+                     var rotation = 1;
+                }
+                //?????
                 this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
                 
                 // Cards taken from some opponent

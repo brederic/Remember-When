@@ -658,6 +658,8 @@ class RememberWhen extends Table
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
 
+        self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
+        
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
         $deck_list = array(1, 2, 3, 6, 8);
@@ -687,7 +689,7 @@ class RememberWhen extends Table
 					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
 				}
                 // only notify non-active players of their cards
-                if ($player != self::getGameStateValue( 'playerBuildingSentence' )) {
+                if ($player_id != self::getGameStateValue( 'playerBuildingSentence' )) {
             
                     // Notify player about his cards
                     self::notifyPlayer( $player_id, 'newCard', '', array( 

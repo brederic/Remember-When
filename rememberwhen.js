@@ -142,7 +142,22 @@ define([
                     this.playerHand.addToStockWithId(color, card_id);
                     // add text to card
                     this.playCardInHand(card_id, card, 'hand_' + card_id);
+
                 }
+                // Hide hand of sentence builder, except actions
+                if (gamedatas.sentence_builder == player_id) {
+                     console.log("I am the sentence builder")
+                        
+                        this.hideCardsOfType(1);
+                        this.hideCardsOfType(2);
+                        this.hideCardsOfType(3);
+                        this.hideCardsOfType(5);
+                        this.hideCardsOfType(6);
+                        this.hideCardsOfType(7);
+                        this.hideCardsOfType(8);
+                        
+                    }                
+                
                 console.log(this.playerHand);
 
 
@@ -400,6 +415,36 @@ define([
 
             },
 
+		hideCardsOfType: function(playedCardType)
+		{
+			for (var i in this.playerHand.getAllItems()) {
+				c = this.playerHand.getAllItems()[i]
+				//console.log(c);
+				type = this.getCardType(c['id']);
+				
+				if (type == playedCardType) {
+					var matchingCard = c;
+					if (this.playerHand.getSelectedItems()[0] == matchingCard) {
+						this.playerHand.unselectAll();
+					}
+					var id = 'myhand_item_'+matchingCard['id'];
+					console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
+					//console.log( 'id: ' + id );
+					require(["dojo/dom-style"], function(domStyle){
+						domStyle.set(id, "opacity", "");
+						domStyle.set(id, "width", "");
+						domStyle.set(id, "height", "");
+						
+					});
+					require(["dojo"], function(dojo){
+						dojo.addClass(id, "invisible");
+					});
+
+				} else {
+					console.log( 'Keep visible card of id: '+ c['id']+ ', type: ' + type );
+				}
+			}
+		},
 
 
 

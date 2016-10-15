@@ -180,6 +180,9 @@ class RememberWhen extends Table
 
         // Working cards
         $result['working_area'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
+
+         // Active Player
+        $result['sentence_builder'] = self::getGameStateValue( 'playerBuildingSentence' );
         
 		
   

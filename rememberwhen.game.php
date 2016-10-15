@@ -700,13 +700,13 @@ class RememberWhen extends Table
         $player_id = self::getGameStateValue( 'playerBuildingSentence' );
 		
 
-        $cards = $this->cards->pickCardsForLocation(2, 'deck-4', 'action_choice', $player_id);
+        $cards = $this->cards->pickCardsForLocation(2, 'deck-4', 'hand', $player_id);
 		 
 		
 		// Notify player about his cards
 			self::notifyPlayer( $player_id, 'considerActions', '', array( 
 				'player_id' => $player_id,
-				'cards' => $cards
+				'cards' => $this->populateCards($cards)
 			) );
 			
         $this->gamestate->nextState();

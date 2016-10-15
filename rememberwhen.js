@@ -117,10 +117,7 @@ define([
 
                     // Build card type
                     this.playerHand.addItemType(color, color, g_gamethemeurl + 'img/fronts-sm.png', color - 1);
-                    //this.top_sentence.addItemType( color, color, g_gamethemeurl+'img/fronts-sm.png', color - 1 );
-                    //this.sentence.addItemType( card_type_id, color, g_gamethemeurl+'img/fronts.png', color - 1 );
-                    //console.log('Card[id:'+card_type_id+ ', color: ' + color + ', value=' + value + '] Calculated details [color/type=' + this.getCardType(card_type_id) + ', value='+ this.getCardValue(card_type_id)+']');
-
+                    
                 }
                 //console.log('this.getCardType(13)=' + this.getCardType(13));
                 //console.log('this.getCardValue(13)=' + this.getCardValue(13));
@@ -320,6 +317,11 @@ define([
             },
 
             playCardInHand: function (card_id, card, card_name) {
+                var color = card.type;
+                var value = card.type_arg;
+                var card_id = this.getCardUniqueId(color, value);
+                this.playerHand.addToStockWithId(color, card_id);
+
                 // get card div
                 div_id = $('myhand_item_' + card_id);
                 // add card text
@@ -560,7 +562,7 @@ define([
                     var color = card.type;
                     var value = card.type_arg;
                     var rotation = 1; //?????
-                    this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
+                    this.playCardInHand(card.id, card, 'action_'+card.id);
                 }            // Play a card on the table
                 //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
             },

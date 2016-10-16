@@ -514,8 +514,13 @@ class RememberWhen extends Table
 		// TODO: save card_pos to player data
 		
 		// get object card
-		$card = $this->cards->getCard( $card_id );
-		$this->cards->moveCard($card_id, 'cardsontable', $player_id);
+		$card = $this->populateCard($this->cards->getCard( $card_id ));
+		$this->cards->moveCard($card_id, 'current_sentence', $player_id);
+        // discard the other
+        $discards = $this->cards->getCardsInLocation('action_choice');
+        foreach ($discards as $id) {
+            $this->cards->playCard($id);
+        }
         
         // And notify
         self::notifyAllPlayers( 
@@ -527,9 +532,11 @@ class RememberWhen extends Table
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
-				//'value_displayed' => $this->values_label[ $card['type_arg'] ],
+				'value_displayed' => $card['text_'.$card_pos],
+                'choice' => $choice,
 				'color' => $card['type'],
-				'color_displayed' => $this->colors[ $card['type'] ]['name']
+				'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                'card' => $card
 			) 
 		);
 
@@ -659,7 +666,7 @@ class RememberWhen extends Table
         $players = self::loadPlayersBasicInfos();	
 
         self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
-        
+
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
         $deck_list = array(1, 2, 3, 6, 8);

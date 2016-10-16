@@ -542,14 +542,32 @@ define([
         onChooseAction: function( evt)
         {
             console.log('onChooseAction');
+            if (this.selectedCard == 0) {
+                this.showMessage("Please select an action card", "error");
+                return;
+            }
             dojo.stopEvent( evt );
-            var choice = evt.currentTarget.id;
-			choice = choice.split('_button_')[1]
+            var choice = this.selectedCard;
+            card_block = $('hand_'+choice);
+            rotation = "";
+            if (dojo.hasClass(card_block, "pos_1")) {
+                rotation = "1";
+            }
+            if (dojo.hasClass(card_block, "pos_2")) {
+                rotation = "2";
+            }
+            if (dojo.hasClass(card_block, "pos_3")) {
+                rotation = "3";
+            }
+            if (dojo.hasClass(card_block, "pos_4")) {
+                rotation = "4";
+            }
+            choice = choice + "_" + rotation;
             console.log('onChooseAction: button choice:' + choice);
             if( this.checkAction( 'chooseAction' ) )
             {
 
-                this.ajaxcall( "/bphearts/bphearts/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
+                this.ajaxcall( "/rememberwhen/rememberwhen/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
                 }, function( is_error) { } );                
             }        
         },    

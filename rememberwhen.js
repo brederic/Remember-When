@@ -33,6 +33,7 @@ define([
                 this.cardwidth = 150;
                 this.cardheight = 150;
                 this.currentState = '';
+                this.selectedCard = '';
 
             },
 
@@ -335,6 +336,12 @@ define([
                 script.
             
             */
+             getCursorPosition: function (canvas, event) {
+                var rect = canvas.getBoundingClientRect();
+                var x = event.clientX - rect.left;
+                var y = event.clientY - rect.top;
+                console.log("x: " + x + " y: " + y);
+            },
              onCardClick: function (card_block) {
          
                 	var id = dojo.getAttr(card_block, 'id');
@@ -388,6 +395,9 @@ define([
                     text_4: card.text_4
                 });
                 dojo.place(card_block, div_id, "only");
+                dojo.addClass(card_name, 'pos_1');
+                
+                
             },
 
 
@@ -543,18 +553,19 @@ define([
         },    
        
 
-            onPlayerHandSelectionChanged: function (control_name) {
+            onPlayerHandSelectionChanged: function (evt) {
                 //require(["dojo/query"], function(query){
                 //	console.log(query(query));
                 //});
 
                 //console.log("onPlayerHandSelectionChanged()");
                 //console.log(control_name);
+                //dojo.stopEvent(evt);
 
                 var items = this.playerHand.getSelectedItems();
 
                 if (items.length > 0) {
-                    if (this.checkAction('playCard', true)) {
+                   /* if (this.checkAction('playCard', true)) {
                         // Can play a card
 
                         var card_id = items[0].id;
@@ -566,7 +577,9 @@ define([
 
                         this.playerHand.unselectAll();
                     }
-                    else if (this.checkAction('giveCards')) {
+                    else 
+                    */
+                    /*if (this.checkAction('giveCards')) {
                         // Can give cards => let the player select some cards
 
                         var id = items[0]['id'];
@@ -580,13 +593,15 @@ define([
                         this.addActionButton('giveCard_button_' + id + '_4', _(color + '_' + value + '_4'), 'onGiveCard');
 
                     }
-                    else  if (this.checkAction('chooseAction')) {
+                    else  */
+                    if (this.checkAction('chooseAction')) {
                         // Can give cards => let the player select some cards
                         console.log('chooseAction with selection');
                         console.log(items[0]);
                         var id = items[0]['id'];
                         var color = items[0]['type'];
                         var value = this.getCardValue(id);
+                        this.selectedCard = id;
                     } else {
                         this.playerHand.unselectAll();
                     }
@@ -594,6 +609,10 @@ define([
                 if (this.checkAction('chooseAction')) {
                         // Can give cards => let the player select some cards
                         console.log('chooseAction without selection');
+                        this.playerHand.selectItem(this.selectedCard);
+                        card_block = $('hand_'+this.selectedCard);
+                        this.onCardClick(card_block);
+
                 }
             },
 

@@ -225,7 +225,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .spot  {
     position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	width: 150px;
     height: 150px;
 	/**background-color: blue; **/
@@ -256,7 +256,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_1 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red; */
 	left: -20%;
 	top: 40%;
 	width: 60%;
@@ -268,7 +268,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_2 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 20%;
 	top: -0%;
 	width: 60%;
@@ -278,7 +278,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_3 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 59%;
 	top: 40%;
 	width: 60%;
@@ -290,7 +290,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_4 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 20%;
 	top:  80%;
 	width: 60%;

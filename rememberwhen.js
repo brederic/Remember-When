@@ -105,7 +105,7 @@ define([
                     // 'this' is now the element clicked on (e.g. id="textDiv")
                     var el = this; 
                 	
-                    console.log('onClick ' + this.id + this.classes ); 
+                    console.log('onClick ' + this.id  ); 
     
                 	
                     if (dojo.hasClass(this.id, 'pos_1')) {
@@ -396,7 +396,7 @@ define([
                 var value = card.type_arg;
                 var card_id = color + "_" + value;
                 
-                card_name = loc + '_' + player_id; 
+                card_name = loc + '_' + card.id; 
                 if (player_id == null) {
                     player_id = this.player_id;
                 }
@@ -450,10 +450,10 @@ define([
                 console.log('Sliding to ' + dest);
                 dojo.addClass(card_name, dest);
                 this.slideToObject(card_name, dest).play();
+                /*
                 dojo.addOnLoad(function(){
                     dojo.connect(dojo.byId(card_name), "onclick", "onCardClick");
-                });
-                //dojo.connect(card_name,'onclick','onCardClick');
+                });*/
 
             },
 

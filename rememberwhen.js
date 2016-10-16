@@ -86,12 +86,22 @@ define([
                 //this.top_sentence.setSelectionMode(1);
                 //dojo.connect( this.top_sentence, 'onmouseclick', this, 'onCardClick' );
 
-                /*
+                
                 console.log( "Add interactions to cards" );
-            	
+            	// do it when the DOM is loaded
+                /*
                 dojo.addOnLoad( function() {
+                    // attach on click to id="textDiv"
+                    dojo.query('#textDiv').onclick( function(evt) { 
+                        // 'this' is now the element clicked on (e.g. id="textDiv")
+                        var el = this; 
+                        ... */
+
+                dojo.addOnLoad( function() {
+                    console.log("onLoad executing...")
+                    
                   // attach on click to id="textDiv"
-                  dojo.query('div[id^="cardontable_"]').onclick( function(evt) { 
+                  dojo.query('div[class*="rotatable"]').onclick( function(evt) { 
                     // 'this' is now the element clicked on (e.g. id="textDiv")
                     var el = this; 
                 	
@@ -109,7 +119,7 @@ define([
                     } 
                   });
                 });
-                */
+                
                 console.log("Create card types");
 
                 // Create cards types:
@@ -238,6 +248,11 @@ define([
                     case 'giveCards':
                         this.addTooltip('myhand', _('Cards in my hand'), _('Select a card'));
                         break;
+                    
+                    case 'chooseAction':
+                        cards = dojo.query('div[id^="cardontable"]');
+                        console.log(cards);
+                        //dojo.connect(this.stock.hand[this.my_id], 'onclick', this, 'action_clicForInitialMeld' );
 
 
 
@@ -320,6 +335,22 @@ define([
                 script.
             
             */
+             onCardClick: function (card_block) {
+         
+                	var id = dojo.getAttr(card_block, 'id');
+                    console.log('onClick ' + id  + dojo.getAttr(card_block, 'classes')); 
+    
+                	
+                    if (dojo.hasClass(id, 'pos_1')) {
+                        dojo.replaceClass(id, 'pos_2', 'pos_1');
+                    } else if (dojo.hasClass(id, 'pos_2')) {
+                        dojo.replaceClass(id, 'pos_3', 'pos_2');
+                    } else if (dojo.hasClass(id, 'pos_3')) {
+                        dojo.replaceClass(id, 'pos_4', 'pos_3');
+                    } else if (dojo.hasClass(id, 'pos_4')) {
+                        dojo.replaceClass(id, 'pos_1', 'pos_4');
+                    } 
+                  },
 
             // Get card unique identifier based on its color and value
             getCardUniqueId: function (color, value) {
@@ -419,6 +450,10 @@ define([
                 console.log('Sliding to ' + dest);
                 dojo.addClass(card_name, dest);
                 this.slideToObject(card_name, dest).play();
+                dojo.addOnLoad(function(){
+                    dojo.connect(dojo.byId(card_name), "onclick", "onCardClick");
+                });
+                //dojo.connect(card_name,'onclick','onCardClick');
 
             },
 
@@ -506,11 +541,15 @@ define([
                 }, function( is_error) { } );                
             }        
         },    
+       
 
-            onPlayerHandSelectionChanged: function () {
+            onPlayerHandSelectionChanged: function (control_name) {
                 //require(["dojo/query"], function(query){
                 //	console.log(query(query));
                 //});
+
+                //console.log("onPlayerHandSelectionChanged()");
+                //console.log(control_name);
 
                 var items = this.playerHand.getSelectedItems();
 
@@ -541,9 +580,20 @@ define([
                         this.addActionButton('giveCard_button_' + id + '_4', _(color + '_' + value + '_4'), 'onGiveCard');
 
                     }
-                    else {
+                    else  if (this.checkAction('chooseAction')) {
+                        // Can give cards => let the player select some cards
+                        console.log('chooseAction with selection');
+                        console.log(items[0]);
+                        var id = items[0]['id'];
+                        var color = items[0]['type'];
+                        var value = this.getCardValue(id);
+                    } else {
                         this.playerHand.unselectAll();
                     }
+                } else
+                if (this.checkAction('chooseAction')) {
+                        // Can give cards => let the player select some cards
+                        console.log('chooseAction without selection');
                 }
             },
 

@@ -33,7 +33,8 @@ define([
                 this.cardwidth = 150;
                 this.cardheight = 150;
                 this.currentState = '';
-                this.selectedCard = '';
+                this.selectedCard = 0;
+                this.handConnection = null;
 
             },
 
@@ -67,7 +68,8 @@ define([
                 this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);
                 this.playerHand.image_items_per_row = 8;
                 this.playerHand.setSelectionMode(1);
-                dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+                this.playerHand.setSelectionAppearance( 'class' );
+                this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
 
 
                 console.log("Build sentences");
@@ -562,6 +564,7 @@ define([
                 //console.log(control_name);
                 //dojo.stopEvent(evt);
 
+                
                 var items = this.playerHand.getSelectedItems();
 
                 if (items.length > 0) {
@@ -594,26 +597,49 @@ define([
 
                     }
                     else  */
-                    if (this.checkAction('chooseAction')) {
-                        // Can give cards => let the player select some cards
-                        console.log('chooseAction with selection');
-                        console.log(items[0]);
-                        var id = items[0]['id'];
-                        var color = items[0]['type'];
-                        var value = this.getCardValue(id);
-                        this.selectedCard = id;
-                    } else {
-                        this.playerHand.unselectAll();
-                    }
-                } else
-                if (this.checkAction('chooseAction')) {
-                        // Can give cards => let the player select some cards
-                        console.log('chooseAction without selection');
-                        this.playerHand.selectItem(this.selectedCard);
+                   
+                    console.log('chooseAction with selection');
+                    console.log(items[0]);
+                    var id = items[0]['id'];
+                    var color = items[0]['type'];
+                    var value = this.getCardValue(id);
+                    if (id== this.selectedCard) {
                         card_block = $('hand_'+this.selectedCard);
+                        // rotate selected card
                         this.onCardClick(card_block);
+                    } else {
+                        this.selectedCard = id;
+                        //dojo.disconnect(this.handConnection);
+                        //this.playerHand.unselectAll();
+                        //this.playerHand.selectItem(this.selectedCard);
+                        //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+                    }
+                    
+
+
+                } else {
+                    //if (this.checkAction('chooseAction')) {
+                    //console.log('chooseAction without selection');
+                    //dojo.disconnect(this.handConnection);
+                    //this.playerHand.selectItem(this.selectedCard);
+                    //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+                    card_block = $('hand_'+this.selectedCard);
+                    // rotate selected card
+                    this.onCardClick(card_block);
+                   // }
 
                 }
+                // update selection styles
+                console.log('fixing classes on hand stock');
+                items = this.playerHand.getAllItems();
+                console.log(items);
+                console.log('selected:' +this.selectedCard);
+                items.forEach( function (item) {
+                    console.log(item.id);
+                    dojo.removeClass('myhand_item_'+item.id, 'myitem_selected');
+                    }
+                );
+                dojo.addClass('myhand_item_'+this.selectedCard, 'myitem_selected');
             },
 
 

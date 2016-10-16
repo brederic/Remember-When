@@ -43,6 +43,13 @@
 */
 @import url(../../../css/csslayer.css);
 
+.stockitem_selected {
+	border: 0px solid lightblue ! important;
+}
+.myitem_selected {
+	border: 2px solid red ! important;
+}
+
 /** Table layout **/
 /**
 #playertables {

@@ -518,10 +518,9 @@ class RememberWhen extends Table
 		$this->cards->moveCard($card_id, 'current_sentence', $card_pos);
         // discard the other
         $discards = $this->cards->getCardsInLocation('action_choice');
-        foreach ($discards as $id) {
-            $this->cards->playCard($id);
+        foreach ($discards as $discard) {
+            $this->cards->playCard($discard['id']);
         }
-        
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 

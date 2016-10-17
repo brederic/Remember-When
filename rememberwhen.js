@@ -547,6 +547,7 @@ define([
                 return;
             }
             dojo.stopEvent( evt );
+            
             var choice = this.selectedCard;
             card_block = $(choice);
             console.log(card_block);
@@ -570,7 +571,9 @@ define([
 
                 this.ajaxcall( "/rememberwhen/rememberwhen/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
                 }, function( is_error) { } );                
-            }        
+            }   
+            this.playerHand.removeAll();
+                 
         },    
        
 

@@ -505,8 +505,8 @@ class RememberWhen extends Table
         self::checkAction( "chooseAction" );
 		
 		$params = explode("_", $choice);
-		$card_id = $params[0];
-		$card_pos = $params[1];
+		$card_id = $params[1];
+		$card_pos = $params[2];
         
         // Here we have to get active player 
         $player_id = self::getActivePlayerId();
@@ -515,7 +515,7 @@ class RememberWhen extends Table
 		
 		// get object card
 		$card = $this->populateCard($this->cards->getCard( $card_id ));
-		$this->cards->moveCard($card_id, 'current_sentence', $player_id);
+		$this->cards->moveCard($card_id, 'current_sentence', $card_pos);
         // discard the other
         $discards = $this->cards->getCardsInLocation('action_choice');
         foreach ($discards as $id) {
@@ -533,7 +533,7 @@ class RememberWhen extends Table
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
 				'value_displayed' => $card['text_'.$card_pos],
-                'choice' => $choice,
+                'choice' => $card_pos,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'card' => $card

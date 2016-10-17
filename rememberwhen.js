@@ -159,7 +159,7 @@ define([
                         //console.log(card);
                         this.playerHand.addToStockWithId(color, card_id);
                         // add text to card
-                        this.playCardInHand(card_id, card, 'hand_' + card_id);
+                        this.playCardInHand(card_id, card, 'hand_' + card.id);
 
                     }
                       
@@ -548,7 +548,8 @@ define([
             }
             dojo.stopEvent( evt );
             var choice = this.selectedCard;
-            card_block = $('hand_'+choice);
+            card_block = $(choice);
+            console.log(card_block);
             rotation = "";
             if (dojo.hasClass(card_block, "pos_1")) {
                 rotation = "1";
@@ -619,14 +620,16 @@ define([
                     console.log('chooseAction with selection');
                     console.log(items[0]);
                     var id = items[0]['id'];
+                    card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
+                    console.log(card_node);
                     var color = items[0]['type'];
                     var value = this.getCardValue(id);
-                    if (id== this.selectedCard) {
-                        card_block = $('hand_'+this.selectedCard);
+                    if (card_node.id == this.selectedCard) {
+                        //card_block = $('hand_'+this.selectedCard);
                         // rotate selected card
-                        this.onCardClick(card_block);
+                        this.onCardClick(card_node);
                     } else {
-                        this.selectedCard = id;
+                        this.selectedCard = card_node.id;
                         //dojo.disconnect(this.handConnection);
                         //this.playerHand.unselectAll();
                         //this.playerHand.selectItem(this.selectedCard);
@@ -641,7 +644,7 @@ define([
                     //dojo.disconnect(this.handConnection);
                     //this.playerHand.selectItem(this.selectedCard);
                     //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
-                    card_block = $('hand_'+this.selectedCard);
+                    card_block = $(this.selectedCard);
                     // rotate selected card
                     this.onCardClick(card_block);
                    // }
@@ -649,15 +652,15 @@ define([
                 }
                 // update selection styles
                 console.log('fixing classes on hand stock');
-                items = this.playerHand.getAllItems();
+                items = dojo.query('div[id^=hand_]');//this.playerHand.getAllItems();
                 console.log(items);
                 console.log('selected:' +this.selectedCard);
                 items.forEach( function (item) {
                     console.log(item.id);
-                    dojo.removeClass('myhand_item_'+item.id, 'myitem_selected');
+                    dojo.removeClass(item, 'myitem_selected');
                     }
                 );
-                dojo.addClass('myhand_item_'+this.selectedCard, 'myitem_selected');
+                dojo.addClass(this.selectedCard, 'myitem_selected');
             },
 
 

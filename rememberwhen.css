@@ -43,6 +43,13 @@
 */
 @import url(../../../css/csslayer.css);
 
+.stockitem_selected {
+	border: 0px solid lightblue ! important;
+}
+.myitem_selected {
+	border: 2px solid red ! important;
+}
+
 /** Table layout **/
 /**
 #playertables {
@@ -225,12 +232,30 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .spot  {
     position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	width: 150px;
     height: 150px;
 	/**background-color: blue; **/
 }
 
+/** Role icons **/
+.role_icon {width: 15px;
+    height: 15px;
+	display: inline-block;
+    
+	}
+.role_icon_0 {width: 15px;
+    height: 15px;
+	background-color: white; 
+	}
+.role_icon_1 {width: 15px;
+    height: 15px;
+	background-color: blue; 
+	}
+.role_icon_2 {width: 15px;
+    height: 15px;
+	background-color: red; 
+	}
 	
 /*** cards on table ***/
 
@@ -256,7 +281,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_1 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red; */
 	left: -20%;
 	top: 40%;
 	width: 60%;
@@ -268,7 +293,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_2 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 20%;
 	top: -0%;
 	width: 60%;
@@ -278,7 +303,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_3 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 59%;
 	top: 40%;
 	width: 60%;
@@ -290,7 +315,7 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 
 .text_4 {
 	position: absolute;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	left: 20%;
 	top:  80%;
 	width: 60%;

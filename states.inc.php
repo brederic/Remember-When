@@ -127,8 +127,16 @@ $machinestates = array(
         "possibleactions" => array( "chooseAction" ),
         "transitions" => array( "chooseAction" => 22 )
     ), 	
+    22 => array(
+        "name" => "chooseRole",
+        "description" => clienttranslate('${actplayer} must choose a role.'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a role.'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "chooseRole" ),
+        "transitions" => array( "chooseRole" => 30 )
+    ), 	
 
-    22 => array(       
+    30 => array(       
         "name" => "giveCards",
         "description" => clienttranslate('Some players must choose a card to give to ${direction}'),
         "descriptionmyturn" => clienttranslate('${you} must choose a card to give to ${direction}'),
@@ -138,7 +146,7 @@ $machinestates = array(
         "possibleactions" => array( "giveCards" ),
         "transitions" => array( "giveCards" => 23 )        
     ), 
-	23 => array(
+	31 => array(
         "name" => "arrangeSentence",
         "description" => clienttranslate('${actplayer} must arrange the cards into a completed memory.'),
         "descriptionmyturn" => clienttranslate('${you} must arrange the cards into a completed memory.'),
@@ -148,7 +156,7 @@ $machinestates = array(
     ), 	
 
     
-    26 => array(
+    40 => array(
         "name" => "scoreSentence",
         "description" => "",
         "type" => "game",

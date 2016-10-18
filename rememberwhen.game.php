@@ -33,6 +33,9 @@ class RememberWhen extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
+             "playerBuildingSentence" => 13,
+             "role" => 14, // 0 = Undecided,  1 = Hero, 2 = Villain
+        
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -45,34 +48,6 @@ class RememberWhen extends Table
 		
 		$this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
-		// These should be in material.inc.php, but I can't get it to load from there in the studio.  Will this work when it goes live?
-		/*$this->colors = array(
-			1 => array( 'name' => clienttranslate('When'),
-						'nametr' => self::_('When'),
-						'num_cards' => 200/4),
-			2 => array( 'name' => clienttranslate('Where'),
-						'nametr' => self::_('Where'),
-						'num_cards' => 408/4),
-			3 => array( 'name' => clienttranslate('How'),
-						'nametr' => self::_('How') ,
-						'num_cards' => 204/4),
-			4 => array( 'name' => clienttranslate('Did What'),
-						'nametr' => self::_('Did What') ,
-						'num_cards' => 412/4),
-			5 => array( 'name' => clienttranslate('Whose'),
-						'nametr' => self::_('Whose'),
-						'num_cards' => 212/4),
-			6 => array( 'name' => clienttranslate('What Kind'),
-						'nametr' => self::_('What Kind'),
-						'num_cards' => 404/4),
-			7 => array( 'name' => clienttranslate('To What'),
-						'nametr' => self::_('To What'),
-						'num_cards' => 508/4 ),
-			8 => array( 'name' => clienttranslate('Why'),
-						'nametr' => self::_('Why'),
-						'num_cards' => 414/4 )
-		);
-        */
 	}
 	
     protected function getGameName( )
@@ -89,7 +64,7 @@ class RememberWhen extends Table
     */
     protected function setupNewGame( $players, $options = array() )
     {    
-        $sql = "DELETE FROM player WHERE 1 ";
+       $sql = "DELETE FROM player WHERE 1 ";
         self::DbQuery( $sql ); 
 
         // Set the colors of the players with HTML color code
@@ -114,7 +89,8 @@ class RememberWhen extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
+        $this->setGameStateInitialValue( 'role', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -128,7 +104,7 @@ class RememberWhen extends Table
         {
 			$cards = array();
 			
-            for( $value=2; $value<=$color['num_cards']+2; $value++ )   //  2, 3, 4, ... K, A
+            for( $value=2; $value<=$color['num_cards']+1; $value++ )   //  2, 3, 4, ... K, A
             {
                 $cards[] = array( 'type' => $color_id, 'type_arg' => $value, 'nbr' => 1);
             }
@@ -172,6 +148,21 @@ class RememberWhen extends Table
           
         // Cards in top sentence
         $result['top_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'top_sentence' ));
+
+        // Cards in current sentence
+        $result['current_sentence'] = $this->populateCards($this->cards->getCardsInLocation( 'current_sentence' ));
+
+        
+         // Active Player
+        $result['sentence_builder'] = self::getGameStateValue( 'playerBuildingSentence' );
+        $result['role'] = self::getGameStateValue( 'role' );
+
+        if ($current_player_id == self::getGameStateValue( 'playerBuildingSentence' )) {
+            // Working cards
+            $result['action_choice'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
+
+        }
+        
 		
   
         return $result;
@@ -318,6 +309,364 @@ class RememberWhen extends Table
         );
     }    
     */
+    
+    function argGiveCards()
+    {
+		$me = self::getCurrentPlayerId();
+		$players = self::loadPlayersBasicInfos();	
+		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
+		$player_name = $players[ $player_id ]['player_name'];
+
+		if ($me == $player_id) {
+			$direction = clienttranslate('you');
+		} else {
+			$direction = $players[ $player_id ]['player_name'];
+		}
+			
+
+        return array(
+            "i18n" => array( 'direction'),
+            "direction" => $direction
+        );
+    }
+
+
+    
+    // Play a card from player hand
+    function playCard( $card_id )
+    {
+        self::checkAction( "playCard" );
+        
+        $player_id = self::getActivePlayerId();
+        
+        // Get all cards in player hand
+        // (note: we must get ALL cards in player's hand in order to check if the card played is correct)
+        
+        $playerhands = $this->cards->getCardsInLocation( 'hand', $player_id );
+
+        $bFirstCard = ( count( $playerhands ) == 13 );
+                
+        $currentTrickColor = self::getGameStateValue( 'trickColor' ) ;
+                
+        // Check that the card is in this hand
+        $bIsInHand = false;
+        $currentCard = null;
+        $bAtLeastOneCardOfCurrentTrickColor = false;
+        $bAtLeastOneCardWithoutPoints = false;
+        $bAtLeastOneCardNotHeart = false;
+        foreach( $playerhands as $card )
+        {
+            if( $card['id'] == $card_id )
+            {
+                $bIsInHand = true;
+                $currentCard = $card;
+            }
+            
+            if( $card['type'] == $currentTrickColor )
+                $bAtLeastOneCardOfCurrentTrickColor = true;
+
+            if( $card['type'] != 2 )
+                $bAtLeastOneCardNotHeart = true;
+                
+            if( $card['type'] == 2 || ( $card['type'] == 1 && $card['type_arg'] == 12  ) )
+            {
+                // This is a card with point
+            }
+            else
+                $bAtLeastOneCardWithoutPoints = true;
+        }
+        if( ! $bIsInHand )
+            throw new feException( "This card is not in your hand" );
+            
+        if( $this->cards->countCardInLocation( 'hand' ) == 52 )
+        {
+            // If this is the first card of the hand, it must be 2-club
+            // Note: first card of the hand <=> cards on hands == 52
+
+            if( $currentCard['type'] != 3 || $currentCard['type_arg'] != 2 ) // Club 2
+                throw new feException( self::_("You must play the Club-2"), true );                
+        }
+        else if( $currentTrickColor == 0 )
+        {
+            // Otherwise, if this is the first card of the trick, any cards can be played
+            // except a Heart if:
+            // _ no heart has been played, and
+            // _ player has at least one non-heart
+            if( self::getGameStateValue( 'alreadyPlayedHearts')==0
+             && $currentCard['type'] == 2   // this is a heart
+             && $bAtLeastOneCardNotHeart )
+            {
+                throw new feException( self::_("You can't play a heart to start the trick if no heart has been played before"), true );
+            }
+        }
+        else
+        {
+            // The trick started before => we must check the color
+            if( $bAtLeastOneCardOfCurrentTrickColor )
+            {
+                if( $currentCard['type'] != $currentTrickColor )
+                    throw new feException( sprintf( self::_("You must play a %s"), $this->colors[ $currentTrickColor ]['nametr'] ), true );
+            }
+            else
+            {
+                // The player has no card of current trick color => he can plays what he want to
+                
+                if( $bFirstCard && $bAtLeastOneCardWithoutPoints )
+                {
+                    // ...except if it is the first card played by this player during this hand
+                    // (it is forbidden to play card with points during the first trick)
+                    // (note: if player has only cards with points, this does not apply)
+                    
+                    if( $currentCard['type'] == 2 || ( $currentCard['type'] == 1 && $currentCard['type_arg'] == 12  ) )
+                    {
+                        // This is a card with point                  
+                        throw new feException( self::_("You can't play cards with points during the first trick"), true );
+                    }
+                }
+            }
+        }
+        
+        // Checks are done! now we can play our card
+        $this->cards->moveCard( $card_id, 'cardsontable', $player_id );
+        
+        // Set the trick color if it hasn't been set yet
+        if( $currentTrickColor == 0 )
+            self::setGameStateValue( 'trickColor', $currentCard['type'] );
+        
+        if( $currentCard['type'] == 2 )
+            self::setGameStateValue( 'alreadyPlayedHearts', 1 );
+        
+        // And notify
+        self::notifyAllPlayers( 'playCard', clienttranslate('${player_name} plays ${value_displayed} ${color_displayed}'), array(
+            'i18n' => array( 'color_displayed', 'value_displayed' ),
+            'card_id' => $card_id,
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'value' => $currentCard['type_arg'],
+            'value_displayed' => $this->values_label[ $currentCard['type_arg'] ],
+            'color' => $currentCard['type'],
+            'color_displayed' => $this->colors[ $currentCard['type'] ]['name']
+        ) );
+        
+        // Next player
+        $this->gamestate->nextState( 'playCard' );
+    }
+    
+    // Give some cards (before the hands begin)
+    function chooseRandomObject( $choice )
+    {
+        self::checkAction( "chooseRandomObject" );
+        
+        // Here we have to get active player 
+        $player_id = self::getActivePlayerId();
+		
+        self::setGameStateValue( 'playerBuildingSentence', $player_id );
+		
+		
+		// get object card
+		$card = $this->cards->pickCardForLocation('deck-7', 'current_sentence', $choice);
+        $card = $this->populateCard($card);
+
+        // TODO: save choice to player data??
+	
+
+        // And notify
+        self::notifyAllPlayers( 
+			'addCardToSentence', 
+			clienttranslate('${player_name} randomly adds ${value_displayed} ${color_displayed} to the sentence.'), 
+			array(
+				'i18n' => array( 'color_displayed', 'value_displayed' ),
+				'card_id' => $card['id'],
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'value' => $card['type_arg'],
+				'value_displayed' => $card['text_'.$choice],
+                'choice' => $choice,
+				'color' => $card['type'],
+				'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                'card' => $card
+			) 
+		);
+
+		
+        // Choose action
+        $this->gamestate->nextState( "chooseRandomObject" );
+
+    } 
+	
+	    
+    // Give some cards (before the hands begin)
+    function chooseRole( $choice )
+    {
+        self::checkAction( "chooseRole" );
+		
+	
+        // Here we have to get active player 
+        $player_id = self::getActivePlayerId();
+		
+		$this->setGameStateValue('role', $choice);
+
+        if ($choice == 1) {
+            $role_name = 'Hero';
+        } else if ($choice == 2) {
+            $role_name = 'Villain';
+        } else {
+            $role_name = 'Undecided';
+        }
+		
+		
+        // And notify
+        self::notifyAllPlayers( 
+			'chooseRole', 
+			clienttranslate('${player_name} is acting as a ${role_name}'), 
+			array(
+				'i18n' => array( 'color_displayed', 'value_displayed' ),
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'role_name' => $role_name,
+                'choice' => $choice
+			) 
+		);
+
+		
+        // Choose action
+        $this->gamestate->nextState( "chooseRole" );
+
+    } 
+	   function chooseAction( $choice )
+    {
+        self::checkAction( "chooseAction" );
+		
+		$params = explode("_", $choice);
+		$card_id = $params[1];
+		$card_pos = $params[2];
+        
+        // Here we have to get active player 
+        $player_id = self::getActivePlayerId();
+		
+		// TODO: save card_pos to player data
+		
+		// get object card
+		$card = $this->populateCard($this->cards->getCard( $card_id ));
+		$this->cards->moveCard($card_id, 'current_sentence', $card_pos);
+        // discard the other
+        $discards = $this->cards->getCardsInLocation('action_choice');
+        foreach ($discards as $discard) {
+            $this->cards->playCard($discard['id']);
+        }
+        // And notify
+        self::notifyAllPlayers( 
+			'addCardToSentence', 
+			clienttranslate('${player_name} vaguely remembers doing ${value_displayed} ${color_displayed} to the object.  But when? where? why? how?'), 
+			array(
+				'i18n' => array( 'color_displayed', 'value_displayed' ),
+				'card_id' => $card['id'],
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'value' => $card['type_arg'],
+				'value_displayed' => $card['text_'.$card_pos],
+                'choice' => $card_pos,
+				'color' => $card['type'],
+				'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                'card' => $card
+			) 
+		);
+
+		
+        // Choose action
+        $this->gamestate->nextState( "chooseAction" );
+
+    } 
+	
+    // Give some cards (before the hands begin)
+    function giveCards( $choice )
+    {
+		//convert choice into card
+		$params = explode("_", $choice);
+		$card_id = $params[0];
+		$card_pos = $params[1];
+		
+		// get object card
+		$card = $this->cards->getCard( $card_id );
+        self::checkAction( "giveCards" );
+        
+        // !! Here we have to get CURRENT player (= player who send the request) and not
+        //    active player, cause we are in a multiple active player state and the "active player"
+        //    correspond to nothing.
+        $player_id = self::getCurrentPlayerId();
+		
+		
+		$card_ids[] = $card_id;
+        
+        //if( count( $card_ids ) != 1 )
+        //  throw new feException( self::_("You must give exactly 1 card") );
+    
+        // Check if these cards are in player hands
+        $cards[] = $card;
+        
+        if( count( $cards ) != 1 )
+            throw new feException( self::_("This card doesn't exist") );
+        
+        foreach( $cards as $card )
+        {
+            if( $card['location'] != 'hand' || $card['location_arg'] != $player_id )
+                throw new feException( self::_("This card is not in your hand") );
+        }
+        
+
+		$this->cards->moveCard($card_id, 'cardsontable', $player_id);		// add card to sentence
+		
+		// TODO: record the player's guess for helper scoring
+        
+        // And notify
+        self::notifyAllPlayers( 
+			'addCardToSentence', 
+			clienttranslate('${player_name} vaguely remembers doing ${value_displayed} ${color_displayed} to the object.  But when? where? why? how?'), 
+			array(
+				'i18n' => array( 'color_displayed', 'value_displayed' ),
+				'card_id' => $card['id'],
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'value' => $card['type_arg'],
+				//'value_displayed' => $this->values_label[ $card['type_arg'] ],
+				'color' => $card['type'],
+				'color_displayed' => $this->colors[ $card['type'] ]['name']
+			) 
+		);
+		/*
+        // To which player should I give these cards ?
+        $player_to_give_cards = null;
+        $player_to_direction = self::getPlayersToDirection();   // Note: current player is on the south
+        $handType = self::getGameStateValue( "currentHandType" );
+        if( $handType == 0 )
+            $direction = 'W';
+        else if( $handType == 1 )
+            $direction = 'N';
+        else if( $handType == 2 )
+            $direction = 'E';
+        foreach( $player_to_direction as $opponent_id => $opponent_direction )
+        {
+            if( $opponent_direction == $direction )
+                $player_to_give_cards = $opponent_id;
+        }
+        if( $player_to_give_cards === null )
+            throw new feException( self::_("Error while determining to who give the cards") );
+        
+        // Allright, these cards can be given to this player
+        // (note: we place the cards in some temporary location in order he can't see them before the hand starts)
+        $this->cards->moveCards( $card_ids, "temporary", $player_to_give_cards );
+		*/
+
+        // Notify the player so we can make these cards disapear
+        self::notifyPlayer( $player_id, "giveCards", "", array(
+            "cards" => $card_ids
+        ) );
+
+        // Make this player unactive now
+        // (and tell the machine state to use transtion "giveCards" if all players are now unactive
+        $this->gamestate->setPlayerNonMultiactive( $player_id, "giveCards" );
+    }
+    
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
@@ -348,6 +697,8 @@ class RememberWhen extends Table
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
 
+        self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
+
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
         $deck_list = array(1, 2, 3, 6, 8);
@@ -376,11 +727,14 @@ class RememberWhen extends Table
 				{
 					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
 				}
+                // only notify non-active players of their cards
+                if ($player_id != self::getGameStateValue( 'playerBuildingSentence' )) {
             
-				// Notify player about his cards
-				self::notifyPlayer( $player_id, 'newCard', '', array( 
-					'cards' => $cards
-				) );
+                    // Notify player about his cards
+                    self::notifyPlayer( $player_id, 'newCard', '', array( 
+                        'cards' => $cards
+                    ) );
+                }
 			}
 
 		}        
@@ -389,8 +743,36 @@ class RememberWhen extends Table
 
         $this->gamestate->nextState( "" );
     } 
+    
+    function stDrawActions()
+    {
+       
+		// Here we have to get player who is building the sentence 
+        $player_id = self::getGameStateValue( 'playerBuildingSentence' );
+		
+
+        $cards = $this->cards->pickCardsForLocation(2, 'deck-4', 'action_choice', $player_id);
+		 
+		
+		// Notify player about his cards
+			self::notifyPlayer( $player_id, 'considerActions', '', array( 
+				'player_id' => $player_id,
+				'cards' => $this->populateCards($cards)
+			) );
+			
+        $this->gamestate->nextState();
+    }
 
 
+    function stGiveCards()
+    {
+        
+        // Active all players (everyone has to choose 1 cards to give)
+        $this->gamestate->setAllPlayersMultiactive();
+		// (and keep the current sentence builder non-active)
+		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+    }
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////

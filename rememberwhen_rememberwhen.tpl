@@ -40,9 +40,9 @@
 <div id="sentence_board" class="floatL whiteblock ">
 	<ul class="tab">
 	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Sentence</a></li>
-	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'sentence')">Current Sentence</a></li>
+	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'current_sentence')">Current Sentence</a></li>
 	</ul>
-    <div id="sentence" class="sentenceboard whiteblock tabcontent"> 
+    <div id="current_sentence" class="sentenceboard whiteblock tabcontent"> 
 		<div class="spot" id="spot_1">1</div><div class="spot" id="spot_2">2</div><div class="spot" id="spot_3">3</div><div class="spot" id="spot_4">4</div>
 		<div class="spot" id="spot_5">5</div><div class="spot" id="spot_6">6</div><div class="spot" id="spot_7">7</div><div class="spot" id="spot_8">8</div>
 
@@ -88,9 +88,15 @@ function showSentence(evt, cityName) {
     evt.currentTarget.className += " active";
 }
  
-var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" style="background-position:-${x}px -${y}px"><div class="text_1"><span class="text">${text_1}</span></div><div class="text_2"><span class="text">${text_2}</span></div><div class="text_3"><span class="text">${text_3}</span></div><div class="text_4"><span class="text">${text_4}</span></div></div>';
+var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="${type}" style="background-position:-${x}px -${y}px"><div class="text_1"><span class="text">${text_1}</span></div><div class="text_2"><span class="text">${text_2}</span></div><div class="text_3"><span class="text">${text_3}</span></div><div class="text_4"><span class="text">${text_4}</span></div></div>';
 						
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
+
+var jstpl_role = '<div id="role_icon_p${player}" class="role_icon role_icon_${color}"><span>${role}</span></div>';
+    
 </script>  
+
+
+
 
 {OVERALL_GAME_FOOTER}

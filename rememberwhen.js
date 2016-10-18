@@ -229,7 +229,7 @@ define([
                     var player_id = 'game_' + this.getCardUniqueId(color, value);
                     this.playCardOnTable(card, 'current_sentence', card.location_arg, player_id);
 
-                    //this.hideCardsOfType(color);
+                    this.hideCardsOfType(card.type);
                 }
                 /*
                 // Cards played on table
@@ -264,6 +264,7 @@ define([
             //
             onEnteringState: function (stateName, args) {
                 console.log('Entering state: ' + stateName);
+                this.currentState = stateName
 
                 switch (stateName) {
                     case 'playerTurn':
@@ -358,6 +359,38 @@ define([
                 script.
             
             */
+            		
+		hideCardsOfType: function(playedCardType)
+		{
+            console.log('Making cards invisible of type:' + playedCardType);
+            
+			for (var i in this.playerHand.getAllItems()) {
+				c = this.playerHand.getAllItems()[i]
+				console.log(c);
+                card_block = dojo.query('div[id=myhand_item_'+c['id']+'] > div')[0];
+                console.log(card_block);
+				type = dojo.getAttr(card_block, 'type')//this.getCardType(c['id']);
+				
+                
+				if (type == playedCardType) {
+					var matchingCard = c;
+                    // check if this card is currently selected and unselect it
+                    if (dojo.getAttr(card_block, 'id') == this.selectedCard) {
+						this.playerHand.unselectAll();
+					}
+					var id = 'myhand_item_'+matchingCard['id'];
+					//console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
+					console.log( 'id: ' + id );
+					require(["dojo"], function(dojo){
+						dojo.addClass(id, "invisible");
+					});
+
+				} else {
+					//console.log( 'Keep visible card of id: '+ c['id']+ ', type: ' + type );
+				}
+			}
+		},
+
              getCursorPosition: function (canvas, event) {
                 var rect = canvas.getBoundingClientRect();
                 var x = event.clientX - rect.left;
@@ -488,7 +521,7 @@ define([
                 });*/
 
             },
-
+/*
 		hideCardsOfType: function(playedCardType)
 		{
 			for (var i in this.playerHand.getAllItems()) {
@@ -496,10 +529,10 @@ define([
 				//console.log(c);
                 // get card hmtl
                 //console.log("Grabbing card block with id:" + 'hand_'+c['id'])
-                var card_html =  $('hand_'+c['id']);
+                //var card_html =  $('hand_'+c['id']);
                 //console.log(card_html);
 
-				var type = dojo.getAttr(card_html,'type'); //this.getCardType(c['id']);
+				var type = this.getCardType(c['id']);
                 //console.log(type);
 				
 				if (type == playedCardType) {
@@ -528,7 +561,7 @@ define([
 			}
 		},
 
-
+*/
 
 
             ///////////////////////////////////////////////////
@@ -885,6 +918,7 @@ define([
                 }
             },
             notif_addCardToSentence: function (notif) {
+                console.log('notifications addCardToSentence');
                 stateName = this.currentState;
                 console.log(notif.args);
                 // Play a card on the table
@@ -897,17 +931,18 @@ define([
                 //?????
                 this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
                 
-                // Cards taken from some opponent
+                /* Cards taken from some opponent
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     var color = card.type;
                     var value = card.type_arg;
                     this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-                }
+                }*/
 
+                console.log('state: '+ stateName);
+                
 
-
-                // TODO:  If we are giving cards and this player is still active, make cards in hand that are no longer valid invisible or unselectable
+                //  If we are giving cards and this player is still active, make cards in hand that are no longer valid invisible or unselectable
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
 
@@ -915,9 +950,7 @@ define([
                             var playedCardType = notif.args.color;
 
 
-                            console.log('Making cards invisible of type:' + playedCardType);
-                            //this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' ); 
-                            //find matching card in my hand
+                            this.hideCardsOfType(playedCardType);
 
 
 

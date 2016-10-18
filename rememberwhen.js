@@ -197,7 +197,7 @@ define([
                         //console.log(card);
                         this.playerHand.addToStockWithId(color, card_id);
                         // add text to card
-                        this.playCardInHand(card_id, card, 'hand_' + card_id);
+                        this.playCardInHand(card_id, card, 'hand_' + card.id);
                     }
                 }             
                 
@@ -787,6 +787,7 @@ define([
                 dojo.subscribe('giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer");
                 dojo.subscribe('newScores', this, "notif_newScores");
                 dojo.subscribe('giveCards', this, "notif_giveCards");
+                dojo.subscribe('cardGiven', this, "notif_cardGiven");
                 dojo.subscribe('takeCards', this, "notif_takeCards");
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
@@ -811,6 +812,17 @@ define([
                     var value = card.type_arg;
                     this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
                 }
+            },
+             notif_cardGiven: function (notif) {
+            
+
+                console.log('notifications card given');
+            
+                var card = notif.args.card;
+                var color = card.type;
+                var value = card.type_arg;
+                this.playerHand.removeFromStockById(this.getCardUniqueId(color, value));
+                
             },
             notif_considerActions: function (notif) {
                 for (var i in notif.args.cards) {

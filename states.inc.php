@@ -144,15 +144,25 @@ $machinestates = array(
         "action" => "stGiveCards",
         "args" => "argGiveCards",
         "possibleactions" => array( "giveCards" ),
-        "transitions" => array( "giveCards" => 23 )        
+        "transitions" => array( "giveCards" => 31 )        
     ), 
-	31 => array(
+     
+    31 => array(
+        "name" => "completeSentence",
+        "description" => "",
+        "type" => "game",
+        "action" => "stCompleteSentence",
+        "updateGameProgression" => true,   
+        "transitions" => array( "" => 32)
+    ),  
+
+	32 => array(
         "name" => "arrangeSentence",
         "description" => clienttranslate('${actplayer} must arrange the cards into a completed memory.'),
         "descriptionmyturn" => clienttranslate('${you} must arrange the cards into a completed memory.'),
         "type" => "activeplayer",
-        "possibleactions" => array( "completeSentence" ),
-        "transitions" => array( "completeSentence" => 26 )
+        "possibleactions" => array( "arrangeSentence" ),
+        "transitions" => array( "arrangeSentence" => 40 )
     ), 	
 
     

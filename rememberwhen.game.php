@@ -780,6 +780,65 @@ class RememberWhen extends Table
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
         $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
     }
+    
+
+    function stCompleteSentence()
+    {
+        $current_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $current_player_hand = $this->cards->getCardsInLocation('hand', $current_player_id );
+        $sentence = $this->cards->getCardsInLocation('current_sentence');
+        $players = self::loadPlayersBasicInfos();	
+		$current_player_name = $players[ $current_player_id ]['player_name'];
+		
+        // find any card types not already in the current sentence
+        foreach( $this->colors as  $type => $color ) // spade, heart, diamond, club
+        {
+            // skip orange
+            if ($type == 5) continue;
+
+            $found = false;
+            foreach ($sentence as $card) {
+                if ($card['type'] == $type) {
+                    $found = true;
+                    break;
+                }
+            }
+            // card types not found will be supplied from active players hand
+            if (!$found) {
+                foreach ($current_player_hand as $card) {
+                    if ($card['type'] == $type) {
+                      
+                        // add card to sentence
+                        $this->cards->moveCard($card['id'], 'current_sentence', $current_player_id);		
+                        
+                        // And notify
+                        self::notifyAllPlayers( 
+                            'addCardToSentence', 
+                            clienttranslate('${current_player_name} added a ${color_displayed} card to the sentence. '), 
+                            array(
+                                'i18n' => array( 'color_displayed', 'value_displayed' ),
+                                'card_id' => $card['id'],
+                                'card' => $this->populateCard($card),
+                                'player_id' => $current_player_id,
+                                'current_player_name' => $current_player_name,
+                                'color' => $card['type'],
+                                'color_displayed' => $this->colors[ $card['type'] ]['name']
+                            ) 
+                        );  
+
+                        // Notify the player so we can make these cards disapear
+                        self::notifyPlayer( $current_player_id, "cardGiven", "", array(
+                            "card" => $card
+                        ) );
+                    }
+                }
+
+            }
+			
+		}
+        $this->gamestate->nextState("");
+ 
+    }
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////

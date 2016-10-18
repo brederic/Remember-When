@@ -97,6 +97,15 @@
         $this->game->chooseAction( $choice );
         self::ajaxResponse( );    
     }
+           
+    public function chooseRole()
+    {
+        self::setAjaxMode();     
+        $choice = self::getArg( "choice", AT_alphanum, true );
+        
+        $this->game->chooseRole( $choice );
+        self::ajaxResponse( );    
+    }
   
 
 

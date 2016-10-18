@@ -35,6 +35,8 @@ define([
                 this.currentState = '';
                 this.selectedCard = 0;
                 this.handConnection = null;
+                this.roles =['Active', 'Hero', 'Villain']
+                    
 
             },
 
@@ -60,6 +62,24 @@ define([
 
                 }
                 player_id = this.player_id;
+                sentence_builder = this.gamedatas.sentence_builder;
+
+                console.log("Sentence Builder: "+ this.gamedatas.sentence_builder);
+                console.log("Role: "+ this.gamedatas.role);
+                
+                 // Setting up player boards
+                //for( var player_id in gamedatas.players )
+                //{
+                    //var player = gamedatas.players[player_id];
+                            
+                    // Setting up players boards if needed
+                    var player_board_div = $('player_board_'+sentence_builder);
+                    dojo.place( this.format_block('jstpl_role', {
+                            player: sentence_builder,
+                            color: this.gamedatas.role,
+                            role: ''
+                        }    ), player_board_div );
+                //}
 
 
 
@@ -145,9 +165,11 @@ define([
                 */
 
                 // Cards in player's hand 
+                
+            
                
                 // Hide hand of sentence builder, except actions
-                if (gamedatas.sentence_builder == player_id) {
+                if (this.gamedatas.sentence_builder == player_id) {
                      console.log("I am the sentence builder")
                     for (var i in this.gamedatas.action_choice) {
                         var card = this.gamedatas.action_choice[i];
@@ -306,19 +328,17 @@ define([
                         break;
                     
                         case 'chooseAction':
-                            //console.log('There are ' + this.gamedatas.working_area.length + ' cards to work with.');
-
-                            /*for (i in this.gamedatas.cardsontable) {
-                                var card = this.gamedatas.working_area[i];
-                                var id = card.id
-                                var color = card.type;
-                                var value = card.type_arg;
-                                var player_id = card.location_arg;
-                                var rotation = 1; // ????*/
-                               // this.playCardOnTable(card,  'current_sentence', rotation, player_id);
+                           
                                 this.addActionButton('Select', 'Select', 'onChooseAction');
 
-                           // }
+                           
+
+                            break;
+                        case 'chooseRole':
+
+                                this.addActionButton('1', 'Hero', 'onChooseRole');
+                                this.addActionButton('2', 'Villain', 'onChooseRole');
+
 
                             break;
                         case 'giveCards':
@@ -537,6 +557,19 @@ define([
                 this.ajaxcall( "/rememberwhen/rememberwhen/chooseRandomObject.html", { choice: choice, lock: true }, this, function( result ) {
                 }, function( is_error) { } );                
             }        
+        }, 
+                     
+        onChooseRole: function( evt)
+        {
+            console.log('onChooseRole');
+            dojo.stopEvent( evt );
+            var choice = evt.currentTarget.id;
+            if( this.checkAction( 'chooseRole' ) )
+            {
+
+                this.ajaxcall( "/rememberwhen/rememberwhen/chooseRole.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
+            }        
         },    
 
         onChooseAction: function( evt)
@@ -729,6 +762,7 @@ define([
                 dojo.subscribe('giveCards', this, "notif_giveCards");
                 dojo.subscribe('takeCards', this, "notif_takeCards");
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
+                dojo.subscribe('chooseRole', this, "notif_chooseRole");
 
 
             },
@@ -759,6 +793,16 @@ define([
                     var rotation = 1; //?????
                     this.playCardInHand(card.id, card, 'action_'+card.id);
                 }            // Play a card on the table
+                //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+            },
+            notif_chooseRole: function (notif) {
+                role_div = dojo.query('div.role_icon')[0];
+                console.log(notif.args);
+
+                dojo.removeClass(role_div, 'role_icon_0');
+                dojo.addClass(role_div, 'role_icon_'+notif.args.choice);
+                
+                //role_div.span.textcontent = notif.args.role_name;
                 //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
             },
             notif_playCard: function (notif) {

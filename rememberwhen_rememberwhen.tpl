@@ -91,6 +91,12 @@ function showSentence(evt, cityName) {
 var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="${type}" style="background-position:-${x}px -${y}px"><div class="text_1"><span class="text">${text_1}</span></div><div class="text_2"><span class="text">${text_2}</span></div><div class="text_3"><span class="text">${text_3}</span></div><div class="text_4"><span class="text">${text_4}</span></div></div>';
 						
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
+
+var jstpl_role = '<div id="role_icon_p${player}" class="role_icon role_icon_${color}"><span>${role}</span></div>';
+    
 </script>  
+
+
+
 
 {OVERALL_GAME_FOOTER}

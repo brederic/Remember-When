@@ -238,6 +238,24 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 	/**background-color: blue; **/
 }
 
+/** Role icons **/
+.role_icon {width: 15px;
+    height: 15px;
+	display: inline-block;
+    
+	}
+.role_icon_0 {width: 15px;
+    height: 15px;
+	background-color: white; 
+	}
+.role_icon_1 {width: 15px;
+    height: 15px;
+	background-color: blue; 
+	}
+.role_icon_2 {width: 15px;
+    height: 15px;
+	background-color: red; 
+	}
 	
 /*** cards on table ***/
 

@@ -33,7 +33,8 @@ class RememberWhen extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
-            				 "playerBuildingSentence" => 13,
+             "playerBuildingSentence" => 13,
+             "role" => 14, // 0 = Undecided,  1 = Hero, 2 = Villain
         
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
@@ -47,34 +48,6 @@ class RememberWhen extends Table
 		
 		$this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
-		// These should be in material.inc.php, but I can't get it to load from there in the studio.  Will this work when it goes live?
-		/*$this->colors = array(
-			1 => array( 'name' => clienttranslate('When'),
-						'nametr' => self::_('When'),
-						'num_cards' => 200/4),
-			2 => array( 'name' => clienttranslate('Where'),
-						'nametr' => self::_('Where'),
-						'num_cards' => 408/4),
-			3 => array( 'name' => clienttranslate('How'),
-						'nametr' => self::_('How') ,
-						'num_cards' => 204/4),
-			4 => array( 'name' => clienttranslate('Did What'),
-						'nametr' => self::_('Did What') ,
-						'num_cards' => 412/4),
-			5 => array( 'name' => clienttranslate('Whose'),
-						'nametr' => self::_('Whose'),
-						'num_cards' => 212/4),
-			6 => array( 'name' => clienttranslate('What Kind'),
-						'nametr' => self::_('What Kind'),
-						'num_cards' => 404/4),
-			7 => array( 'name' => clienttranslate('To What'),
-						'nametr' => self::_('To What'),
-						'num_cards' => 508/4 ),
-			8 => array( 'name' => clienttranslate('Why'),
-						'nametr' => self::_('Why'),
-						'num_cards' => 414/4 )
-		);
-        */
 	}
 	
     protected function getGameName( )
@@ -91,7 +64,7 @@ class RememberWhen extends Table
     */
     protected function setupNewGame( $players, $options = array() )
     {    
-        $sql = "DELETE FROM player WHERE 1 ";
+       $sql = "DELETE FROM player WHERE 1 ";
         self::DbQuery( $sql ); 
 
         // Set the colors of the players with HTML color code
@@ -116,7 +89,8 @@ class RememberWhen extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
+        $this->setGameStateInitialValue( 'role', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -181,6 +155,7 @@ class RememberWhen extends Table
         
          // Active Player
         $result['sentence_builder'] = self::getGameStateValue( 'playerBuildingSentence' );
+        $result['role'] = self::getGameStateValue( 'role' );
 
         if ($current_player_id == self::getGameStateValue( 'playerBuildingSentence' )) {
             // Working cards
@@ -334,6 +309,27 @@ class RememberWhen extends Table
         );
     }    
     */
+    
+    function argGiveCards()
+    {
+		$me = self::getCurrentPlayerId();
+		$players = self::loadPlayersBasicInfos();	
+		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
+		$player_name = $players[ $player_id ]['player_name'];
+
+		if ($me == $player_id) {
+			$direction = clienttranslate('you');
+		} else {
+			$direction = $players[ $player_id ]['player_name'];
+		}
+			
+
+        return array(
+            "i18n" => array( 'direction'),
+            "direction" => $direction
+        );
+    }
+
 
     
     // Play a card from player hand
@@ -500,7 +496,44 @@ class RememberWhen extends Table
 	
 	    
     // Give some cards (before the hands begin)
-    function chooseAction( $choice )
+    function chooseRole( $choice )
+    {
+        self::checkAction( "chooseRole" );
+		
+	
+        // Here we have to get active player 
+        $player_id = self::getActivePlayerId();
+		
+		$this->setGameStateValue('role', $choice);
+
+        if ($choice == 1) {
+            $role_name = 'Hero';
+        } else if ($choice == 2) {
+            $role_name = 'Villain';
+        } else {
+            $role_name = 'Undecided';
+        }
+		
+		
+        // And notify
+        self::notifyAllPlayers( 
+			'chooseRole', 
+			clienttranslate('${player_name} is acting as a ${role_name}'), 
+			array(
+				'i18n' => array( 'color_displayed', 'value_displayed' ),
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'role_name' => $role_name,
+                'choice' => $choice
+			) 
+		);
+
+		
+        // Choose action
+        $this->gamestate->nextState( "chooseRole" );
+
+    } 
+	   function chooseAction( $choice )
     {
         self::checkAction( "chooseAction" );
 		
@@ -731,6 +764,15 @@ class RememberWhen extends Table
     }
 
 
+    function stGiveCards()
+    {
+        
+        // Active all players (everyone has to choose 1 cards to give)
+        $this->gamestate->setAllPlayersMultiactive();
+		// (and keep the current sentence builder non-active)
+		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+    }
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////

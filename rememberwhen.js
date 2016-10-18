@@ -271,7 +271,7 @@ define([
                         break;
 
                     case 'giveCards':
-                        this.addTooltip('myhand', _('Cards in my hand'), _('Select a card'));
+                        this.addTooltip('myhand', _('Cards in my hand'), _('Select/Rotate a card'));
                         break;
                     
                     case 'chooseAction':
@@ -342,7 +342,7 @@ define([
 
                             break;
                         case 'giveCards':
-                            //this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' ); 
+                              this.addActionButton('Select', 'Select', 'onGiveCard'); 
                             break;
 
                     }
@@ -571,18 +571,8 @@ define([
                 }, function( is_error) { } );                
             }        
         },    
-
-        onChooseAction: function( evt)
+        getRotation: function(card_block) 
         {
-            console.log('onChooseAction');
-            if (this.selectedCard == 0) {
-                this.showMessage("Please select an action card", "error");
-                return;
-            }
-            dojo.stopEvent( evt );
-            
-            var choice = this.selectedCard;
-            card_block = $(choice);
             console.log(card_block);
             rotation = "";
             if (dojo.hasClass(card_block, "pos_1")) {
@@ -597,7 +587,21 @@ define([
             if (dojo.hasClass(card_block, "pos_4")) {
                 rotation = "4";
             }
-            choice = choice + "_" + rotation;
+            return rotation;
+        },
+        onChooseAction: function( evt)
+        {
+            console.log('onChooseAction');
+            if (this.selectedCard == 0) {
+                this.showMessage("Please select an action card", "error");
+                return;
+            }
+            dojo.stopEvent( evt );
+            
+            var choice = this.selectedCard;
+            card_block = $(choice);
+            
+            choice = choice + "_" + this.getRotation(card_block);
             console.log('onChooseAction: button choice:' + choice);
             if( this.checkAction( 'chooseAction' ) )
             {
@@ -606,6 +610,29 @@ define([
                 }, function( is_error) { } );                
             }   
             this.playerHand.removeAll();
+                 
+        },    
+        onGiveCard: function( evt)
+        {
+            console.log('onChooseCard');
+            if (this.selectedCard == 0) {
+                this.showMessage("Please select a card", "error");
+                return;
+            }
+            dojo.stopEvent( evt );
+            
+            var choice = this.selectedCard;
+            card_block = $(choice);
+            
+            choice = choice + "_" + this.getRotation(card_block);
+            console.log('onGiveCard: ' + choice);
+            if( this.checkAction( 'giveCards' ) )
+            {
+
+                this.ajaxcall( "/rememberwhen/rememberwhen/giveCards.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
+            }   
+            //this.playerHand.removeAll();
                  
         },    
        

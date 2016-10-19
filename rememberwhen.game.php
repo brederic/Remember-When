@@ -162,6 +162,8 @@ class RememberWhen extends Table
             $result['action_choice'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
 
         }
+
+        $result['contribution'] = $this->getContributionMap();
         
 		
   
@@ -245,6 +247,23 @@ class RememberWhen extends Table
 		}
 		return $result;
 	}
+
+    protected function getContributionMap(  ) {
+        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution FROM player" );
+        //random data for testing
+        /*foreach(array_keys($result) as $id) {
+            $randomize = array('id'=> $id, 'contribution'=> rand(1,8));
+            $result[$id] = $randomize;
+        }*/
+        return $result;
+        /*
+        Result:
+        array(
+        1234 => array( 'id'=>1234, 'name'=>'myuser0', 'score'=>1 ),
+        1235 => array( 'id'=>1235, 'name'=>'myuser1', 'score'=>0 )
+        )	
+		*/
+    }
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -589,6 +608,7 @@ class RememberWhen extends Table
 		
 		// get object card
 		$card = $this->cards->getCard( $card_id );
+        $type = $card['type'];
         self::checkAction( "giveCards" );
         
         // !! Here we have to get CURRENT player (= player who send the request) and not
@@ -623,7 +643,14 @@ class RememberWhen extends Table
 
 		$this->cards->moveCard($card_id, 'current_sentence', $current_player_id);		// add card to sentence
 		
-		// TODO: record the player's guess for helper scoring
+		// record the player's guess for helper scoring
+        $sql = "
+                UPDATE  player
+                SET     contribution = $type,
+                        guess = $card_pos
+                WHERE   player_id =  $current_player_id
+            ";
+        self::DbQuery( $sql );
         
         // And notify
         self::notifyAllPlayers( 

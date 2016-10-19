@@ -244,16 +244,41 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 	}
 .role_icon_0 {width: 15px;
     height: 15px;
-	background-color: white; 
+	background-color: gray; 
 	}
 .role_icon_1 {width: 15px;
     height: 15px;
-	background-color: blue; 
+	background-color: white; 
 	}
 .role_icon_2 {width: 15px;
     height: 15px;
-	background-color: red; 
+	background-color: black; 
 	}
+/** card icons **/
+.card_icon_1 {
+	background-color: rgb(0,165,79);
+}
+.card_icon_2 {
+	background-color: rgb(138,93,59);
+}
+.card_icon_3 {
+	background-color: rgb(121,48,145);
+}
+.card_icon_4 {
+	background-color: rgb(255,241,1);
+}
+.card_icon_5 {
+	background-color: rgb(248,156,28);
+}
+.card_icon_6 {
+	background-color: rgb(0,174,239);
+}
+.card_icon_7 {
+	background-color: rgb(238,29,35);
+}
+.card_icon_8 {
+	background-color: rgb(242,135,182);
+}
 	
 /*** cards on table ***/
 

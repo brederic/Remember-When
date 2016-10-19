@@ -66,20 +66,34 @@ define([
 
                 console.log("Sentence Builder: "+ this.gamedatas.sentence_builder);
                 console.log("Role: "+ this.gamedatas.role);
-                
+                console.log('Contribution map:');
+                console.log(gamedatas.contribution);
                  // Setting up player boards
-                //for( var player_id in gamedatas.players )
-                //{
-                    //var player = gamedatas.players[player_id];
-                            
-                    // Setting up players boards if needed
-                    var player_board_div = $('player_board_'+sentence_builder);
-                    dojo.place( this.format_block('jstpl_role', {
-                            player: sentence_builder,
-                            color: this.gamedatas.role,
-                            role: ''
-                        }    ), player_board_div );
-                //}
+                for( var id in gamedatas.contribution )
+                {
+                    console.log(id);
+                    player_id = id;
+                    var player = gamedatas.players[player_id];
+
+                    if (player_id == sentence_builder) {     
+                        // Setting up players boards if needed
+                        var player_board_div = $('player_board_'+sentence_builder);
+                        dojo.place( this.format_block('jstpl_role', {
+                                player: sentence_builder,
+                                color: this.gamedatas.role,
+                                role: ''
+                            }    ), player_board_div );
+                    } else {
+                        data = {
+                                player: player_id,
+                                color: gamedatas.contribution[id]['contribution'],
+                                role: ''
+                            } ;
+                        console.log(data);
+                        var player_board_div = $('player_board_'+player_id);
+                        dojo.place( this.format_block('jstpl_card', data ), player_board_div );
+                    }
+                }
 
 
 
@@ -93,23 +107,7 @@ define([
 
 
                 console.log("Build sentences");
-                /*			
-                 // Sentence board
-                this.sentence = new ebg.stock();
-                this.sentence.create( this, $('sentence'));
-                //this.sentence.image_items_per_row = 8;
-                //this.sentence.setSelectionMode(1);
-                //dojo.connect( this.sentence, 'onmouseclick', this, 'onCardClick' );
-                */
-
-                // Sentence board
-                //this.top_sentence = new ebg.stock();
-                //this.top_sentence.create( this, $('top_sentence'), this.cardwidth, this.cardheight);
-                //this.top_sentence.image_items_per_row = 8;
-                //this.top_sentence.setSelectionMode(1);
-                //dojo.connect( this.top_sentence, 'onmouseclick', this, 'onCardClick' );
-
-                
+                               
                 console.log( "Add interactions to cards" );
             	// do it when the DOM is loaded
                 /*
@@ -152,22 +150,9 @@ define([
                     this.playerHand.addItemType(color, color, g_gamethemeurl + 'img/fronts-sm.png', color - 1);
                     
                 }
-                //console.log('this.getCardType(13)=' + this.getCardType(13));
-                //console.log('this.getCardValue(13)=' + this.getCardValue(13));
-                /*
-                console.log( "Hide hand of sentence builder" );
-                // Hide hand of sentence builder
-                console.log('Sentence builder: ' + gamedatas.sentence_builder + ', Me: ' + player_id);
-                if (gamedatas.sentence_builder == player_id) {
-                    console.log('I am building this sentence.');
-                    dojo.style( 'myhand', 'display', 'none' );
-                }
-                */
-
                 // Cards in player's hand 
                 
-            
-               
+                 
                 // Hide hand of sentence builder, except actions
                 if (this.gamedatas.sentence_builder == player_id) {
                      console.log("I am the sentence builder")
@@ -203,18 +188,14 @@ define([
                 
                 console.log(this.playerHand);
 
-
-                //console.log('Top Sentence:' + this.gamedatas.top_sentence);
-                //console.log(this.gamedatas.card_text);
-
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
                     var card = this.gamedatas.top_sentence[i];
                     
                 
-                    var player_id = 'game_' + this.getCardUniqueId(color, value);
+                    var id = 'game_' + this.getCardUniqueId(color, value);
                     
-                    this.playCardOnTable(card, 'top_sentence', card.location_arg, player_id);
+                    this.playCardOnTable(card, 'top_sentence', card.location_arg, id);
 
                     //this.hideCardsOfType(color);
                 }
@@ -482,9 +463,7 @@ define([
                 if (loc == 'top_sentence') {
                     dest = 'top_' + dest;
                 }
-                //if (loc == 'current_sentence') {
-                //    dest = 'current_' + dest;
-                //}
+
                 dojo.place(card_block, dest, "only"); //'overall_player_board_'+player_id );
 
                 this.placeOnObject(card_name, dest);
@@ -514,6 +493,9 @@ define([
                 dest = 'spot_' + color;
                 console.log('Sliding to ' + dest);
                 dojo.addClass(card_name, dest);
+                if (loc == 'top_sentence') {
+                //    dest = 'current_' + dest;
+                }
                 this.slideToObject(card_name, dest).play();
                 /*
                 dojo.addOnLoad(function(){
@@ -943,22 +925,26 @@ define([
                 
 
                 //  If we are giving cards and this player is still active, make cards in hand that are no longer valid invisible or unselectable
-                if (this.isCurrentPlayerActive()) {
-                    switch (stateName) {
+               
+                switch (stateName) {
 
-                        case 'giveCards':
-                            var playedCardType = notif.args.color;
+                    case 'giveCards':
+                        var playedCardType = notif.args.color;
 
-
+                        if (this.isCurrentPlayerActive()) {
                             this.hideCardsOfType(playedCardType);
+                        }
+                        // mark contribution
+                        card_icon_id = 'card_icon_p'+ notif.args.player_id;
+                        dojo.removeClass(card_icon_id, 'card_icon_0');
+                        dojo.addClass(card_icon_id, 'card_icon_'+playedCardType);
 
 
 
+                        break;
 
-                            break;
-
-                    }
                 }
+                
             }
 
 

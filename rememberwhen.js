@@ -336,6 +336,9 @@ define([
                         case 'giveCards':
                               this.addActionButton('Select', 'Select', 'onGiveCard'); 
                             break;
+                        case 'arrangeSentence':
+                              this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
+                            break;
 
                     }
                 }
@@ -543,19 +546,13 @@ define([
         getRotation: function(card_block) 
         {
             console.log(card_block);
-            rotation = "";
-            if (dojo.hasClass(card_block, "pos_1")) {
-                rotation = "1";
-            }
-            if (dojo.hasClass(card_block, "pos_2")) {
-                rotation = "2";
-            }
-            if (dojo.hasClass(card_block, "pos_3")) {
-                rotation = "3";
-            }
-            if (dojo.hasClass(card_block, "pos_4")) {
-                rotation = "4";
-            }
+            rotation = 0;
+            for (var j = 1; j<=4;j++){
+                    if (dojo.hasClass(card_block, 'pos_'+j)) {
+                        rotation = j;
+                        break;
+                    }
+                }
             return rotation;
         },
         onChooseAction: function( evt)
@@ -583,7 +580,7 @@ define([
         },    
         onGiveCard: function( evt)
         {
-            console.log('onChooseCard');
+            console.log('onGiveCard');
             if (this.selectedCard == 0) {
                 this.showMessage("Please select a card", "error");
                 return;
@@ -602,6 +599,36 @@ define([
                 }, function( is_error) { } );                
             }   
             //this.playerHand.removeAll();
+                 
+        },    
+         onArrangeSentence: function( evt)
+        {
+            console.log('onArrangeSentence');
+                if( this.checkAction( 'arrangeSentence' ) )
+                {
+                
+                // collect choices
+                var choices = '';
+                for (var i=1; i <=8; i++){
+                    card = dojo.query('div.spot_'+i)[0];
+                    if (card != null) {
+                        choices += i+','+this.getRotation(card)+';';       
+                    }
+                }
+                
+                dojo.stopEvent( evt );
+                
+                
+                console.log('onArrangeSentence: ');
+                console.log( choices);
+                if( this.checkAction( 'arrangeSentence' ) )
+                {
+
+                    this.ajaxcall( "/rememberwhen/rememberwhen/arrangeSentence.html", { choices: choices, lock: true }, this, function( result ) {
+                    }, function( is_error) { } );                
+                }   
+            } 
+            
                  
         },    
        

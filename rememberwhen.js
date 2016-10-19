@@ -35,7 +35,8 @@ define([
                 this.currentState = '';
                 this.selectedCard = 0;
                 this.handConnection = null;
-                this.roles =['Active', 'Hero', 'Villain']
+                this.roles =['Active', 'Hero', 'Villain'];
+                this.sentenceBuilder;
                     
 
             },
@@ -62,7 +63,7 @@ define([
 
                 }
                 player_id = this.player_id;
-                sentence_builder = this.gamedatas.sentence_builder;
+                this.sentenceBuilder = this.gamedatas.sentence_builder;
 
                 console.log("Sentence Builder: "+ this.gamedatas.sentence_builder);
                 console.log("Role: "+ this.gamedatas.role);
@@ -75,11 +76,11 @@ define([
                     pid = id;
                     var player = gamedatas.players[pid];
 
-                    if (pid == sentence_builder) {     
+                    if (pid == this.sentenceBuilder) {     
                         // Setting up players boards if needed
-                        var player_board_div = $('player_board_'+sentence_builder);
+                        var player_board_div = $('player_board_'+this.sentenceBuilder);
                         dojo.place( this.format_block('jstpl_role', {
-                                player: sentence_builder,
+                                player: this.sentenceBuilder,
                                 color: this.gamedatas.role,
                                 role: ''
                             }    ), player_board_div );
@@ -109,37 +110,8 @@ define([
                 console.log("Build sentences");
                                
                 console.log( "Add interactions to cards" );
-            	// do it when the DOM is loaded
-                /*
-                dojo.addOnLoad( function() {
-                    // attach on click to id="textDiv"
-                    dojo.query('#textDiv').onclick( function(evt) { 
-                        // 'this' is now the element clicked on (e.g. id="textDiv")
-                        var el = this; 
-                        ... */
-
-                dojo.addOnLoad( function() {
-                    console.log("onLoad executing...")
-                    
-                  // attach on click to id="textDiv"
-                  dojo.query('div[class*="rotatable"]').onclick( function(evt) { 
-                    // 'this' is now the element clicked on (e.g. id="textDiv")
-                    var el = this; 
-                	
-                    console.log('onClick ' + this.id  ); 
-    
-                	
-                    if (dojo.hasClass(this.id, 'pos_1')) {
-                        dojo.replaceClass(this.id, 'pos_2', 'pos_1');
-                    } else if (dojo.hasClass(this.id, 'pos_2')) {
-                        dojo.replaceClass(this.id, 'pos_3', 'pos_2');
-                    } else if (dojo.hasClass(this.id, 'pos_3')) {
-                        dojo.replaceClass(this.id, 'pos_4', 'pos_3');
-                    } else if (dojo.hasClass(this.id, 'pos_4')) {
-                        dojo.replaceClass(this.id, 'pos_1', 'pos_4');
-                    } 
-                  });
-                });
+                this.hookupCardsOnLoad();
+               
                 
                 console.log("Create card types");
 
@@ -154,7 +126,7 @@ define([
                 
                  
                 // Hide hand of sentence builder, except actions
-                if (this.gamedatas.sentence_builder == player_id) {
+                if (this.sentenceBuilder == this.player_id) {
                      console.log("I am the sentence builder")
                     for (var i in this.gamedatas.action_choice) {
                         var card = this.gamedatas.action_choice[i];
@@ -208,36 +180,12 @@ define([
                     
                     var card = this.gamedatas.current_sentence[i];
                     var id = 'game_' + this.getCardUniqueId(color, value);
-                    // handle hidden cards
-                    if (card.type != '4' & card.type != '7') {
-                        if (player_id == sentence_builder) {     
-                            this.playCardOnTable(card, 'current_sentence', '1', id,'rotatable' );
-                        } else {
-                            //play face down
-                            this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'reverse' );
-                        }
-                    } else {
-                        this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
-                    }
+
+                    this.playCardOnTable(card, 'current_sentence', '1', id,'' );
 
                     this.hideCardsOfType(card.type);
                 }
-                /*
-                // Cards played on table
-                for( i in this.gamedatas.cardsontable )
-                {
-                    var card = this.gamedatas.cardsontable[i];
-                    var color = card.type;
-                    var value = card.type_arg;
-                    var player_id = card.location_arg;
-                    this.playCardOnTable(player_id, color, value, this.getCardUniqueId( color, value ), 'cardontable', 1, card);
-                    //this.hideCardsOfType(color);
-                }
-                dojo.query("div[id^='sentence_item']").connect( 'onmouseclick', this, 'onCardClick' );
-            	
                 
-                this.addTooltipToClass( "playertablecard", _("Card played on the table"), '' );
-                */
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -353,6 +301,30 @@ define([
                 script.
             
             */
+        hookupCardsOnLoad:  function () {
+             dojo.addOnLoad( function() {
+                    console.log("onLoad executing...")
+                    
+                  // attach on click to id="textDiv"
+                  dojo.query('div[class*="rotatable"]').onclick( function(evt) { 
+                    // 'this' is now the element clicked on (e.g. id="textDiv")
+                    var el = this; 
+                	
+                    console.log('onClick ' + this.id  ); 
+    
+                	
+                    if (dojo.hasClass(this.id, 'pos_1')) {
+                        dojo.replaceClass(this.id, 'pos_2', 'pos_1');
+                    } else if (dojo.hasClass(this.id, 'pos_2')) {
+                        dojo.replaceClass(this.id, 'pos_3', 'pos_2');
+                    } else if (dojo.hasClass(this.id, 'pos_3')) {
+                        dojo.replaceClass(this.id, 'pos_4', 'pos_3');
+                    } else if (dojo.hasClass(this.id, 'pos_4')) {
+                        dojo.replaceClass(this.id, 'pos_1', 'pos_4');
+                    } 
+                  });
+                });
+        },
             		
 		hideCardsOfType: function(playedCardType)
 		{
@@ -451,6 +423,18 @@ define([
 
 
             playCardOnTable: function (card,  loc, rotation, player_id, klass) {
+                isActivePlayer = this.player_id == this.sentenceBuilder;
+                // handle hidden cards
+                if (card.type != '4' & card.type != '7') {
+                    if (isActivePlayer) {     
+                        klass = 'rotatable';
+                    } else {
+                        //play face down
+                        klass ='reverse';
+                    }
+                } else {
+                    klass ='';
+                }
                 var color = card.type;
                 var value = card.type_arg;
                 var card_id = color + "_" + value;
@@ -827,8 +811,7 @@ define([
                     var value = card.type_arg;
                     var rotation = 1; //?????
                     this.playCardInHand(card.id, card, 'action_'+card.id);
-                }            // Play a card on the table
-                //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
+                }         
             },
             notif_chooseRole: function (notif) {
                 role_div = dojo.query('div.role_icon')[0];
@@ -837,13 +820,12 @@ define([
                 dojo.removeClass(role_div, 'role_icon_0');
                 dojo.addClass(role_div, 'role_icon_'+notif.args.choice);
                 
-                //role_div.span.textcontent = notif.args.role_name;
-                //this.playCardOnTable( notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, 'sentence' );
             },
             notif_playCard: function (notif) {
                 // Play a card on the table
                 var rotation = 1; //?????
                 this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
+                this.hookupCardsOnLoad();
             },
             notif_trickWin: function (notif) {
                 // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
@@ -894,13 +876,7 @@ define([
                 //?????
                 this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
                 
-                /* Cards taken from some opponent
-                for (var i in notif.args.cards) {
-                    var card = notif.args.cards[i];
-                    var color = card.type;
-                    var value = card.type_arg;
-                    this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-                }*/
+                this.hookupCardsOnLoad();
 
                 console.log('state: '+ stateName);
                 

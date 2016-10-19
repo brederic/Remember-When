@@ -111,7 +111,7 @@
         self::setAjaxMode();     
         $choice = self::getArg( "choices", AT_numberlist, true );
         
-        //$this->game->chooseRole( $choice );
+       // $this->game->arrangeSentence( $choice );
         self::ajaxResponse( );    
     }
   

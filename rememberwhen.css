@@ -292,6 +292,15 @@ ul.tab li a:focus, .active {background-color: #ccc;}
 	background-size: 1200px 150px ;
     background-image: url('img/fronts-sm.png'); 
 }
+.reverse {
+   
+	background-size: 1200px 150px ;
+    background-image: url('img/backs-sm.png'); 
+}
+
+.rotatable {
+	border: 2px solid red ! important;
+}
 
 
 .text {

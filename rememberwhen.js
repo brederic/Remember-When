@@ -72,10 +72,10 @@ define([
                 for( var id in gamedatas.contribution )
                 {
                     console.log(id);
-                    player_id = id;
-                    var player = gamedatas.players[player_id];
+                    pid = id;
+                    var player = gamedatas.players[pid];
 
-                    if (player_id == sentence_builder) {     
+                    if (pid == sentence_builder) {     
                         // Setting up players boards if needed
                         var player_board_div = $('player_board_'+sentence_builder);
                         dojo.place( this.format_block('jstpl_role', {
@@ -85,12 +85,12 @@ define([
                             }    ), player_board_div );
                     } else {
                         data = {
-                                player: player_id,
+                                player: pid,
                                 color: gamedatas.contribution[id]['contribution'],
                                 role: ''
                             } ;
                         console.log(data);
-                        var player_board_div = $('player_board_'+player_id);
+                        var player_board_div = $('player_board_'+pid);
                         dojo.place( this.format_block('jstpl_card', data ), player_board_div );
                     }
                 }
@@ -205,10 +205,20 @@ define([
 
                 // Cards in current sentence
                 for (var i in this.gamedatas.current_sentence) {
-
+                    
                     var card = this.gamedatas.current_sentence[i];
-                    var player_id = 'game_' + this.getCardUniqueId(color, value);
-                    this.playCardOnTable(card, 'current_sentence', card.location_arg, player_id);
+                    var id = 'game_' + this.getCardUniqueId(color, value);
+                    // handle hidden cards
+                    if (card.type != '4' & card.type != '7') {
+                        if (player_id == sentence_builder) {     
+                            this.playCardOnTable(card, 'current_sentence', '1', id,'rotatable' );
+                        } else {
+                            //play face down
+                            this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'reverse' );
+                        }
+                    } else {
+                        this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
+                    }
 
                     this.hideCardsOfType(card.type);
                 }
@@ -437,18 +447,16 @@ define([
             },
 
 
-            playCardOnTable: function (card,  loc, rotation, player_id) {
+            playCardOnTable: function (card,  loc, rotation, player_id, klass) {
                 var color = card.type;
                 var value = card.type_arg;
                 var card_id = color + "_" + value;
                 
                 card_name = loc + '_' + card.id; 
-                if (player_id == null) {
-                    player_id = this.player_id;
-                }
-                console.log('playCardOnTable(' + player_id + ', ' + color + ', ' + card_id + ', ' + loc + ')');
+                
+                console.log('playCardOnTable(' + card_name + ', ' + color + ', ' + card_id + ', ' + loc + ')');
                 console.log(card);
-                // player_id => direction
+                
                 card_block = this.format_block('jstpl_cardontable', {
                     x: this.cardwidth * (color - 1),
                     y: 0,
@@ -464,35 +472,21 @@ define([
                     dest = 'top_' + dest;
                 }
 
-                dojo.place(card_block, dest, "only"); //'overall_player_board_'+player_id );
+                dojo.place(card_block, dest, "only"); 
 
                 this.placeOnObject(card_name, dest);
                 dojo.addClass(card_name, 'pos_' + rotation);
-                //dojo.connect( card_block, 'onclick', this.onCardClick );
-                /*
-                if( player_id != this.player_id )
-                {
-                    // Some opponent played a card
-                    // Move card from player panel
-                    this.placeOnObject( 'cardontable_'+player_id, 'overall_player_board_'+player_id );
-                }
-                else
-                {
-                    // You played a card. If it exists in your hand, move card from there and remove
-                    // corresponding item
-                    
-                    if( $('myhand_item_'+card_id) )
-                    {
-                        //this.placeOnObject( 'cardontable_'+player_id, 'myhand_item_'+card_id );
-                        this.placeOnObject( 'cardontable_'+player_id,  'overall_player_board_'+player_id );
-                        //this.playerHand.removeFromStockById( card_id );
-                    }
-                }
-                */
+                
                 // In any case: move it to its final destination
                 dest = 'spot_' + color;
                 console.log('Sliding to ' + dest);
                 dojo.addClass(card_name, dest);
+                if (klass != '') {
+                    dojo.addClass(card_name, klass);
+                }
+                if (klass == 'reverse') {
+                    dojo.query('div[id='+card_name+'] > div').addClass('invisible');
+                }
                 if (loc == 'top_sentence') {
                 //    dest = 'current_' + dest;
                 }
@@ -503,47 +497,7 @@ define([
                 });*/
 
             },
-/*
-		hideCardsOfType: function(playedCardType)
-		{
-			for (var i in this.playerHand.getAllItems()) {
-				c = this.playerHand.getAllItems()[i]
-				//console.log(c);
-                // get card hmtl
-                //console.log("Grabbing card block with id:" + 'hand_'+c['id'])
-                //var card_html =  $('hand_'+c['id']);
-                //console.log(card_html);
 
-				var type = this.getCardType(c['id']);
-                //console.log(type);
-				
-				if (type == playedCardType) {
-					var matchingCard = c;
-					if (this.playerHand.getSelectedItems()[0] == matchingCard) {
-						this.playerHand.unselectAll();
-					}
-					var id = 'myhand_item_'+matchingCard['id'];
-					console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
-					//console.log( 'id: ' + id );
-					require(["dojo/dom-style"], function(domStyle){
-						domStyle.set(id, "opacity", "");
-						domStyle.set(id, "width", "");
-						domStyle.set(id, "height", "");
-						
-					});
-					require(["dojo"], function(dojo){
-						dojo.addClass(id, "invisible");
-                        dojo.addClass('hand_'+ matchingCard['id'], "invisible");
-                        dojo.removeClass('hand_'+ matchingCard['id'], "spot cardontable");
-					});
-
-				} else {
-					//console.log( 'Keep visible card of id: '+ c['id']+ ', type: ' + type );
-				}
-			}
-		},
-
-*/
 
 
             ///////////////////////////////////////////////////

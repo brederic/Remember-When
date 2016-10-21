@@ -34,6 +34,7 @@ class RememberWhen extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
              "playerBuildingSentence" => 13,
+             "topSentenceBuilder" => 12,
              "role" => 14, // 0 = Undecided,  1 = Hero, 2 = Villain
         
             //    "my_first_global_variable" => 10,
@@ -90,6 +91,7 @@ class RememberWhen extends Table
 
         // Init global values with their initial values
         $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
+        $this->setGameStateInitialValue( 'topSentenceBuilder', 0 );
         $this->setGameStateInitialValue( 'role', 0 );
         
         // Init game statistics
@@ -848,6 +850,34 @@ class RememberWhen extends Table
 
     function stVote()
     {    
+         // Active all players (everyone has to vote)
+        $this->gamestate->setAllPlayersMultiactive();
+
+        // Who is NOT voting?
+        $playersVoting = self::getPlayersNumber();
+        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
+        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
+        if ($topSentenceBuilder != 0 && $topSentenceBuilder != $currentSentenceBuilder) {
+            // (and keep the owner of the sentence builder non-active)
+            $this->gamestate->setPlayerNonMultiactive( $topSentenceBuilder , "vote" );
+            $playersVoting--;
+        }
+        // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
+        if ($playersVoting-1 % 2 != 0  ) {
+            $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
+
+        }
+        //notify card rotations
+        // And notify
+            self::notifyAllPlayers( 
+                'revealCurrentSentence', 
+                clienttranslate("It is time to vote! "), 
+                array(
+                    
+                    'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
+                    
+                ) 
+            );  
     }
     
     

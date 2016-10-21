@@ -37,6 +37,7 @@ define([
                 this.handConnection = null;
                 this.roles =['Active', 'Hero', 'Villain'];
                 this.sentenceBuilder;
+                this.currentSentence = null;
                     
 
             },
@@ -176,13 +177,24 @@ define([
                 console.log(this.gamedatas.current_sentence);
 
                 // Cards in current sentence
+                this.currentSentence = gamedatas.current_sentence;
+                //start with current sentence visible 
+                dojo.addOnLoad( function() {
+                    target = $('firstTab');
+                    var evt = { currentTarget: target};
+                    showSentence(evt,'current_sentence');
+                    });
                 for (var i in this.gamedatas.current_sentence) {
                     
                     var card = this.gamedatas.current_sentence[i];
                     var id = 'game_' + this.getCardUniqueId(color, value);
 
-                    this.playCardOnTable(card, 'current_sentence', '1', id,'' );
-
+                    // verb and object are fixed
+                    if (card.type == 4 || card.type == 7) {
+                        this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
+                    } else {
+                        this.playCardOnTable(card, 'current_sentence', '1', id,'' );
+                    }
                     this.hideCardsOfType(card.type);
                 }
                 
@@ -219,6 +231,18 @@ define([
                         console.log(cards);
                         //dojo.connect(this.stock.hand[this.my_id], 'onclick', this, 'action_clicForInitialMeld' );
 
+                    case 'vote':
+                        dojo.query('.reverse').removeClass('reverse');
+                        dojo.query('.rotatable').removeClass('rotatable');
+                        dojo.query('.invisible').removeClass('invisible');
+                        // rotate cards to their chosen positions
+                        //console.log(this.currentSentence);
+                         for (var i in this.currentSentence) {
+                            var card = this.currentSentence[i];
+                            card_block = $('current_sentence_' + card.id);
+                            dojo.removeClass(card_block, 'pos_1 pos_2 pos_3 pos_4');
+                            dojo.addClass(card_block, 'pos_'+card.location_arg);
+                        }
 
 
 
@@ -286,6 +310,11 @@ define([
                             break;
                         case 'arrangeSentence':
                               this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
+                            break;
+                         case 'vote':
+                              this.addActionButton('Top Sentence', 'Top Sentence', 'onVote'); 
+                              this.addActionButton('Current Sentence', 'Current Sentence', 'onVote'); 
+
                             break;
 
                     }
@@ -426,11 +455,13 @@ define([
                 isActivePlayer = this.player_id == this.sentenceBuilder;
                 // handle hidden cards
                 if (card.type != '4' & card.type != '7') {
-                    if (isActivePlayer) {     
-                        klass = 'rotatable';
-                    } else {
-                        //play face down
-                        klass ='reverse';
+                    if (this.currentState != "vote") {
+                        if (isActivePlayer) {     
+                            klass = 'rotatable';
+                        } else {
+                            //play face down
+                            klass ='reverse';
+                        }
                     }
                 } else {
                     klass ='';
@@ -560,6 +591,31 @@ define([
                 }, function( is_error) { } );                
             }   
             this.playerHand.removeAll();
+                 
+        },    
+        onVote: function( evt)
+        {
+            console.log('onVote');
+            /*
+            if (this.selectedCard == 0) {
+                this.showMessage("Please select an action card", "error");
+                return;
+            }
+            dojo.stopEvent( evt );
+            
+            var choice = this.selectedCard;
+            card_block = $(choice);
+            
+            choice = choice + "_" + this.getRotation(card_block);
+            console.log('onChooseAction: button choice:' + choice);
+            */
+            if( this.checkAction( 'Vote' ) )
+            {
+
+              //  this.ajaxcall( "/rememberwhen/rememberwhen/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
+               // }, function( is_error) { } );                
+            }   
+           // this.playerHand.removeAll();
                  
         },    
         onGiveCard: function( evt)
@@ -773,6 +829,8 @@ define([
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
 
+                dojo.subscribe('currentSentenceReveal', this, "notif_revealCurrentSentence");
+
 
             },
 
@@ -781,6 +839,12 @@ define([
             notif_deal: function (notif) {
 
                 console.log('notifications deal');
+
+            }, 
+            notif_revealCurrentSentence: function (notif) {
+
+                console.log('notifications revealCurrentSentence');
+                this.currentSentence = notif.args.cards;
 
             },
             notif_newCard: function (notif) {

@@ -162,7 +162,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must arrange the cards into a completed memory.'),
         "type" => "activeplayer",
         "possibleactions" => array( "arrangeSentence" ),
-        "transitions" => array( "arrangeSentence" => 40 )
+        "transitions" => array( "arrangeSentence" => 50 )
     ), 	
 
     
@@ -171,8 +171,27 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stScoreSentence",
-        "transitions" => array( "startHand" => 27  )
+        "transitions" => array( "" => 50  )
     ),        
+
+    
+    50 => array(       
+        "name" => "vote",
+        "description" => clienttranslate('Some players must vote for the best memory.'),
+        "descriptionmyturn" => clienttranslate('${you} must vote for the best memory.'),
+        "type" => "multipleactiveplayer",
+        "action" => "stVote",
+        "possibleactions" => array( "vote" ),
+        "transitions" => array( "vote" => 51 )        
+    ), 
+
+    51 => array(
+        "name" => "countVotes",
+        "description" => "",
+        "type" => "game",
+        "action" => "stCountVotes",
+        "transitions" => array( "newHand" => 21 , "gameOver" => 99 )
+    ),    
    
     // Final state.
     // Please do not modify.

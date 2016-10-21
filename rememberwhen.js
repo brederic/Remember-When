@@ -771,6 +771,7 @@ define([
                 dojo.subscribe('takeCards', this, "notif_takeCards");
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
+                dojo.subscribe('score', this, "notif_updateScore");
 
 
             },
@@ -902,6 +903,23 @@ define([
 
                 }
                 
+            },
+            
+            notif_updateScore: function (notif) {
+                console.log('notifications updateScore');
+                stateName = this.currentState;
+                console.log(notif.args);
+                /* data from server
+                  'i18n' => array( 'color_displayed', 'value_displayed' ),
+                        'player_id' => $player['id'],
+                        'current_player_name' => $current_player_name,
+                        'active_player_name' => $active_player_name,
+                        'color' => $player['contribution'],
+                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
+                        'score' => $score
+                */
+
+                this.scoreCtrl[ notif.args.player_id ].setValue( notif.args.score );
             }
 
 

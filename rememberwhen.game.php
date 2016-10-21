@@ -716,6 +716,7 @@ class RememberWhen extends Table
                  $current_player_name = $players[ $player['id'] ]['player_name'];
                 $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
                 $active_player_name = $players[ $active_player_id ]['player_name'];
+                $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
                  self::notifyAllPlayers( 
                     'score', 
                     clienttranslate('${current_player_name} correctly guessed ${color_displayed} ${active_player_name} did what they did and scores a point.'), 
@@ -725,7 +726,8 @@ class RememberWhen extends Table
                         'current_player_name' => $current_player_name,
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
-                        'color_displayed' => $this->colors[$player['contribution'] ]['name']
+                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
+                        'score' => $score
                     ) 
                 );
             }

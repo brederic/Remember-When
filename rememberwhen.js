@@ -312,8 +312,8 @@ define([
                               this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
                             break;
                          case 'vote':
-                              this.addActionButton('Top Sentence', 'Top Sentence', 'onVote'); 
-                              this.addActionButton('Current Sentence', 'Current Sentence', 'onVote'); 
+                              this.addActionButton('1', 'Top Sentence', 'onVote'); 
+                              this.addActionButton('2', 'Current Sentence', 'onVote'); 
 
                             break;
 
@@ -596,26 +596,15 @@ define([
         onVote: function( evt)
         {
             console.log('onVote');
-            /*
-            if (this.selectedCard == 0) {
-                this.showMessage("Please select an action card", "error");
-                return;
-            }
-            dojo.stopEvent( evt );
-            
-            var choice = this.selectedCard;
-            card_block = $(choice);
-            
-            choice = choice + "_" + this.getRotation(card_block);
-            console.log('onChooseAction: button choice:' + choice);
-            */
-            if( this.checkAction( 'Vote' ) )
+           dojo.stopEvent( evt );
+            var choice = evt.currentTarget.id;
+            if( this.checkAction( 'vote' ) )
             {
 
-              //  this.ajaxcall( "/rememberwhen/rememberwhen/chooseAction.html", { choice: choice, lock: true }, this, function( result ) {
-               // }, function( is_error) { } );                
+                this.ajaxcall( "/rememberwhen/rememberwhen/vote.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
             }   
-           // this.playerHand.removeAll();
+            
                  
         },    
         onGiveCard: function( evt)

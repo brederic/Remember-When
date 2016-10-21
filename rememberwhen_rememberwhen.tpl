@@ -39,8 +39,8 @@
 
 <div id="sentence_board" class="floatL whiteblock ">
 	<ul class="tab">
-	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Sentence</a></li>
-	  <li><a href="#" class="tablinks" id="firstTab" onclick="showSentence(event, 'current_sentence')">Current Sentence</a></li>
+	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Memory</a></li>
+	  <li><a href="#" class="tablinks" id="firstTab" onclick="showSentence(event, 'current_sentence')">Current Memory</a></li>
 	</ul>
     <div id="current_sentence" class="sentenceboard whiteblock tabcontent" style=""> 
 		<div class="spot" id="spot_1">1</div><div class="spot" id="spot_2">2</div><div class="spot" id="spot_3">3</div><div class="spot" id="spot_4">4</div>

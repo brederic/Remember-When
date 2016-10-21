@@ -36,6 +36,8 @@ class RememberWhen extends Table
              "playerBuildingSentence" => 13,
              "topSentenceBuilder" => 12,
              "role" => 14, // 0 = Undecided,  1 = Hero, 2 = Villain
+             "currentRound" => 15,
+             "totalRounds" => 16,
         
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
@@ -93,6 +95,12 @@ class RememberWhen extends Table
         $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
         $this->setGameStateInitialValue( 'topSentenceBuilder', 0 );
         $this->setGameStateInitialValue( 'role', 0 );
+        $this->setGameStateInitialValue( 'currentRound', 0 );
+        if (count($players) < 6) {
+            $this->setGameStateInitialValue( 'totalRounds', count($players) *2 );
+         } else {
+            $this->setGameStateInitialValue( 'totalRounds', count($players) );
+         }
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -689,74 +697,30 @@ class RememberWhen extends Table
         // !! Here we have to get CURRENT player (= player who send the request) and not
         //    active player, cause we are in a multiple active player state and the "active player"
         //    correspond to nothing.
-        $current_player_id = self::getCurrentPlayerId();		/*
+        $current_player_id = self::getCurrentPlayerId();		
 
-		
-		// get object card
-		$card = $this->cards->getCard( $card_id );
-        $type = $card['type'];
-        self::checkAction( "giveCards" );
-        
-
-
-
-        $players = self::loadPlayersBasicInfos();	
-		$active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
-        $current_player_name = $players[ $current_player_id ]['player_name'];
-		$active_player_name = $players[ $active_player_id ]['player_name'];
-		
-		
-		$card_ids[] = $card_id;
-        
-        //if( count( $card_ids ) != 1 )
-        //  throw new feException( self::_("You must give exactly 1 card") );
-    
-        // Check if these cards are in player hands
-        $cards[] = $card;
-        
-        if( count( $cards ) != 1 )
-            throw new feException( self::_("This card doesn't exist") );
-        
-        foreach( $cards as $card )
-        {
-            if( $card['location'] != 'hand' || $card['location_arg'] != $current_player_id )
-                throw new feException( self::_("This card is not in your hand") );
-        }
-        
-
-		$this->cards->moveCard($card_id, 'current_sentence', $current_player_id);		// add card to sentence
-		
-		// record the player's guess for helper scoring
-        $sql = "
+        //save vote
+             $sql = "
                 UPDATE  player
-                SET     contribution = $type,
-                        guess = $card_pos
+                SET     contribution = $choice
                 WHERE   player_id =  $current_player_id
             ";
         self::DbQuery( $sql );
         
+        $players = self::loadPlayersBasicInfos();	
+		$current_player_name = $players[ $current_player_id ]['player_name'];
+      
         // And notify
         self::notifyAllPlayers( 
-			'addCardToSentence', 
-			clienttranslate('${current_player_name} guessed ${color_displayed} ${active_player_name} did what they did. '), 
+			'status', 
+			clienttranslate('${current_player_name} has voted. '), 
 			array(
-				'i18n' => array( 'color_displayed', 'value_displayed' ),
-				'card_id' => $card['id'],
-                'card' => $this->populateCard($card),
-				'player_id' => $current_player_id,
+				
 				'current_player_name' => $current_player_name,
-				'active_player_name' => $active_player_name,
-				'color' => $card['type'],
-				'color_displayed' => $this->colors[ $card['type'] ]['name']
+				
 			) 
 		);
 
-
-        // Notify the player so we can make these cards disapear
-        self::notifyPlayer( $current_player_id, "cardGiven", "", array(
-            "card" => $card
-        ) );
-        */
         // Make this player unactive now
         // (and tell the machine state to use transtion "giveCards" if all players are now unactive
         $this->gamestate->setPlayerNonMultiactive( $current_player_id, "vote" );
@@ -848,7 +812,8 @@ class RememberWhen extends Table
     {
         //self::incStat( 1, "handNbr" );
     
-    
+        self::incGameStateValue( 'currentRound', 1);
+
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
 
@@ -935,6 +900,14 @@ class RememberWhen extends Table
          // Active all players (everyone has to vote)
         $this->gamestate->setAllPlayersMultiactive();
 
+        // clear all votes, guess = 1 means their vote will be counted
+        $sql = "
+                UPDATE  player
+                SET     contribution = 0,
+                        guess = 1
+            ";
+        self::DbQuery( $sql );
+
         // Who is NOT voting?
         $playersVoting = self::getPlayersNumber();
         $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
@@ -943,11 +916,35 @@ class RememberWhen extends Table
             // (and keep the owner of the sentence builder non-active)
             $this->gamestate->setPlayerNonMultiactive( $topSentenceBuilder , "vote" );
             $playersVoting--;
+             // mark not voting
+            $sql = "
+                    UPDATE  player
+                    SET     
+                            guess = 0
+                    WHERE player_id = $topSentenceBuilder
+                ";
+            self::DbQuery( $sql );
         }
         // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
         if ($playersVoting-1 % 2 != 0  ) {
             $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
-
+            // mark not voting
+            $sql = "
+                    UPDATE  player
+                    SET     
+                            guess = 0
+                    WHERE player_id = $currentSentenceBuilder
+                ";
+            self::DbQuery( $sql );
+        } else {
+            // mark guess = 2 for tiebreaker only
+            $sql = "
+                    UPDATE  player
+                    SET     
+                            guess = 2
+                    WHERE player_id = $currentSentenceBuilder
+                ";
+            self::DbQuery( $sql );            
         }
         //notify card rotations
         // And notify
@@ -1018,6 +1015,143 @@ class RememberWhen extends Table
 			
 		}
         $this->gamestate->nextState("");
+ 
+    }
+    
+    
+    function stCountVotes()
+    {
+
+        // total votes for top sentence (contribution = 1)
+            $sql = "
+                    SELECT count(*)  
+                    FROM player    
+                           
+                    WHERE guess = 1 and contribution = 1
+                ";
+        $top_sentence_votes = self::getUniqueValueFromDB( $sql );
+        
+        // total votes for top sentence (contribution = 1)
+            $sql = "
+                    SELECT count(*)  
+                    FROM player    
+                           
+                    WHERE guess = 2 and contribution = 1
+                ";
+        $current_sentence_votes = self::getUniqueValueFromDB( $sql );
+
+        $tiebreaker = false;
+        if ($top_sentence_votes > $current_sentence_votes) {
+           $winner = 1;
+        } else if ($top_sentence_votes < $current_sentence_votes) {
+           $winner = 2;
+        } else { //tie
+            $sql = "
+                        SELECT contribution  
+                        FROM player    
+                        WHERE guess = 2 
+                    ";
+            $winner = self::getUniqueValueFromDB( $sql );
+            $tiebreaker = true;
+        }
+        $players = self::loadPlayersBasicInfos();	
+        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
+        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
+		$currentMemoryName = $players[ $currentSentenceBuilder ]['player_name'];
+        if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
+		    $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
+        } else {
+            $topMemoryName = "Random Memory";
+        }
+		
+
+        if ($winner = 1) { // Top memory won!!
+            $winnerName = $topMemoryName;
+        } else {
+            $winnerName = $currentMemoryName;
+            // clear out top sentence and replace it with current stCompleteSentence
+            $old = $this->cards->getCardsInLocation('top_sentence');
+            $this->cards->moveCards($old, 'discard');
+            $new = $this->cards->getCardsInLocation('current_sentence');
+            $this->cards->moveCards($new, 'top_sentence');
+            
+        }
+        // And notify
+        $table = array();
+        $firstRow = array( '' );
+        foreach( $players as $player_id => $player )
+        {
+            $firstRow[] = array( 'str' => '${player_name}',
+                                 'args' => array( 'player_name' => $player['player_name'] ),
+                                 'type' => 'header'
+                               );
+        }
+        $firstRow[] = "Totals";
+        $table[] = $firstRow;
+
+        // get vote data
+        $data = self::getCollectionFromDB( "SELECT player_id id, contribution vote, guess mode FROM player" );
+
+        
+        // Previous Champion Votes
+        $secondRow = array(  );
+        $secondRow[] = array( 'str' => 'Previous Champion ${player_name}',
+                                 'args' => array( 'player_name' => $topMemoryName ),
+                                 'type' => 'header'
+                               );
+        foreach( $players as $player_id => $player )
+        {
+            if ($data[$player['player_id']]['vote'] == 1) { // match
+                if ($data[$player['player_id']]['mode'] == 1) { // normal vote
+                    $str = 'X';
+                } else { // tie-break
+                    $str = 'T';
+                }
+            } else {
+                $str = "";
+            }
+            $secondRow[] = $str;
+        }
+        $secondRow[] = $top_sentence_votes;
+        $table[] = $secondRow;
+
+        // Challenger Votes
+        $thirdRow = array(  );
+        $thirdRow[] = array( 'str' => 'Challenger ${player_name}',
+                                 'args' => array( 'player_name' => $currentMemoryName ),
+                                 'type' => 'header'
+                               );
+        foreach( $players as $player_id => $player )
+        {
+            if ($data[$player['player_id']]['vote'] == 2) { // match
+                if ($data[$player['player_id']]['mode'] == 1) { // normal vote
+                    $str = 'X';
+                } else { // tie-break
+                    $str = 'T';
+                }
+            } else {
+                $str = "";
+            }
+            $thirdRow[] = $str;
+        }
+        $thirdRow[] = $top_sentence_votes;
+        $table[] = $thirdRow;
+        
+        $this->notifyAllPlayers( "tableWindow", '', array(
+                    "id" => 'voteTotals',
+                    "title" => clienttranslate('Voting Results - ${winner} wins!'),
+                    "table" => $table,
+                    "winner" => $winnerName,
+                    "footer" => '<div>T = tie-break vote</div>',
+                    "closing" =>clienttranslate( 'Continue')
+                ) ); 
+        
+        self::activeNextPlayer();
+        if ( self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {
+            $this->gamestate->nextState("newHand");
+        } else {
+             $this->gamestate->nextState("gameOver");
+        }
  
     }
 //////////////////////////////////////////////////////////////////////////////

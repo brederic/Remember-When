@@ -162,6 +162,8 @@ class RememberWhen extends Table
             $result['action_choice'] = $this->populateCards($this->cards->getCardsInLocation( 'action_choice'));
 
         }
+
+        $result['contribution'] = $this->getContributionMap();
         
 		
   
@@ -245,6 +247,23 @@ class RememberWhen extends Table
 		}
 		return $result;
 	}
+
+    protected function getContributionMap(  ) {
+        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution FROM player" );
+        //random data for testing
+        /*foreach(array_keys($result) as $id) {
+            $randomize = array('id'=> $id, 'contribution'=> rand(1,8));
+            $result[$id] = $randomize;
+        }*/
+        return $result;
+        /*
+        Result:
+        array(
+        1234 => array( 'id'=>1234, 'name'=>'myuser0', 'score'=>1 ),
+        1235 => array( 'id'=>1235, 'name'=>'myuser1', 'score'=>0 )
+        )	
+		*/
+    }
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -583,17 +602,25 @@ class RememberWhen extends Table
     {
 		//convert choice into card
 		$params = explode("_", $choice);
-		$card_id = $params[0];
-		$card_pos = $params[1];
+		$card_id = $params[1];
+		$card_pos = $params[2];
+
 		
 		// get object card
 		$card = $this->cards->getCard( $card_id );
+        $type = $card['type'];
         self::checkAction( "giveCards" );
         
         // !! Here we have to get CURRENT player (= player who send the request) and not
         //    active player, cause we are in a multiple active player state and the "active player"
         //    correspond to nothing.
-        $player_id = self::getCurrentPlayerId();
+        $current_player_id = self::getCurrentPlayerId();
+
+
+        $players = self::loadPlayersBasicInfos();	
+		$active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $current_player_name = $players[ $current_player_id ]['player_name'];
+		$active_player_name = $players[ $active_player_id ]['player_name'];
 		
 		
 		$card_ids[] = $card_id;
@@ -609,62 +636,106 @@ class RememberWhen extends Table
         
         foreach( $cards as $card )
         {
-            if( $card['location'] != 'hand' || $card['location_arg'] != $player_id )
+            if( $card['location'] != 'hand' || $card['location_arg'] != $current_player_id )
                 throw new feException( self::_("This card is not in your hand") );
         }
         
 
-		$this->cards->moveCard($card_id, 'cardsontable', $player_id);		// add card to sentence
+		$this->cards->moveCard($card_id, 'current_sentence', $current_player_id);		// add card to sentence
 		
-		// TODO: record the player's guess for helper scoring
+		// record the player's guess for helper scoring
+        $sql = "
+                UPDATE  player
+                SET     contribution = $type,
+                        guess = $card_pos
+                WHERE   player_id =  $current_player_id
+            ";
+        self::DbQuery( $sql );
         
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} vaguely remembers doing ${value_displayed} ${color_displayed} to the object.  But when? where? why? how?'), 
+			clienttranslate('${current_player_name} guessed ${color_displayed} ${active_player_name} did what they did. '), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
-				'player_id' => $player_id,
-				'player_name' => self::getActivePlayerName(),
-				'value' => $card['type_arg'],
-				//'value_displayed' => $this->values_label[ $card['type_arg'] ],
+                'card' => $this->populateCard($card),
+				'player_id' => $current_player_id,
+				'current_player_name' => $current_player_name,
+				'active_player_name' => $active_player_name,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name']
 			) 
 		);
-		/*
-        // To which player should I give these cards ?
-        $player_to_give_cards = null;
-        $player_to_direction = self::getPlayersToDirection();   // Note: current player is on the south
-        $handType = self::getGameStateValue( "currentHandType" );
-        if( $handType == 0 )
-            $direction = 'W';
-        else if( $handType == 1 )
-            $direction = 'N';
-        else if( $handType == 2 )
-            $direction = 'E';
-        foreach( $player_to_direction as $opponent_id => $opponent_direction )
-        {
-            if( $opponent_direction == $direction )
-                $player_to_give_cards = $opponent_id;
-        }
-        if( $player_to_give_cards === null )
-            throw new feException( self::_("Error while determining to who give the cards") );
-        
-        // Allright, these cards can be given to this player
-        // (note: we place the cards in some temporary location in order he can't see them before the hand starts)
-        $this->cards->moveCards( $card_ids, "temporary", $player_to_give_cards );
-		*/
+
 
         // Notify the player so we can make these cards disapear
-        self::notifyPlayer( $player_id, "giveCards", "", array(
-            "cards" => $card_ids
+        self::notifyPlayer( $current_player_id, "cardGiven", "", array(
+            "card" => $card
         ) );
 
         // Make this player unactive now
         // (and tell the machine state to use transtion "giveCards" if all players are now unactive
-        $this->gamestate->setPlayerNonMultiactive( $player_id, "giveCards" );
+        $this->gamestate->setPlayerNonMultiactive( $current_player_id, "giveCards" );
+    }
+    
+	
+    // Active player has finished arranging the sentence
+    function arrangeSentence( $choices )
+    {
+	
+        //throw new BgaSystemException ( "Choices: ".http_build_query($choices,'',', '));
+        // set positions on current_sentence cards
+        $cards = $this->cards->getCardsInLocation('current_sentence');
+        $contributions = self::getCollectionFromDB( "SELECT player_id id, contribution contribution, guess guess FROM player" );
+         //throw new BgaSystemException ( "Choices: ".implode(" "));
+       
+        $description = '';
+
+        foreach ($cards as $card) {
+            $type = strval($card['type']);
+            
+            $rotation = $choices[$type];
+            $this->cards->moveCard($card['id'],'current_sentence',$rotation);
+            $description .= $type.': '.$rotation.';';
+            
+        }
+        //throw new BgaSystemException ( "Choices: ".$description);
+        
+        // score points
+        foreach ($contributions as $player) {
+            if ($player['contribution'] == 0)  continue; // this player did not make a contribution this round
+            $actual_choice = $choices[strval($player['contribution'])];
+            $prediction = $player['guess'];
+            if ($actual_choice == $prediction) {
+                // add to player score
+               self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
+                 
+                // notify everyone
+                 $players = self::loadPlayersBasicInfos();	
+                 $current_player_name = $players[ $player['id'] ]['player_name'];
+                $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+                $active_player_name = $players[ $active_player_id ]['player_name'];
+                $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                 self::notifyAllPlayers( 
+                    'score', 
+                    clienttranslate('${current_player_name} correctly guessed ${color_displayed} ${active_player_name} did what they did and scores a point.'), 
+                    array(
+                        'i18n' => array( 'color_displayed', 'value_displayed' ),
+                        'player_id' => $player['id'],
+                        'current_player_name' => $current_player_name,
+                        'active_player_name' => $active_player_name,
+                        'color' => $player['contribution'],
+                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
+                        'score' => $score
+                    ) 
+                );
+            }
+        }
+        
+        
+        // Continue
+        $this->gamestate->nextState( "" );
     }
     
 
@@ -772,6 +843,70 @@ class RememberWhen extends Table
 		// (and keep the current sentence builder non-active)
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
         $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+    }
+    
+
+    function stVote()
+    {    
+    }
+    
+    
+    function stCompleteSentence()
+    {
+        $current_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $current_player_hand = $this->cards->getCardsInLocation('hand', $current_player_id );
+        $sentence = $this->cards->getCardsInLocation('current_sentence');
+        $players = self::loadPlayersBasicInfos();	
+		$current_player_name = $players[ $current_player_id ]['player_name'];
+		
+        // find any card types not already in the current sentence
+        foreach( $this->colors as  $type => $color ) // spade, heart, diamond, club
+        {
+            // skip orange
+            if ($type == 5) continue;
+
+            $found = false;
+            foreach ($sentence as $card) {
+                if ($card['type'] == $type) {
+                    $found = true;
+                    break;
+                }
+            }
+            // card types not found will be supplied from active players hand
+            if (!$found) {
+                foreach ($current_player_hand as $card) {
+                    if ($card['type'] == $type) {
+                      
+                        // add card to sentence
+                        $this->cards->moveCard($card['id'], 'current_sentence', $current_player_id);		
+                        
+                        // And notify
+                        self::notifyAllPlayers( 
+                            'addCardToSentence', 
+                            clienttranslate('${current_player_name} added a ${color_displayed} card to the sentence. '), 
+                            array(
+                                'i18n' => array( 'color_displayed', 'value_displayed' ),
+                                'card_id' => $card['id'],
+                                'card' => $this->populateCard($card),
+                                'player_id' => $current_player_id,
+                                'current_player_name' => $current_player_name,
+                                'color' => $card['type'],
+                                'color_displayed' => $this->colors[ $card['type'] ]['name']
+                            ) 
+                        );  
+
+                        // Notify the player so we can make these cards disapear
+                        self::notifyPlayer( $current_player_id, "cardGiven", "", array(
+                            "card" => $card
+                        ) );
+                    }
+                }
+
+            }
+			
+		}
+        $this->gamestate->nextState("");
+ 
     }
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

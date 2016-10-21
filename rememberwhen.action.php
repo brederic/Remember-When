@@ -105,6 +105,33 @@
         
         $this->game->chooseRole( $choice );
         self::ajaxResponse( );    
+    }        
+    public function arrangeSentence()
+    {
+        self::setAjaxMode();     
+        $card_ids_raw = self::getArg( "choices", AT_numberlist, true );
+        
+        // Removing last ';' if exists
+        if( substr( $card_ids_raw, -1 ) == ';' )
+            $card_ids_raw = substr( $card_ids_raw, 0, -1 );
+        if( $card_ids_raw == '' )
+            $card_ids = array();
+        else
+            $pairs = explode( ';', $card_ids_raw );
+        //throw new BgaSystemException ( "Pairs: ".implode(" ",$pairs));
+       
+        $choices = array("test" => "success");
+        foreach ($pairs as $pair) {
+            $data = explode(",", $pair);
+            //throw new BgaSystemException ( "Data: ".implode(" ",$data));
+            $choices[$data[0]] = $data[1];
+        
+            //throw new BgaSystemException ( "Choice: ".$data[0]." ".$choices[$data[0]]);
+       
+        }
+        
+        $this->game->arrangeSentence( $choices );
+        self::ajaxResponse( );    
     }
   
 

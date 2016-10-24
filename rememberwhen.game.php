@@ -1017,6 +1017,14 @@ class RememberWhen extends Table
         $this->gamestate->nextState("");
  
     }
+
+    function getCardIds($cards) {
+        $ids = array();
+        foreach ($cards as $card) {
+            $ids[]=$card['id'];
+        }
+        return $ids;
+    }
     
     
     function stCountVotes()
@@ -1031,12 +1039,12 @@ class RememberWhen extends Table
                 ";
         $top_sentence_votes = self::getUniqueValueFromDB( $sql );
         
-        // total votes for top sentence (contribution = 1)
+        // total votes for current sentence (contribution = 2)
             $sql = "
                     SELECT count(*)  
                     FROM player    
                            
-                    WHERE guess = 2 and contribution = 1
+                    WHERE guess = 1 and contribution = 2
                 ";
         $current_sentence_votes = self::getUniqueValueFromDB( $sql );
 
@@ -1054,6 +1062,7 @@ class RememberWhen extends Table
             $winner = self::getUniqueValueFromDB( $sql );
             $tiebreaker = true;
         }
+
         $players = self::loadPlayersBasicInfos();	
         $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
         $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
@@ -1065,15 +1074,20 @@ class RememberWhen extends Table
         }
 		
 
-        if ($winner = 1) { // Top memory won!!
+        if ($winner == 1) { // Top memory won!!
+            self::trace('Top memory won!');
             $winnerName = $topMemoryName;
-        } else {
-            $winnerName = $currentMemoryName;
+        } else {  // current sentence won!!
+            self::trace('Current memory won!');
+           $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
-            $old = $this->cards->getCardsInLocation('top_sentence');
+            $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
+            self::dump('Top sentence:', $old);
             $this->cards->moveCards($old, 'discard');
-            $new = $this->cards->getCardsInLocation('current_sentence');
+            $new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
+            self::dump('Current sentence:', $new);
             $this->cards->moveCards($new, 'top_sentence');
+            self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
             
         }
         // And notify
@@ -1095,7 +1109,7 @@ class RememberWhen extends Table
         
         // Previous Champion Votes
         $secondRow = array(  );
-        $secondRow[] = array( 'str' => 'Previous Champion ${player_name}',
+        $secondRow[] = array( 'str' => 'Champion ${player_name}',
                                  'args' => array( 'player_name' => $topMemoryName ),
                                  'type' => 'header'
                                );
@@ -1134,19 +1148,21 @@ class RememberWhen extends Table
             }
             $thirdRow[] = $str;
         }
-        $thirdRow[] = $top_sentence_votes;
+        $thirdRow[] = $current_sentence_votes;
         $table[] = $thirdRow;
         
         $this->notifyAllPlayers( "tableWindow", '', array(
                     "id" => 'voteTotals',
-                    "title" => clienttranslate('Voting Results - ${winner} wins!'),
+                    "title" => "Voting Results - $winnerName wins!",
                     "table" => $table,
                     "winner" => $winnerName,
                     "footer" => '<div>T = tie-break vote</div>',
                     "closing" =>clienttranslate( 'Continue')
                 ) ); 
-        
+        // change Active Player
         self::activeNextPlayer();
+        self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());
+            
         if ( self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {
             $this->gamestate->nextState("newHand");
         } else {

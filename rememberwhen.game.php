@@ -120,7 +120,9 @@ class RememberWhen extends Table
             }
 			$this->cards->createCards( $cards, 'deck-'.$color_id );
 			$this->cards->shuffle( 'deck-'.$color_id );
-			$this->cards->pickCardForLocation('deck-'.$color_id, 'top_sentence', rand(1,4) );
+            if ($color_id != 5) { // no orange cards
+			    $this->cards->pickCardForLocation('deck-'.$color_id, 'top_sentence', rand(1,4) );
+            }
 		}
        
 

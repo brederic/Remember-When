@@ -164,13 +164,13 @@ define([
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
                     var card = this.gamedatas.top_sentence[i];
-                    
-                
-                    var id = 'game_' + this.getCardUniqueId(color, value);
-                    
+                    var color = card.type;
+                    var value = card.type_arg;
+                    var card_id = this.getCardUniqueId(color, value);
+                        
                     this.playCardOnTable(card, 'top_sentence', card.location_arg, id);
 
-                    //this.hideCardsOfType(color);
+                    
                 }
 
                 console.log('Current Sentence:');
@@ -453,8 +453,8 @@ define([
 
             playCardOnTable: function (card,  loc, rotation, player_id, klass) {
                 isActivePlayer = this.player_id == this.sentenceBuilder;
-                // handle hidden cards
-                if (card.type != '4' & card.type != '7') {
+                // handle hidden cards in current sentence                
+                if (loc == 'current_sentence' & card.type != '4' & card.type != '7') {
                     if (this.currentState != "vote") {
                         if (isActivePlayer) {     
                             klass = 'rotatable';
@@ -492,13 +492,11 @@ define([
 
                 dojo.place(card_block, dest, "only"); 
 
-                this.placeOnObject(card_name, dest);
+                //this.placeOnObject(card_name, dest);
                 dojo.addClass(card_name, 'pos_' + rotation);
                 
                 // In any case: move it to its final destination
-                dest = 'spot_' + color;
                 console.log('Sliding to ' + dest);
-                dojo.addClass(card_name, dest);
                 if (klass != '') {
                     dojo.addClass(card_name, klass);
                 }
@@ -508,7 +506,7 @@ define([
                 if (loc == 'top_sentence') {
                 //    dest = 'current_' + dest;
                 }
-                this.slideToObject(card_name, dest).play();
+                //this.slideToObject(card_name, dest).play();
                 /*
                 dojo.addOnLoad(function(){
                     dojo.connect(dojo.byId(card_name), "onclick", "onCardClick");
@@ -820,6 +818,8 @@ define([
 
                 dojo.subscribe('currentSentenceReveal', this, "notif_revealCurrentSentence");
 
+                dojo.subscribe('newTop', this, "notif_newTopSentence");
+
 
             },
 
@@ -834,6 +834,24 @@ define([
 
                 console.log('notifications revealCurrentSentence');
                 this.currentSentence = notif.args.cards;
+
+            },
+            
+            notif_newTopSentence: function (notif) {
+
+                console.log('notifications newTopSentence');
+                
+                // play new cards
+                for (var i in notif.args.topSentence) {
+                    var card = notif.args.topSentence[i];
+                    var color = card.type;
+                    var value = card.type_arg;
+                    var card_id = this.getCardUniqueId(color, value);
+                        
+                    this.playCardOnTable(card, 'top_sentence', card.location_arg, card_id);
+
+                    
+                }
 
             },
             notif_newCard: function (notif) {

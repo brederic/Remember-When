@@ -1082,11 +1082,11 @@ class RememberWhen extends Table
            $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
-            self::dump('Top sentence:', $old);
             $this->cards->moveCards($old, 'discard');
             $new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
-            self::dump('Current sentence:', $new);
-            $this->cards->moveCards($new, 'top_sentence');
+            foreach ($new as $card) {
+                $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
+            }
             self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
             
         }
@@ -1159,6 +1159,13 @@ class RememberWhen extends Table
                     "footer" => '<div>T = tie-break vote</div>',
                     "closing" =>clienttranslate( 'Continue')
                 ) ); 
+        
+        if ($winner == 2) {
+            $this->notifyAllPlayers( "newTop", '', array(
+                    
+                    "topSentence" => $this->populateCards($this->cards->getCardsInLocation('top_sentence'))
+                ) ); 
+        }
         // change Active Player
         self::activeNextPlayer();
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());

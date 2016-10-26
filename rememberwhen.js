@@ -637,7 +637,7 @@ define([
                 // collect choices
                 var choices = '';
                 for (var i=1; i <=8; i++){
-                    card = dojo.query('div.spot_'+i)[0];
+                    card = dojo.query("div[id=current_sentence] > div[id=spot_" +i + '] > div')[0];
                     if (card != null) {
                         choices += i+','+this.getRotation(card)+';';       
                     }

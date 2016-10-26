@@ -877,6 +877,16 @@ define([
                     }
                 }
 
+                // clear current sentence
+                console.log('Clear Current sentence:');
+                cards = dojo.query('div[id=current_sentence] div[id^=current_sentence_]');
+                console.log(cards);
+                for (var i in cards) {
+                    var card = cards[i];
+                    this.fadeOutAndDestroy(card);
+                    
+                }
+
             },
             notif_newCard: function (notif) {
             

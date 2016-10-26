@@ -190,7 +190,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCountVotes",
-        "transitions" => array( "newHand" => 21 , "gameOver" => 99 )
+        "transitions" => array( "newHand" => 20 , "gameOver" => 99 )
     ),    
    
     // Final state.

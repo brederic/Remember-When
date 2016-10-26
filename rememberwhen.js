@@ -80,9 +80,16 @@ define([
                     if (pid == this.sentenceBuilder) {     
                         // Setting up players boards if needed
                         var player_board_div = $('player_board_'+this.sentenceBuilder);
+                        if (this.gamedatas.role ==1) {
+                            color = 'H';
+                        } else if (this.gamedatas.role ==2 ) {
+                            color = 'V';
+                        } else {
+                            color = 'A';
+                        }
                         dojo.place( this.format_block('jstpl_role', {
                                 player: this.sentenceBuilder,
-                                color: this.gamedatas.role,
+                                color: color,
                                 role: ''
                             }    ), player_board_div );
                     } else {
@@ -93,7 +100,7 @@ define([
                             } ;
                         console.log(data);
                         var player_board_div = $('player_board_'+pid);
-                        dojo.place( this.format_block('jstpl_card', data ), player_board_div );
+                        dojo.place( this.format_block('jstpl_role', data ), player_board_div );
                     }
                 }
 
@@ -792,6 +799,7 @@ define([
             setupNotifications: function () {
                 console.log('notifications subscriptions setup');
 
+                dojo.subscribe('newRound', this, "notif_newRound");
                 dojo.subscribe('dealing', this, "notif_deal");
                 dojo.subscribe('newCard', this, "notif_newCard");
                 dojo.subscribe('considerActions', this, "notif_considerActions");
@@ -855,15 +863,34 @@ define([
                 }
 
             },
+            notif_newRound: function (notif) {
+                console.log('notifications new round');
+                this.sentenceBuilder = notif.args.active_player;
+                // clear all contribution marks
+                for (var player_id in this.gamedatas.players) {
+                    role_icon_id = 'role_icon_p'+ player_id;
+                    dojo.removeClass(role_icon_id, 'role_icon_A role_icon_H role_icon_V role_icon_1 role_icon_2 role_icon_3 role_icon_4 role_icon_5 role_icon_6 role_icon_7 role_icon_8');
+                    if (player_id == this.sentenceBuilder) {
+                        dojo.addClass(role_icon_id, 'role_icon_A');
+                    } else {
+                        dojo.addClass(role_icon_id, 'role_icon_0');
+                    }
+                }
+
+            },
             notif_newCard: function (notif) {
             
 
                 console.log('notifications new card');
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
+                    console.log(card);
                     var color = card.type;
                     var value = card.type_arg;
-                    this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
+                    //console.log(card);
+                    //this.playerHand.addToStockWithId(color, this.getCardUniqueId(color, value));
+                    // add text to card
+                    this.playCardInHand(card.id, card, 'hand_' + card.id);
                 }
             },
              notif_cardGiven: function (notif) {
@@ -965,9 +992,9 @@ define([
                             this.hideCardsOfType(playedCardType);
                         }
                         // mark contribution
-                        card_icon_id = 'card_icon_p'+ notif.args.player_id;
-                        dojo.removeClass(card_icon_id, 'card_icon_0');
-                        dojo.addClass(card_icon_id, 'card_icon_'+playedCardType);
+                        card_icon_id = 'role_icon_p'+ notif.args.player_id;
+                        dojo.removeClass(card_icon_id, 'role_icon_0');
+                        dojo.addClass(card_icon_id, 'role_icon_'+playedCardType);
 
 
 

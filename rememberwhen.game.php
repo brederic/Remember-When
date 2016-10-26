@@ -212,7 +212,7 @@ class RememberWhen extends Table
 	{
 		$playerhand = $this->cards->getPlayerHand( $playerId );
 		// look at each card and check
-		foreach ($this->cards->getPlayerHand($playerId) as $card)
+		foreach ($playerhand as $card)
 		{
 			if ($card['type'] == $cardType) 
 			{
@@ -821,25 +821,30 @@ class RememberWhen extends Table
 
         self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
 
+        self::notifyAllPlayers('newRound', 'Beginning round ${round} of ${roundCount}. it is ${player_name}\'s turn to reminisce.', array(
+                'round' => self::getGameStateValue( 'currentRound'),
+                'roundCount' => self::getGameStateValue( 'totalRounds'),
+                'player_name' => self::getActivePlayerName(),
+                'active_player' => self::getActivePlayerId()
+
+            ) );
+
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
-        $deck_list = array(1, 2, 3, 6, 8);
+        $deck_list = array('1', '2', '3', '6', '8');
         if ($player_count >= 7) {
-            $deck_list[] = 4;
+            $deck_list[] = '4';
         }
         if ($player_count >= 8) {
-            $deck_list[] = 7;
+            $deck_list[] = '7';
         }
         if ($player_count == 9) {
-            $deck_list[] = 5;
+            $deck_list[] = '5';
         }
 		
         foreach( $deck_list as  $color_id ) 
         {
-			self::notifyAllPlayers('dealing', 'Dealing cards from deck-'.$color_id, array(
-                    'player_id' => '',
-                    'player_name' => ''
-                ) );
+			
 			// Test deal
 			//$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, 1001 );
 			// Normal deal
@@ -848,15 +853,16 @@ class RememberWhen extends Table
 				if (!$this->doesPlayerHaveCardType($player_id, $color_id)) 
 				{
 					$cards = $this->cards->pickCards( 1, 'deck-'.$color_id, $player_id );
+                     // only notify non-active players of their cards
+                    if ($player_id != self::getGameStateValue( 'playerBuildingSentence' )) {
+                
+                        // Notify player about his cards
+                        self::notifyPlayer( $player_id, 'newCard', '', array( 
+                            'cards' => $this->populateCards($cards),
+                        ) );
+                    }
 				}
-                // only notify non-active players of their cards
-                if ($player_id != self::getGameStateValue( 'playerBuildingSentence' )) {
-            
-                    // Notify player about his cards
-                    self::notifyPlayer( $player_id, 'newCard', '', array( 
-                        'cards' => $cards
-                    ) );
-                }
+               
 			}
 
 		}        

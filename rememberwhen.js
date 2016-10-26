@@ -235,16 +235,7 @@ define([
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
                         dojo.query('.invisible').removeClass('invisible');
-                        // rotate cards to their chosen positions
-                        //console.log(this.currentSentence);
-                         for (var i in this.currentSentence) {
-                            var card = this.currentSentence[i];
-                            card_block = $('current_sentence_' + card.id);
-                            dojo.removeClass(card_block, 'pos_1 pos_2 pos_3 pos_4');
-                            dojo.addClass(card_block, 'pos_'+card.location_arg);
-                        }
-
-
+                        
 
                     case 'dummmy':
                         break;
@@ -816,7 +807,7 @@ define([
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
 
-                dojo.subscribe('currentSentenceReveal', this, "notif_revealCurrentSentence");
+                dojo.subscribe('revealCurrentSentence', this, "notif_revealCurrentSentence");
 
                 dojo.subscribe('newTop', this, "notif_newTopSentence");
 
@@ -834,6 +825,16 @@ define([
 
                 console.log('notifications revealCurrentSentence');
                 this.currentSentence = notif.args.cards;
+                // rotate cards to their chosen positions
+                        //console.log(this.currentSentence);
+                for (var i in this.currentSentence) {
+                    var card = this.currentSentence[i];
+                    card_block = $('current_sentence_' + card.id);
+                    dojo.removeClass(card_block, 'pos_1 pos_2 pos_3 pos_4');
+                    dojo.addClass(card_block, 'pos_'+card.location_arg);
+                }
+
+
 
             },
             

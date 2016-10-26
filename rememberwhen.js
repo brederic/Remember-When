@@ -236,8 +236,7 @@ define([
                     case 'chooseAction':
                         cards = dojo.query('div[id^="cardontable"]');
                         console.log(cards);
-                        //dojo.connect(this.stock.hand[this.my_id], 'onclick', this, 'action_clicForInitialMeld' );
-
+                       
                     case 'vote':
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
@@ -659,79 +658,35 @@ define([
        
 
             onPlayerHandSelectionChanged: function (evt) {
-                //require(["dojo/query"], function(query){
-                //	console.log(query(query));
-                //});
 
-                //console.log("onPlayerHandSelectionChanged()");
-                //console.log(control_name);
-                //dojo.stopEvent(evt);
-
-                
+                // get the cards that the stock thinks are highlighted                
                 var items = this.playerHand.getSelectedItems();
 
-                if (items.length > 0) {
-                   /* if (this.checkAction('playCard', true)) {
-                        // Can play a card
-
-                        var card_id = items[0].id;
-
-                        this.ajaxcall("/bphearts/bphearts/playCard.html", {
-                            id: card_id,
-                            lock: true
-                        }, this, function (result) { }, function (is_error) { });
-
-                        this.playerHand.unselectAll();
-                    }
-                    else 
-                    */
-                    /*if (this.checkAction('giveCards')) {
-                        // Can give cards => let the player select some cards
-
-                        var id = items[0]['id'];
-                        var color = items[0]['type'];
-                        var value = this.getCardValue(id);
-                        console.log('Destroying previous buttons');
-                        dojo.query('a[id^="giveCard"]').forEach(dojo.destroy);
-                        this.addActionButton('giveCard_button_' + id + '_1', _(color + '_' + value + '_1'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_2', _(color + '_' + value + '_2'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_3', _(color + '_' + value + '_3'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_4', _(color + '_' + value + '_4'), 'onGiveCard');
-
-                    }
-                    else  */
+                if (items.length > 0) { // a card was clicked 
                    
                     console.log('chooseAction with selection');
                     console.log(items[0]);
                     var id = items[0]['id'];
+
+                    // get the card block
                     card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
                     console.log(card_node);
-                    var color = items[0]['type'];
-                    var value = this.getCardValue(id);
-                    if (card_node.id == this.selectedCard) {
-                        //card_block = $('hand_'+this.selectedCard);
+
+                    if (card_node.id == this.selectedCard) { // the click was on the currently selected card
                         // rotate selected card
                         this.onCardClick(card_node);
-                    } else {
+                    } else { // we have a new selected card, it should be highlighted, not rotated
                         this.selectedCard = card_node.id;
-                        //dojo.disconnect(this.handConnection);
-                        //this.playerHand.unselectAll();
-                        //this.playerHand.selectItem(this.selectedCard);
-                        //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
                     }
                     
 
 
-                } else {
-                    //if (this.checkAction('chooseAction')) {
-                    //console.log('chooseAction without selection');
-                    //dojo.disconnect(this.handConnection);
-                    //this.playerHand.selectItem(this.selectedCard);
-                    //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+                } else { // the same card was click (the stock interpret this as a deselect)
+                    // get the currently selected card
                     card_block = $(this.selectedCard);
                     // rotate selected card
                     this.onCardClick(card_block);
-                   // }
+                   
 
                 }
                 // update selection styles
@@ -915,12 +870,16 @@ define([
                 
             },
             notif_considerActions: function (notif) {
+                 // Player hand
+                this.playerHand.removeAll();
+                
+
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     var color = card.type;
                     var value = card.type_arg;
                     var rotation = 1; //?????
-                    this.playCardInHand(card.id, card, 'action_'+card.id);
+                    this.playCardInHand(card.id, card, 'hand_'+card.id);
                 }         
             },
             notif_chooseRole: function (notif) {

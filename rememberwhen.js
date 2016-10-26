@@ -37,6 +37,7 @@ define([
                 this.handConnection = null;
                 this.roles =['Active', 'Hero', 'Villain'];
                 this.sentenceBuilder;
+                this.currentSentence = null;
                     
 
             },
@@ -79,9 +80,16 @@ define([
                     if (pid == this.sentenceBuilder) {     
                         // Setting up players boards if needed
                         var player_board_div = $('player_board_'+this.sentenceBuilder);
+                        if (this.gamedatas.role ==1) {
+                            color = 'H';
+                        } else if (this.gamedatas.role ==2 ) {
+                            color = 'V';
+                        } else {
+                            color = 'A';
+                        }
                         dojo.place( this.format_block('jstpl_role', {
                                 player: this.sentenceBuilder,
-                                color: this.gamedatas.role,
+                                color: color,
                                 role: ''
                             }    ), player_board_div );
                     } else {
@@ -92,7 +100,7 @@ define([
                             } ;
                         console.log(data);
                         var player_board_div = $('player_board_'+pid);
-                        dojo.place( this.format_block('jstpl_card', data ), player_board_div );
+                        dojo.place( this.format_block('jstpl_role', data ), player_board_div );
                     }
                 }
 
@@ -163,26 +171,37 @@ define([
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
                     var card = this.gamedatas.top_sentence[i];
-                    
-                
-                    var id = 'game_' + this.getCardUniqueId(color, value);
-                    
+                    var color = card.type;
+                    var value = card.type_arg;
+                    var card_id = this.getCardUniqueId(color, value);
+                        
                     this.playCardOnTable(card, 'top_sentence', card.location_arg, id);
 
-                    //this.hideCardsOfType(color);
+                    
                 }
 
                 console.log('Current Sentence:');
                 console.log(this.gamedatas.current_sentence);
 
                 // Cards in current sentence
+                this.currentSentence = gamedatas.current_sentence;
+                //start with current sentence visible 
+                dojo.addOnLoad( function() {
+                    target = $('firstTab');
+                    var evt = { currentTarget: target};
+                    showSentence(evt,'current_sentence');
+                    });
                 for (var i in this.gamedatas.current_sentence) {
                     
                     var card = this.gamedatas.current_sentence[i];
                     var id = 'game_' + this.getCardUniqueId(color, value);
 
-                    this.playCardOnTable(card, 'current_sentence', '1', id,'' );
-
+                    // verb and object are fixed
+                    if (card.type == 4 || card.type == 7) {
+                        this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
+                    } else {
+                        this.playCardOnTable(card, 'current_sentence', '1', id,'' );
+                    }
                     this.hideCardsOfType(card.type);
                 }
                 
@@ -219,8 +238,11 @@ define([
                         console.log(cards);
                         //dojo.connect(this.stock.hand[this.my_id], 'onclick', this, 'action_clicForInitialMeld' );
 
-
-
+                    case 'vote':
+                        dojo.query('.reverse').removeClass('reverse');
+                        dojo.query('.rotatable').removeClass('rotatable');
+                        dojo.query('.invisible').removeClass('invisible');
+                        
 
                     case 'dummmy':
                         break;
@@ -286,6 +308,11 @@ define([
                             break;
                         case 'arrangeSentence':
                               this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
+                            break;
+                         case 'vote':
+                              this.addActionButton('1', 'Top Sentence', 'onVote'); 
+                              this.addActionButton('2', 'Current Sentence', 'onVote'); 
+
                             break;
 
                     }
@@ -424,13 +451,15 @@ define([
 
             playCardOnTable: function (card,  loc, rotation, player_id, klass) {
                 isActivePlayer = this.player_id == this.sentenceBuilder;
-                // handle hidden cards
-                if (card.type != '4' & card.type != '7') {
-                    if (isActivePlayer) {     
-                        klass = 'rotatable';
-                    } else {
-                        //play face down
-                        klass ='reverse';
+                // handle hidden cards in current sentence                
+                if (loc == 'current_sentence' & card.type != '4' & card.type != '7') {
+                    if (this.currentState != "vote") {
+                        if (isActivePlayer) {     
+                            klass = 'rotatable';
+                        } else {
+                            //play face down
+                            klass ='reverse';
+                        }
                     }
                 } else {
                     klass ='';
@@ -461,13 +490,11 @@ define([
 
                 dojo.place(card_block, dest, "only"); 
 
-                this.placeOnObject(card_name, dest);
+                //this.placeOnObject(card_name, dest);
                 dojo.addClass(card_name, 'pos_' + rotation);
                 
                 // In any case: move it to its final destination
-                dest = 'spot_' + color;
                 console.log('Sliding to ' + dest);
-                dojo.addClass(card_name, dest);
                 if (klass != '') {
                     dojo.addClass(card_name, klass);
                 }
@@ -477,7 +504,7 @@ define([
                 if (loc == 'top_sentence') {
                 //    dest = 'current_' + dest;
                 }
-                this.slideToObject(card_name, dest).play();
+                //this.slideToObject(card_name, dest).play();
                 /*
                 dojo.addOnLoad(function(){
                     dojo.connect(dojo.byId(card_name), "onclick", "onCardClick");
@@ -562,6 +589,20 @@ define([
             this.playerHand.removeAll();
                  
         },    
+        onVote: function( evt)
+        {
+            console.log('onVote');
+           dojo.stopEvent( evt );
+            var choice = evt.currentTarget.id;
+            if( this.checkAction( 'vote' ) )
+            {
+
+                this.ajaxcall( "/rememberwhen/rememberwhen/vote.html", { choice: choice, lock: true }, this, function( result ) {
+                }, function( is_error) { } );                
+            }   
+            
+                 
+        },    
         onGiveCard: function( evt)
         {
             console.log('onGiveCard');
@@ -594,7 +635,7 @@ define([
                 // collect choices
                 var choices = '';
                 for (var i=1; i <=8; i++){
-                    card = dojo.query('div.spot_'+i)[0];
+                    card = dojo.query("div[id=current_sentence] > div[id=spot_" +i + '] > div')[0];
                     if (card != null) {
                         choices += i+','+this.getRotation(card)+';';       
                     }
@@ -758,6 +799,7 @@ define([
             setupNotifications: function () {
                 console.log('notifications subscriptions setup');
 
+                dojo.subscribe('newRound', this, "notif_newRound");
                 dojo.subscribe('dealing', this, "notif_deal");
                 dojo.subscribe('newCard', this, "notif_newCard");
                 dojo.subscribe('considerActions', this, "notif_considerActions");
@@ -773,6 +815,10 @@ define([
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
 
+                dojo.subscribe('revealCurrentSentence', this, "notif_revealCurrentSentence");
+
+                dojo.subscribe('newTop', this, "notif_newTopSentence");
+
 
             },
 
@@ -782,6 +828,65 @@ define([
 
                 console.log('notifications deal');
 
+            }, 
+            notif_revealCurrentSentence: function (notif) {
+
+                console.log('notifications revealCurrentSentence');
+                this.currentSentence = notif.args.cards;
+                // rotate cards to their chosen positions
+                        //console.log(this.currentSentence);
+                for (var i in this.currentSentence) {
+                    var card = this.currentSentence[i];
+                    card_block = $('current_sentence_' + card.id);
+                    dojo.removeClass(card_block, 'pos_1 pos_2 pos_3 pos_4');
+                    dojo.addClass(card_block, 'pos_'+card.location_arg);
+                }
+
+
+
+            },
+            
+            notif_newTopSentence: function (notif) {
+
+                console.log('notifications newTopSentence');
+                
+                // play new cards
+                for (var i in notif.args.topSentence) {
+                    var card = notif.args.topSentence[i];
+                    var color = card.type;
+                    var value = card.type_arg;
+                    var card_id = this.getCardUniqueId(color, value);
+                        
+                    this.playCardOnTable(card, 'top_sentence', card.location_arg, card_id);
+
+                    
+                }
+
+            },
+            notif_newRound: function (notif) {
+                console.log('notifications new round');
+                this.sentenceBuilder = notif.args.active_player;
+                // clear all contribution marks
+                for (var player_id in this.gamedatas.players) {
+                    role_icon_id = 'role_icon_p'+ player_id;
+                    dojo.removeClass(role_icon_id, 'role_icon_A role_icon_H role_icon_V role_icon_1 role_icon_2 role_icon_3 role_icon_4 role_icon_5 role_icon_6 role_icon_7 role_icon_8');
+                    if (player_id == this.sentenceBuilder) {
+                        dojo.addClass(role_icon_id, 'role_icon_A');
+                    } else {
+                        dojo.addClass(role_icon_id, 'role_icon_0');
+                    }
+                }
+
+                // clear current sentence
+                console.log('Clear Current sentence:');
+                cards = dojo.query('div[id=current_sentence] div[id^=current_sentence_]');
+                console.log(cards);
+                for (var i in cards) {
+                    var card = cards[i];
+                    this.fadeOutAndDestroy(card);
+                    
+                }
+
             },
             notif_newCard: function (notif) {
             
@@ -789,9 +894,13 @@ define([
                 console.log('notifications new card');
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
+                    console.log(card);
                     var color = card.type;
                     var value = card.type_arg;
-                    this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
+                    //console.log(card);
+                    //this.playerHand.addToStockWithId(color, this.getCardUniqueId(color, value));
+                    // add text to card
+                    this.playCardInHand(card.id, card, 'hand_' + card.id);
                 }
             },
              notif_cardGiven: function (notif) {
@@ -893,9 +1002,9 @@ define([
                             this.hideCardsOfType(playedCardType);
                         }
                         // mark contribution
-                        card_icon_id = 'card_icon_p'+ notif.args.player_id;
-                        dojo.removeClass(card_icon_id, 'card_icon_0');
-                        dojo.addClass(card_icon_id, 'card_icon_'+playedCardType);
+                        card_icon_id = 'role_icon_p'+ notif.args.player_id;
+                        dojo.removeClass(card_icon_id, 'role_icon_0');
+                        dojo.addClass(card_icon_id, 'role_icon_'+playedCardType);
 
 
 

@@ -39,10 +39,10 @@
 
 <div id="sentence_board" class="floatL whiteblock ">
 	<ul class="tab">
-	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Sentence</a></li>
-	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'current_sentence')">Current Sentence</a></li>
+	  <li><a href="#" class="tablinks" onclick="showSentence(event, 'top_sentence')">Top Memory</a></li>
+	  <li><a href="#" class="tablinks" id="firstTab" onclick="showSentence(event, 'current_sentence')">Current Memory</a></li>
 	</ul>
-    <div id="current_sentence" class="sentenceboard whiteblock tabcontent"> 
+    <div id="current_sentence" class="sentenceboard whiteblock tabcontent" style=""> 
 		<div class="spot" id="spot_1">1</div><div class="spot" id="spot_2">2</div><div class="spot" id="spot_3">3</div><div class="spot" id="spot_4">4</div>
 		<div class="spot" id="spot_5">5</div><div class="spot" id="spot_6">6</div><div class="spot" id="spot_7">7</div><div class="spot" id="spot_8">8</div>
 
@@ -67,6 +67,8 @@
 
 
 <script type="text/javascript">
+
+                    
 function showSentence(evt, cityName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -93,7 +95,6 @@ var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="$
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
 
 var jstpl_role = '<div id="role_icon_p${player}" class="role_icon role_icon_${color}"><span>${role}</span></div>';
-var jstpl_card = '<div id="card_icon_p${player}" class="role_icon card_icon_${color}"><span>${role}</span></div>';
     
 </script>  
 

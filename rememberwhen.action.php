@@ -133,7 +133,15 @@
         $this->game->arrangeSentence( $choices );
         self::ajaxResponse( );    
     }
-  
+         
+    public function vote()
+    {
+        self::setAjaxMode();     
+        $choice = self::getArg( "choice", AT_posint, true );
+        
+        $this->game->vote( $choice );
+        self::ajaxResponse( );    
+    }   
 
 
   }

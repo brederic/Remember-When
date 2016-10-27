@@ -21,6 +21,9 @@ define([
     "ebg/counter",
     "ebg/stock"
 ],
+
+ 
+
     function (dojo, declare) {
         return declare("bgagame.rememberwhen", ebg.core.gamegui, {
             constructor: function () {
@@ -38,8 +41,8 @@ define([
                 this.roles =['Active', 'Hero', 'Villain'];
                 this.sentenceBuilder;
                 this.currentSentence = null;
-                    
-
+                this.connects = {};
+               
             },
 
             /*
@@ -238,9 +241,19 @@ define([
                         console.log(cards);
                        
                     case 'vote':
+                        // clear all connections
+                        var nodes = dojo.query('div[class*="rotatable"]');
+                        var self = this;
+                        nodes.forEach( function (node, idx) {
+                            dojo.forEach( self.connects[node.id], function( handle ) {
+                                dojo.disconnect( handle );
+                            });
+                        });
+                            
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
                         dojo.query('.invisible').removeClass('invisible');
+                        
                         
 
                     case 'dummmy':
@@ -327,32 +340,56 @@ define([
                 script.
             
             */
+
+       
+
+        makeConnections: function (node) {
+            events =  ['click','ondblclick' ];
+            var self = this;
+            events.forEach( function (evt, idx) {
+                if (!(node.id in self.connects)) {
+                    self.connects[node.id] = [];
+                } else { // don't make duplicate connections
+                    return;
+                }
+                self.connects[ node.id ][idx] = dojo.connect( node, evt, function(evt) { 
+                        // 'this' is now the element clicked on (e.g. id="textDiv")
+                        var el = this; 
+                        
+                        console.log('onClick ' + this.id  ); 
+        
+                        
+                        if (dojo.hasClass(this.id, 'pos_1')) {
+                            dojo.replaceClass(this.id, 'pos_2', 'pos_1');
+                        } else if (dojo.hasClass(this.id, 'pos_2')) {
+                            dojo.replaceClass(this.id, 'pos_3', 'pos_2');
+                        } else if (dojo.hasClass(this.id, 'pos_3')) {
+                            dojo.replaceClass(this.id, 'pos_4', 'pos_3');
+                        } else if (dojo.hasClass(this.id, 'pos_4')) {
+                            dojo.replaceClass(this.id, 'pos_1', 'pos_4');
+                        } 
+                });
+            
+            });
+           
+        },
+
         hookupCardsOnLoad:  function () {
+            var self = this;
+
              dojo.addOnLoad( function() {
                     console.log("onLoad executing...")
                     
                   // attach on click to id="textDiv"
-                  dojo.query('div[class*="rotatable"]').onclick( function(evt) { 
-                    // 'this' is now the element clicked on (e.g. id="textDiv")
-                    var el = this; 
-                	
-                    console.log('onClick ' + this.id  ); 
-    
-                	
-                    if (dojo.hasClass(this.id, 'pos_1')) {
-                        dojo.replaceClass(this.id, 'pos_2', 'pos_1');
-                    } else if (dojo.hasClass(this.id, 'pos_2')) {
-                        dojo.replaceClass(this.id, 'pos_3', 'pos_2');
-                    } else if (dojo.hasClass(this.id, 'pos_3')) {
-                        dojo.replaceClass(this.id, 'pos_4', 'pos_3');
-                    } else if (dojo.hasClass(this.id, 'pos_4')) {
-                        dojo.replaceClass(this.id, 'pos_1', 'pos_4');
-                    } 
-                  });
-                });
+                  var nodes = dojo.query('div[class*="rotatable"]');
+                  nodes.forEach( function (node, idx) {
+                     
+                      self.makeConnections(node);
+                     });   
+             });
         },
             		
-		hideCardsOfType: function(playedCardType)
+		hideCardsOfType: function (playedCardType)
 		{
             console.log('Making cards invisible of type:' + playedCardType);
             
@@ -527,7 +564,7 @@ define([
             
             */
                     
-        onChooseRandomObject: function( evt)
+        onChooseRandomObject: function ( evt)
         {
             console.log('onChooseRandomObject');
             dojo.stopEvent( evt );
@@ -541,7 +578,7 @@ define([
             }        
         }, 
                      
-        onChooseRole: function( evt)
+        onChooseRole: function ( evt)
         {
             console.log('onChooseRole');
             dojo.stopEvent( evt );
@@ -758,7 +795,6 @@ define([
                 dojo.subscribe('dealing', this, "notif_deal");
                 dojo.subscribe('newCard', this, "notif_newCard");
                 dojo.subscribe('considerActions', this, "notif_considerActions");
-                dojo.subscribe('playCard', this, "notif_playCard");
                 dojo.subscribe('trickWin', this, "notif_trickWin");
                 this.notifqueue.setSynchronous('trickWin', 1000);
                 dojo.subscribe('giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer");
@@ -889,12 +925,6 @@ define([
                 dojo.removeClass(role_div, 'role_icon_0');
                 dojo.addClass(role_div, 'role_icon_'+notif.args.choice);
                 
-            },
-            notif_playCard: function (notif) {
-                // Play a card on the table
-                var rotation = 1; //?????
-                this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
-                this.hookupCardsOnLoad();
             },
             notif_trickWin: function (notif) {
                 // We do nothing here (just wait in order players can view the 4 cards played before they're gone.

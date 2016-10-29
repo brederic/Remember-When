@@ -200,11 +200,8 @@ define([
                     var id = 'game_' + this.getCardUniqueId(color, value);
 
                     // verb and object are fixed
-                    if (card.type == 4 || card.type == 7) {
-                        this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
-                    } else {
-                        this.playCardOnTable(card, 'current_sentence', '1', id,'' );
-                    }
+                    this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
+                   
                     this.hideCardsOfType(card.type);
                 }
                 

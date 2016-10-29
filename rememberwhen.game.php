@@ -73,7 +73,7 @@ class RememberWhen extends Table
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $default_colors = array( "ff0000", "008000", "0000ff", "ffa500", "773300" );
+        $default_colors = array( "ff0000", "00ff00", "0000ff", "888800", "008888", "880088" );
 
  
         // Create players
@@ -978,10 +978,17 @@ class RememberWhen extends Table
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
             $this->cards->moveCards($old, 'discard');
-            $new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
-            foreach ($new as $card) {
-                $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
-            }
+            $sql = "
+                UPDATE  card
+                SET     card_location = 'top_sentence'
+                WHERE   card_location = 'current_sentence'
+            ";
+            self::DbQuery( $sql );
+            //$new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
+            //foreach ($new as $card) {
+            //    self::dump("card:", implode(' ',$card));
+            //    $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
+            //}
             self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
             
         }

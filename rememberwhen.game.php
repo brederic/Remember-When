@@ -817,7 +817,7 @@ class RememberWhen extends Table
             self::DbQuery( $sql );
         }
         // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
-        if ($playersVoting-1 % 2 != 0  ) {
+        if ($playersVoting-1 % 2 == 0  ) {
             $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
             // mark not voting
             $sql = "
@@ -968,6 +968,10 @@ class RememberWhen extends Table
         if ($winner == 1) { // Top memory won!!
             self::trace('Top memory won!');
             $winnerName = $topMemoryName;
+            // clear out current sentence
+            $old = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
+            $this->cards->moveCards($old, 'discard');
+            
         } else {  // current sentence won!!
             self::trace('Current memory won!');
            $winnerName = $currentMemoryName;
@@ -1057,6 +1061,12 @@ class RememberWhen extends Table
                     "topSentence" => $this->populateCards($this->cards->getCardsInLocation('top_sentence'))
                 ) ); 
         }
+
+        // before changing the active player, restore the current active player's hand
+        self::notifyPlayer(  $currentSentenceBuilder, 'newCard', '', array( 
+            'cards' => $this->populateCards($this->cards->getCardsInLocation('hand', $currentSentenceBuilder)),
+            ) 
+        );
         // change Active Player
         self::activeNextPlayer();
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());

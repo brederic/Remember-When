@@ -343,7 +343,8 @@ class RememberWhen extends Table
     
     function argGiveCards()
     {
-		$me = self::getCurrentPlayerId();
+		/* ORIGINAL CODE
+        $me = self::getCurrentPlayerId();
         self::trace('argGiveCards $me='.$me);
 		$players = self::loadPlayersBasicInfos();	
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
@@ -361,6 +362,23 @@ class RememberWhen extends Table
             "i18n" => array( 'direction'),
             "direction" => $direction
         );
+        
+        */
+        // Suggestion from MarcGenesis (forums)
+        $players = self::loadPlayersBasicInfos();   
+        $player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $player_name = $players[ $player_id ]['player_name'];
+
+        $player_color = $players[ $player_id ]['player_color'];
+        $direction = $player_name;
+        
+        self::trace('argGiveCards $direction='.$direction);
+        return array(
+            "i18n" => array( 'direction'),
+         "player_color" => $player_color,
+            "direction" => $direction
+        );
+    
     }
 
 

@@ -135,7 +135,7 @@ $machinestates = array(
         "possibleactions" => array( "chooseRole" ),
         "transitions" => array( "chooseRole" => 30 )
     ), 	
-
+/* ORIGINAL CODE
     30 => array(       
         "name" => "giveCards",
         "description" => clienttranslate('Some players must choose a card to give to ${direction}'),
@@ -145,6 +145,17 @@ $machinestates = array(
         "args" => "argGiveCards",
         "possibleactions" => array( "giveCards" ),
         "transitions" => array( "giveCards" => 31 )        
+    ), */
+    // Suggestion from MarcGenesis on forums
+    30 => array(       
+        "name" => "giveCards",
+        "description" => clienttranslate('Some players are choosing cards to give to <span style="color: #${player_color};">you</span>.'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a card to give to <span style="color: #${player_color};">${direction}</span>'),
+        "type" => "multipleactiveplayer",
+        "action" => "stGiveCards",
+        "args" => "argGiveCards",
+        "possibleactions" => array( "giveCards" ),
+        "transitions" => array( "giveCards" => 31 )       
     ), 
      
     31 => array(

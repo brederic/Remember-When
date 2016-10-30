@@ -500,6 +500,13 @@ class RememberWhen extends Table
 		$card_id = $params[1];
 		$card_pos = $params[2];
 
+        // make sure noone else has submitted this card $type
+        $count = self::getUniqueValueFromDB("select count(p.contribution) from card c JOIN player p
+  ON p.contribution = c.card_type  WHERE c.card_id='$card_id'");
+        if ($count > 0) {
+            throw new BgaUserException( self::_("Sorry! Someone submitted this card type before you.") );
+        }
+    
 		
 		// get object card
 		$card = $this->cards->getCard( $card_id );

@@ -808,6 +808,13 @@ class RememberWhen extends Table
 		// (and keep the current sentence builder non-active)
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
         $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+        // clear all previous contributions
+                $sql = "
+                UPDATE  player
+                SET     contribution = 0,
+                        guess = 0
+            ";
+        self::DbQuery( $sql );
     }
     
 

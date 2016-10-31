@@ -43,13 +43,13 @@
 	  <li><a href="#" class="tablinks" id="firstTab" onclick="showSentence(event, 'current_sentence')">Current Memory</a></li>
 	</ul>
     <div id="current_sentence" class="sentenceboard whiteblock tabcontent" style=""> 
-		<div class="spot" id="spot_1">1</div><div class="spot" id="spot_2">2</div><div class="spot" id="spot_3">3</div><div class="spot" id="spot_4">4</div>
-		<div class="spot" id="spot_5">5</div><div class="spot" id="spot_6">6</div><div class="spot" id="spot_7">7</div><div class="spot" id="spot_8">8</div>
+		<div class="spot" id="spot_1"></div><div class="spot" id="spot_2"></div><div class="spot" id="spot_3"></div><div class="spot" id="spot_4"></div>
+		<div class="spot" id="spot_5"></div><div class="spot" id="spot_6"></div><div class="spot" id="spot_7"></div><div class="spot" id="spot_8"></div>
 
     </div> 
 	<div id="top_sentence" class="sentenceboard whiteblock tabcontent"> 
-		<div class="spot spot_1" id="top_spot_1">1</div><div class="spot spot_2" id="top_spot_2">2</div><div class="spot spot_3" id="top_spot_3">3</div><div class="spot spot_4" id="top_spot_4">4</div>
-		<div class="spot spot_5" id="top_spot_5">5</div><div class="spot spot_6" id="top_spot_6">6</div><div class="spot spot_7" id="top_spot_7">7</div><div class="spot spot_8" id="top_spot_8">8</div>
+		<div class="spot spot_1" id="top_spot_1"></div><div class="spot spot_2" id="top_spot_2"></div><div class="spot spot_3" id="top_spot_3"></div><div class="spot spot_4" id="top_spot_4">4</div>
+		<div class="spot spot_5" id="top_spot_5"></div><div class="spot spot_6" id="top_spot_6"></div><div class="spot spot_7" id="top_spot_7"></div><div class="spot spot_8" id="top_spot_8">8</div>
 
     </div> 
 

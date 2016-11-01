@@ -261,7 +261,7 @@ class RememberWhen extends Table
 	}
 
     protected function getContributionMap(  ) {
-        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution FROM player" );
+        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution, guess guess FROM player" );
         //random data for testing
         /*foreach(array_keys($result) as $id) {
             $randomize = array('id'=> $id, 'contribution'=> rand(1,8));
@@ -638,22 +638,20 @@ class RememberWhen extends Table
             
         }
         //throw new BgaSystemException ( "Choices: ".$description);
-        
+        $players = self::loadPlayersBasicInfos();	
         // score points
         foreach ($contributions as $player) {
             if ($player['contribution'] == 0)  continue; // this player did not make a contribution this round
             $actual_choice = $choices[strval($player['contribution'])];
             $prediction = $player['guess'];
+            $current_player_name = $players[ $player['id'] ]['player_name'];
+            $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+            $active_player_name = $players[ $active_player_id ]['player_name'];
             if ($actual_choice == $prediction) {
-                // add to player score
+                 // add to player score
                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
-                 
-                // notify everyone
-                 $players = self::loadPlayersBasicInfos();	
-                 $current_player_name = $players[ $player['id'] ]['player_name'];
-                $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
-                $active_player_name = $players[ $active_player_id ]['player_name'];
                 $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                // notify everyone
                  self::notifyAllPlayers( 
                     'score', 
                     clienttranslate('${current_player_name} correctly guessed ${color_displayed} ${active_player_name} did what they did and scores a point.'), 
@@ -664,11 +662,41 @@ class RememberWhen extends Table
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
-                        'score' => $score
+                        'score' => $score,
+                        'choice' => $prediction
+                    ) 
+                );
+            } else {
+                $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                // notify everyone
+                 self::notifyAllPlayers( 
+                    'score', 
+                    clienttranslate('${current_player_name} made an incorrect guess and does not score this round.'), 
+                    array(
+                        'i18n' => array( 'color_displayed', 'value_displayed' ),
+                        'player_id' => $player['id'],
+                        'current_player_name' => $current_player_name,
+                        'active_player_name' => $active_player_name,
+                        'color' => $player['contribution'],
+                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
+                        'score' => $score,
+                        'choice' => $prediction
                     ) 
                 );
             }
         }
+        //notify card rotations
+        // And notify
+            self::notifyAllPlayers( 
+                'revealCurrentSentence', 
+                clienttranslate("It is time to vote! "), 
+                array(
+                    
+                    'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
+                    'contributions' => $this->getContributionMap()
+                    
+                ) 
+            );  
         
         
         // Continue
@@ -707,6 +735,8 @@ class RememberWhen extends Table
         $players = self::loadPlayersBasicInfos();	
 
         self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
+        $this->setGameStateInitialValue( 'role', 0 );
+        
 
         self::notifyAllPlayers('newRound', 'Beginning round ${round} of ${roundCount}. it is ${player_name}\'s turn to reminisce.', array(
                 'round' => self::getGameStateValue( 'currentRound'),
@@ -715,6 +745,16 @@ class RememberWhen extends Table
                 'active_player' => self::getActivePlayerId()
 
             ) );
+
+        // clear all previous contributions
+            $sql = "
+            UPDATE  player
+            SET     contribution = 0,
+                    guess = 0,
+                    vote = 0,
+                    vote_type = 0
+        ";
+        self::DbQuery( $sql );
 
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
@@ -787,13 +827,7 @@ class RememberWhen extends Table
 		// (and keep the current sentence builder non-active)
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
         $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
-        // clear all previous contributions
-                $sql = "
-                UPDATE  player
-                SET     contribution = 0,
-                        guess = 0
-            ";
-        self::DbQuery( $sql );
+
     }
     
 
@@ -848,17 +882,7 @@ class RememberWhen extends Table
                 ";
             self::DbQuery( $sql );            
         }
-        //notify card rotations
-        // And notify
-            self::notifyAllPlayers( 
-                'revealCurrentSentence', 
-                clienttranslate("It is time to vote! "), 
-                array(
-                    
-                    'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
-                    
-                ) 
-            );  
+        
     }
     
     

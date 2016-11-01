@@ -42,6 +42,7 @@ define([
                 this.sentenceBuilder;
                 this.currentSentence = null;
                 this.connects = {};
+                this.contributionMap = null;
                
             },
 
@@ -62,17 +63,13 @@ define([
                 console.log("Starting game setup");
 
                 console.log("start creating player boards");
-                for (var player_id in gamedatas.players) {
-                    var player = gamedatas.players[player_id];
-
-                }
-                player_id = this.player_id;
                 this.sentenceBuilder = this.gamedatas.sentence_builder;
 
                 console.log("Sentence Builder: "+ this.gamedatas.sentence_builder);
                 console.log("Role: "+ this.gamedatas.role);
                 console.log('Contribution map:');
                 console.log(gamedatas.contribution);
+                this.contributionMap = gamedatas.contribution;
                  // Setting up player boards
                 for( var id in gamedatas.contribution )
                 {
@@ -257,6 +254,24 @@ define([
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
                         dojo.query('.invisible').removeClass('invisible');
+                        var map = this.contributionMap;
+
+                        // display all contributions
+                        for( var id in map )
+                        {
+                            console.log(id);
+                            
+                        
+
+                            if (id != this.sentenceBuilder) {     
+                               role_icon_id = 'role_icon_p'+ id;
+                               console.log(role_icon_id);
+                                require(["dojo/html"], function(html){
+                                    html.set(role_icon_id, map[id]['guess']);
+                                });
+                            
+                            }
+                        }
                         
                         
 
@@ -810,7 +825,6 @@ define([
                 dojo.subscribe('trickWin', this, "notif_trickWin");
                 this.notifqueue.setSynchronous('trickWin', 1000);
                 dojo.subscribe('giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer");
-                dojo.subscribe('newScores', this, "notif_newScores");
                 dojo.subscribe('giveCards', this, "notif_giveCards");
                 dojo.subscribe('cardGiven', this, "notif_cardGiven");
                 dojo.subscribe('takeCards', this, "notif_takeCards");
@@ -836,6 +850,7 @@ define([
 
                 console.log('notifications revealCurrentSentence');
                 this.currentSentence = notif.args.cards;
+                this.contributionMap = notif.args.contributions;
                 // rotate cards to their chosen positions
                         //console.log(this.currentSentence);
                 for (var i in this.currentSentence) {
@@ -872,6 +887,9 @@ define([
                 // clear all contribution marks
                 for (var player_id in this.gamedatas.players) {
                     role_icon_id = 'role_icon_p'+ player_id;
+                    require(["dojo/html"], function(html){
+                        html.set(role_icon_id, '');
+                     });
                     dojo.removeClass(role_icon_id, 'role_icon_A role_icon_H role_icon_V role_icon_1 role_icon_2 role_icon_3 role_icon_4 role_icon_5 role_icon_6 role_icon_7 role_icon_8');
                     if (player_id == this.sentenceBuilder) {
                         dojo.addClass(role_icon_id, 'role_icon_A');
@@ -962,14 +980,7 @@ define([
                     anim.play();
                 }
             },
-            notif_newScores: function (notif) {
-                console.log('notifications newScores');
-                // Update players' scores
-
-                for (var player_id in notif.args.newScores) {
-                    this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
-                }
-            },
+           
             notif_giveCards: function (notif) {
                 console.log('notifications giveCards');
                 // Remove cards from the hand (they have been given)
@@ -1021,7 +1032,10 @@ define([
                         card_icon_id = 'role_icon_p'+ notif.args.player_id;
                         dojo.removeClass(card_icon_id, 'role_icon_0');
                         dojo.addClass(card_icon_id, 'role_icon_'+playedCardType);
-
+                        
+                        require(["dojo/html"], function(html){
+                            html.set(card_icon_id, '');
+                        });
 
 
                         break;
@@ -1034,17 +1048,13 @@ define([
                 console.log('notifications updateScore');
                 stateName = this.currentState;
                 console.log(notif.args);
-                /* data from server
-                  'i18n' => array( 'color_displayed', 'value_displayed' ),
-                        'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
-                        'active_player_name' => $active_player_name,
-                        'color' => $player['contribution'],
-                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
-                        'score' => $score
-                */
 
                 this.scoreCtrl[ notif.args.player_id ].setValue( notif.args.score );
+                 // also display guess
+                role_icon_id = 'role_icon_p'+ notif.args.player_id;
+                require(["dojo/html"], function(html){
+                    html.set(role_icon_id, notif.args.choice);
+                });
             }
 
 

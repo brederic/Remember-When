@@ -612,7 +612,7 @@ class RememberWhen extends Table
         //save vote
              $sql = "
                 UPDATE  player
-                SET     contribution = $choice
+                SET     vote = $choice
                 WHERE   player_id =  $current_player_id
             ";
         self::DbQuery( $sql );
@@ -826,8 +826,8 @@ class RememberWhen extends Table
         // clear all votes, guess = 1 means their vote will be counted
         $sql = "
                 UPDATE  player
-                SET     contribution = 0,
-                        guess = 1
+                SET     vote = 0,
+                        vote_type = 1
             ";
         self::DbQuery( $sql );
 
@@ -843,19 +843,19 @@ class RememberWhen extends Table
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 0
+                            vote_type = 0
                     WHERE player_id = $topSentenceBuilder
                 ";
             self::DbQuery( $sql );
         }
         // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
-        if (($playersVoting-1) % 2 == 0  ) {
+        if (($playersVoting-1) % 2 != 0  ) {
             $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
             // mark not voting
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 0
+                            vote_type = 0
                     WHERE player_id = $currentSentenceBuilder
                 ";
             self::DbQuery( $sql );
@@ -864,7 +864,7 @@ class RememberWhen extends Table
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 2
+                            vote_type = 2
                     WHERE player_id = $currentSentenceBuilder
                 ";
             self::DbQuery( $sql );            
@@ -953,21 +953,21 @@ class RememberWhen extends Table
     function stCountVotes()
     {
 
-        // total votes for top sentence (contribution = 1)
+        // total votes for top sentence (vote = 1)
             $sql = "
                     SELECT count(*)  
                     FROM player    
                            
-                    WHERE guess = 1 and contribution = 1
+                    WHERE vote_type = 1 and vote = 1
                 ";
         $top_sentence_votes = self::getUniqueValueFromDB( $sql );
         
-        // total votes for current sentence (contribution = 2)
+        // total votes for current sentence (vote = 2)
             $sql = "
                     SELECT count(*)  
                     FROM player    
                            
-                    WHERE guess = 1 and contribution = 2
+                    WHERE vote_type = 1 and vote = 2
                 ";
         $current_sentence_votes = self::getUniqueValueFromDB( $sql );
 
@@ -978,9 +978,9 @@ class RememberWhen extends Table
            $winner = 2;
         } else { //tie
             $sql = "
-                        SELECT contribution  
+                        SELECT vote  
                         FROM player    
-                        WHERE guess = 2 
+                        WHERE vote_type = 2 
                     ";
             $winner = self::getUniqueValueFromDB( $sql );
             $tiebreaker = true;
@@ -1038,7 +1038,7 @@ class RememberWhen extends Table
         $table[] = $firstRow;
 
         // get vote data
-        $data = self::getCollectionFromDB( "SELECT player_id id, contribution vote, guess mode FROM player" );
+        $data = self::getCollectionFromDB( "SELECT player_id id, vote vote, vote_type mode FROM player" );
 
         
         // Previous Champion Votes

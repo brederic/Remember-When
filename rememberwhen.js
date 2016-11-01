@@ -935,11 +935,17 @@ define([
             notif_chooseRole: function (notif) {
                 console.log('notifications chooseRole');
                 
-                role_div = dojo.query('div.role_icon')[0];
+                role_div = dojo.query('div.role_icon_A')[0];
                 console.log(notif.args);
+                //console.log(role_div);
 
-                dojo.removeClass(role_div, 'role_icon_0');
-                dojo.addClass(role_div, 'role_icon_'+notif.args.choice);
+                dojo.removeClass(role_div, 'role_icon_A');
+                if (notif.args.choice == '1') {
+                    dojo.addClass(role_div, 'role_icon_H');
+                } else {
+                    dojo.addClass(role_div, 'role_icon_V');
+                }
+                
                 
             },
             notif_trickWin: function (notif) {

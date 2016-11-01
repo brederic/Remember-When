@@ -849,7 +849,7 @@ class RememberWhen extends Table
             self::DbQuery( $sql );
         }
         // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
-        if ($playersVoting-1 % 2 == 0  ) {
+        if (($playersVoting-1) % 2 == 0  ) {
             $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
             // mark not voting
             $sql = "

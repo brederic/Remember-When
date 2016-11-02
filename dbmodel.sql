@@ -36,6 +36,8 @@
 -- add info about each players contribution to the sentence
 ALTER TABLE `player` ADD `contribution` varchar(1) DEFAULT '0';
 ALTER TABLE `player` ADD `guess` SMALLINT unsigned DEFAULT '0';
+ALTER TABLE `player` ADD `vote` varchar(1) DEFAULT '0';
+ALTER TABLE `player` ADD `vote_type` SMALLINT unsigned DEFAULT '0';
 
 
 CREATE TABLE IF NOT EXISTS `card` (

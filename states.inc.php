@@ -138,13 +138,13 @@ $machinestates = array(
 
     30 => array(       
         "name" => "giveCards",
-        "description" => clienttranslate('Some players must choose a card to give to ${direction}'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a card to give to ${direction}'),
+        "description" => clienttranslate('Some players are choosing cards to give to the current memory.'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a card to give to <span style="color: #${player_color};">${direction}</span>'),
         "type" => "multipleactiveplayer",
         "action" => "stGiveCards",
         "args" => "argGiveCards",
         "possibleactions" => array( "giveCards" ),
-        "transitions" => array( "giveCards" => 31 )        
+        "transitions" => array( "giveCards" => 31 )       
     ), 
      
     31 => array(

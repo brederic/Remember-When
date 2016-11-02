@@ -21,6 +21,9 @@ define([
     "ebg/counter",
     "ebg/stock"
 ],
+
+ 
+
     function (dojo, declare) {
         return declare("bgagame.rememberwhen", ebg.core.gamegui, {
             constructor: function () {
@@ -38,8 +41,9 @@ define([
                 this.roles =['Active', 'Hero', 'Villain'];
                 this.sentenceBuilder;
                 this.currentSentence = null;
-                    
-
+                this.connects = {};
+                this.contributionMap = null;
+               
             },
 
             /*
@@ -59,17 +63,13 @@ define([
                 console.log("Starting game setup");
 
                 console.log("start creating player boards");
-                for (var player_id in gamedatas.players) {
-                    var player = gamedatas.players[player_id];
-
-                }
-                player_id = this.player_id;
                 this.sentenceBuilder = this.gamedatas.sentence_builder;
 
                 console.log("Sentence Builder: "+ this.gamedatas.sentence_builder);
                 console.log("Role: "+ this.gamedatas.role);
                 console.log('Contribution map:');
                 console.log(gamedatas.contribution);
+                this.contributionMap = gamedatas.contribution;
                  // Setting up player boards
                 for( var id in gamedatas.contribution )
                 {
@@ -121,7 +121,7 @@ define([
                 this.hookupCardsOnLoad();
                
                 
-                console.log("Create card types");
+                console.log("Create hand card types");
 
                 // Create cards types:
                 for (var color = 1; color <= 8; color++) {
@@ -158,15 +158,15 @@ define([
                         var color = card.type;
                         var value = card.type_arg;
                         var card_id = this.getCardUniqueId(color, value);
-                        //console.log('Hand Card: ');
-                        //console.log(card);
+                        console.log('Hand Card: ');
+                        console.log(card);
                         this.playerHand.addToStockWithId(color, card_id);
                         // add text to card
                         this.playCardInHand(card_id, card, 'hand_' + card.id);
                     }
                 }             
-                
-                console.log(this.playerHand);
+                console.log('Hand:')
+                console.log($('myhand'));
 
                 // Cards in top sentence
                 for (var i in this.gamedatas.top_sentence) {
@@ -197,19 +197,23 @@ define([
                     var id = 'game_' + this.getCardUniqueId(color, value);
 
                     // verb and object are fixed
-                    if (card.type == 4 || card.type == 7) {
+                    if (card.location_arg <= 4) {
                         this.playCardOnTable(card, 'current_sentence', card.location_arg, id,'' );
                     } else {
-                        this.playCardOnTable(card, 'current_sentence', '1', id,'' );
+                        this.playCardOnTable(card, 'current_sentence', 1, id,'' );
                     }
+                   
                     this.hideCardsOfType(card.type);
+                    console.log('Hand:')
+                    console.log($('myhand'));
                 }
                 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
                 this.ensureSpecificImageLoading(['../common/point.png']);
-
+                console.log('Hand:')
+                console.log($('myhand'));
                 console.log("Ending game setup");
             },
 
@@ -222,7 +226,7 @@ define([
             //
             onEnteringState: function (stateName, args) {
                 console.log('Entering state: ' + stateName);
-                this.currentState = stateName
+                this.currentState = stateName;
 
                 switch (stateName) {
                     case 'playerTurn':
@@ -236,12 +240,39 @@ define([
                     case 'chooseAction':
                         cards = dojo.query('div[id^="cardontable"]');
                         console.log(cards);
-                        //dojo.connect(this.stock.hand[this.my_id], 'onclick', this, 'action_clicForInitialMeld' );
-
+                       
                     case 'vote':
+                        // clear all connections
+                        var nodes = dojo.query('div[class*="rotatable"]');
+                        var self = this;
+                        nodes.forEach( function (node, idx) {
+                            dojo.forEach( self.connects[node.id], function( handle ) {
+                                dojo.disconnect( handle );
+                            });
+                        });
+                            
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
                         dojo.query('.invisible').removeClass('invisible');
+                        var map = this.contributionMap;
+
+                        // display all contributions
+                        for( var id in map )
+                        {
+                            console.log(id);
+                            
+                        
+
+                            if (id != this.sentenceBuilder) {     
+                               role_icon_id = 'role_icon_p'+ id;
+                               console.log(role_icon_id);
+                                require(["dojo/html"], function(html){
+                                    html.set(role_icon_id, map[id]['guess']);
+                                });
+                            
+                            }
+                        }
+                        
                         
 
                     case 'dummmy':
@@ -328,40 +359,64 @@ define([
                 script.
             
             */
+
+       
+
+        makeConnections: function (node) {
+            events =  ['click','ondblclick' ];
+            var self = this;
+            events.forEach( function (evt, idx) {
+                if (!(node.id in self.connects)) {
+                    self.connects[node.id] = [];
+                } else { // don't make duplicate connections
+                    return;
+                }
+                self.connects[ node.id ][idx] = dojo.connect( node, evt, function(evt) { 
+                        // 'this' is now the element clicked on (e.g. id="textDiv")
+                        var el = this; 
+                        
+                        console.log('onClick ' + this.id  ); 
+        
+                        
+                        if (dojo.hasClass(this.id, 'pos_1')) {
+                            dojo.replaceClass(this.id, 'pos_2', 'pos_1');
+                        } else if (dojo.hasClass(this.id, 'pos_2')) {
+                            dojo.replaceClass(this.id, 'pos_3', 'pos_2');
+                        } else if (dojo.hasClass(this.id, 'pos_3')) {
+                            dojo.replaceClass(this.id, 'pos_4', 'pos_3');
+                        } else if (dojo.hasClass(this.id, 'pos_4')) {
+                            dojo.replaceClass(this.id, 'pos_1', 'pos_4');
+                        } 
+                });
+            
+            });
+           
+        },
+
         hookupCardsOnLoad:  function () {
+            var self = this;
+
              dojo.addOnLoad( function() {
                     console.log("onLoad executing...")
                     
                   // attach on click to id="textDiv"
-                  dojo.query('div[class*="rotatable"]').onclick( function(evt) { 
-                    // 'this' is now the element clicked on (e.g. id="textDiv")
-                    var el = this; 
-                	
-                    console.log('onClick ' + this.id  ); 
-    
-                	
-                    if (dojo.hasClass(this.id, 'pos_1')) {
-                        dojo.replaceClass(this.id, 'pos_2', 'pos_1');
-                    } else if (dojo.hasClass(this.id, 'pos_2')) {
-                        dojo.replaceClass(this.id, 'pos_3', 'pos_2');
-                    } else if (dojo.hasClass(this.id, 'pos_3')) {
-                        dojo.replaceClass(this.id, 'pos_4', 'pos_3');
-                    } else if (dojo.hasClass(this.id, 'pos_4')) {
-                        dojo.replaceClass(this.id, 'pos_1', 'pos_4');
-                    } 
-                  });
-                });
+                  var nodes = dojo.query('div[class*="rotatable"]');
+                  nodes.forEach( function (node, idx) {
+                     
+                      self.makeConnections(node);
+                     });   
+             });
         },
             		
-		hideCardsOfType: function(playedCardType)
+		hideCardsOfType: function (playedCardType)
 		{
             console.log('Making cards invisible of type:' + playedCardType);
             
 			for (var i in this.playerHand.getAllItems()) {
 				c = this.playerHand.getAllItems()[i]
-				console.log(c);
+				//console.log(c);
                 card_block = dojo.query('div[id=myhand_item_'+c['id']+'] > div')[0];
-                console.log(card_block);
+                //console.log(card_block);
 				type = dojo.getAttr(card_block, 'type')//this.getCardType(c['id']);
 				
                 
@@ -372,8 +427,9 @@ define([
 						this.playerHand.unselectAll();
 					}
 					var id = 'myhand_item_'+matchingCard['id'];
-					//console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
+					console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
 					console.log( 'id: ' + id );
+                    console.log(card_block);
 					require(["dojo"], function(dojo){
 						dojo.addClass(id, "invisible");
 					});
@@ -409,7 +465,7 @@ define([
 
             // Get card unique identifier based on its color and value
             getCardUniqueId: function (color, value) {
-                return (color - 1) * 13 + (value - 1);
+                return (color) * 1000 + (value );
 
             },
 
@@ -427,6 +483,9 @@ define([
                 var value = card.type_arg;
                 var card_id = this.getCardUniqueId(color, value);
                 this.playerHand.addToStockWithId(color, card_id);
+                console.log('playCardInHand(' + card_name + ', ' + color + ', ' + card_id + ')');
+                console.log(card);
+                
 
                 // get card div
                 div_id = $('myhand_item_' + card_id);
@@ -442,6 +501,10 @@ define([
                     text_3: card.text_3,
                     text_4: card.text_4
                 });
+                console.log(div_id);
+                if (div_id == null) {
+                    console.error('No div to put card in!!')
+                }
                 dojo.place(card_block, div_id, "only");
                 dojo.addClass(card_name, 'pos_1');
                 
@@ -470,8 +533,8 @@ define([
                 
                 card_name = loc + '_' + card.id; 
                 
-                console.log('playCardOnTable(' + card_name + ', ' + color + ', ' + card_id + ', ' + loc + ')');
-                console.log(card);
+                //console.log('playCardOnTable(' + card_name + ', ' + color + ', ' + card_id + ', ' + loc + ')');
+                //console.log(card);
                 
                 card_block = this.format_block('jstpl_cardontable', {
                     x: this.cardwidth * (color - 1),
@@ -494,7 +557,7 @@ define([
                 dojo.addClass(card_name, 'pos_' + rotation);
                 
                 // In any case: move it to its final destination
-                console.log('Sliding to ' + dest);
+                //console.log('Sliding to ' + dest);
                 if (klass != '') {
                     dojo.addClass(card_name, klass);
                 }
@@ -528,7 +591,7 @@ define([
             
             */
                     
-        onChooseRandomObject: function( evt)
+        onChooseRandomObject: function ( evt)
         {
             console.log('onChooseRandomObject');
             dojo.stopEvent( evt );
@@ -542,7 +605,7 @@ define([
             }        
         }, 
                      
-        onChooseRole: function( evt)
+        onChooseRole: function ( evt)
         {
             console.log('onChooseRole');
             dojo.stopEvent( evt );
@@ -659,79 +722,35 @@ define([
        
 
             onPlayerHandSelectionChanged: function (evt) {
-                //require(["dojo/query"], function(query){
-                //	console.log(query(query));
-                //});
 
-                //console.log("onPlayerHandSelectionChanged()");
-                //console.log(control_name);
-                //dojo.stopEvent(evt);
-
-                
+                // get the cards that the stock thinks are highlighted                
                 var items = this.playerHand.getSelectedItems();
 
-                if (items.length > 0) {
-                   /* if (this.checkAction('playCard', true)) {
-                        // Can play a card
-
-                        var card_id = items[0].id;
-
-                        this.ajaxcall("/bphearts/bphearts/playCard.html", {
-                            id: card_id,
-                            lock: true
-                        }, this, function (result) { }, function (is_error) { });
-
-                        this.playerHand.unselectAll();
-                    }
-                    else 
-                    */
-                    /*if (this.checkAction('giveCards')) {
-                        // Can give cards => let the player select some cards
-
-                        var id = items[0]['id'];
-                        var color = items[0]['type'];
-                        var value = this.getCardValue(id);
-                        console.log('Destroying previous buttons');
-                        dojo.query('a[id^="giveCard"]').forEach(dojo.destroy);
-                        this.addActionButton('giveCard_button_' + id + '_1', _(color + '_' + value + '_1'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_2', _(color + '_' + value + '_2'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_3', _(color + '_' + value + '_3'), 'onGiveCard');
-                        this.addActionButton('giveCard_button_' + id + '_4', _(color + '_' + value + '_4'), 'onGiveCard');
-
-                    }
-                    else  */
+                if (items.length > 0) { // a card was clicked 
                    
                     console.log('chooseAction with selection');
                     console.log(items[0]);
                     var id = items[0]['id'];
+
+                    // get the card block
                     card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
                     console.log(card_node);
-                    var color = items[0]['type'];
-                    var value = this.getCardValue(id);
-                    if (card_node.id == this.selectedCard) {
-                        //card_block = $('hand_'+this.selectedCard);
+
+                    if (card_node.id == this.selectedCard) { // the click was on the currently selected card
                         // rotate selected card
                         this.onCardClick(card_node);
-                    } else {
+                    } else { // we have a new selected card, it should be highlighted, not rotated
                         this.selectedCard = card_node.id;
-                        //dojo.disconnect(this.handConnection);
-                        //this.playerHand.unselectAll();
-                        //this.playerHand.selectItem(this.selectedCard);
-                        //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
                     }
                     
 
 
-                } else {
-                    //if (this.checkAction('chooseAction')) {
-                    //console.log('chooseAction without selection');
-                    //dojo.disconnect(this.handConnection);
-                    //this.playerHand.selectItem(this.selectedCard);
-                    //this.handConnection = dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+                } else { // the same card was click (the stock interpret this as a deselect)
+                    // get the currently selected card
                     card_block = $(this.selectedCard);
                     // rotate selected card
                     this.onCardClick(card_block);
-                   // }
+                   
 
                 }
                 // update selection styles
@@ -803,11 +822,9 @@ define([
                 dojo.subscribe('dealing', this, "notif_deal");
                 dojo.subscribe('newCard', this, "notif_newCard");
                 dojo.subscribe('considerActions', this, "notif_considerActions");
-                dojo.subscribe('playCard', this, "notif_playCard");
                 dojo.subscribe('trickWin', this, "notif_trickWin");
                 this.notifqueue.setSynchronous('trickWin', 1000);
                 dojo.subscribe('giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer");
-                dojo.subscribe('newScores', this, "notif_newScores");
                 dojo.subscribe('giveCards', this, "notif_giveCards");
                 dojo.subscribe('cardGiven', this, "notif_cardGiven");
                 dojo.subscribe('takeCards', this, "notif_takeCards");
@@ -833,6 +850,7 @@ define([
 
                 console.log('notifications revealCurrentSentence');
                 this.currentSentence = notif.args.cards;
+                this.contributionMap = notif.args.contributions;
                 // rotate cards to their chosen positions
                         //console.log(this.currentSentence);
                 for (var i in this.currentSentence) {
@@ -869,6 +887,9 @@ define([
                 // clear all contribution marks
                 for (var player_id in this.gamedatas.players) {
                     role_icon_id = 'role_icon_p'+ player_id;
+                    require(["dojo/html"], function(html){
+                        html.set(role_icon_id, '');
+                     });
                     dojo.removeClass(role_icon_id, 'role_icon_A role_icon_H role_icon_V role_icon_1 role_icon_2 role_icon_3 role_icon_4 role_icon_5 role_icon_6 role_icon_7 role_icon_8');
                     if (player_id == this.sentenceBuilder) {
                         dojo.addClass(role_icon_id, 'role_icon_A');
@@ -906,7 +927,7 @@ define([
              notif_cardGiven: function (notif) {
             
 
-                console.log('notifications card given');
+                console.log('notifications cardGiven');
             
                 var card = notif.args.card;
                 var color = card.type;
@@ -915,33 +936,43 @@ define([
                 
             },
             notif_considerActions: function (notif) {
+                console.log('notifications considerActions');
+                
+                 // Player hand
+                this.playerHand.removeAll();
+                
+
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     var color = card.type;
                     var value = card.type_arg;
                     var rotation = 1; //?????
-                    this.playCardInHand(card.id, card, 'action_'+card.id);
+                    this.playCardInHand(card.id, card, 'hand_'+card.id);
                 }         
             },
             notif_chooseRole: function (notif) {
-                role_div = dojo.query('div.role_icon')[0];
+                console.log('notifications chooseRole');
+                
+                role_div = dojo.query('div.role_icon_A')[0];
                 console.log(notif.args);
+                //console.log(role_div);
 
-                dojo.removeClass(role_div, 'role_icon_0');
-                dojo.addClass(role_div, 'role_icon_'+notif.args.choice);
+                dojo.removeClass(role_div, 'role_icon_A');
+                if (notif.args.choice == '1') {
+                    dojo.addClass(role_div, 'role_icon_H');
+                } else {
+                    dojo.addClass(role_div, 'role_icon_V');
+                }
+                
                 
             },
-            notif_playCard: function (notif) {
-                // Play a card on the table
-                var rotation = 1; //?????
-                this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
-                this.hookupCardsOnLoad();
-            },
             notif_trickWin: function (notif) {
+                console.log('notifications trickWin');
                 // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
             },
             notif_giveAllCardsToPlayer: function (notif) {
-                // Move all cards on table to given table, then destroy them
+                console.log('notifications giveAllCardsToPlayer');
+                 // Move all cards on table to given table, then destroy them
                 var winner_id = notif.args.player_id;
                 for (var player_id in this.gamedatas.players) {
                     var anim = this.slideToObject('cardontable_' + player_id, 'overall_player_board_' + winner_id);
@@ -949,14 +980,9 @@ define([
                     anim.play();
                 }
             },
-            notif_newScores: function (notif) {
-                // Update players' scores
-
-                for (var player_id in notif.args.newScores) {
-                    this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
-                }
-            },
+           
             notif_giveCards: function (notif) {
+                console.log('notifications giveCards');
                 // Remove cards from the hand (they have been given)
                 for (var i in notif.args.cards) {
                     var card_id = notif.args.cards[i];
@@ -964,6 +990,7 @@ define([
                 }
             },
             notif_takeCards: function (notif) {
+                console.log('notifications takeCards');
                 // Cards taken from some opponent
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
@@ -1005,7 +1032,10 @@ define([
                         card_icon_id = 'role_icon_p'+ notif.args.player_id;
                         dojo.removeClass(card_icon_id, 'role_icon_0');
                         dojo.addClass(card_icon_id, 'role_icon_'+playedCardType);
-
+                        
+                        require(["dojo/html"], function(html){
+                            html.set(card_icon_id, '');
+                        });
 
 
                         break;
@@ -1018,17 +1048,13 @@ define([
                 console.log('notifications updateScore');
                 stateName = this.currentState;
                 console.log(notif.args);
-                /* data from server
-                  'i18n' => array( 'color_displayed', 'value_displayed' ),
-                        'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
-                        'active_player_name' => $active_player_name,
-                        'color' => $player['contribution'],
-                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
-                        'score' => $score
-                */
 
                 this.scoreCtrl[ notif.args.player_id ].setValue( notif.args.score );
+                 // also display guess
+                role_icon_id = 'role_icon_p'+ notif.args.player_id;
+                require(["dojo/html"], function(html){
+                    html.set(role_icon_id, notif.args.choice);
+                });
             }
 
 

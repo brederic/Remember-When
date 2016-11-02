@@ -73,7 +73,7 @@ class RememberWhen extends Table
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $default_colors = array( "ff0000", "008000", "0000ff", "ffa500", "773300" );
+        $default_colors = array( "ff0000", "00ff00", "0000ff", "888800", "008888", "880088" );
 
  
         // Create players
@@ -261,7 +261,7 @@ class RememberWhen extends Table
 	}
 
     protected function getContributionMap(  ) {
-        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution FROM player" );
+        $result = self::getCollectionFromDB( "SELECT player_id id, contribution contribution, guess guess FROM player" );
         //random data for testing
         /*foreach(array_keys($result) as $id) {
             $randomize = array('id'=> $id, 'contribution'=> rand(1,8));
@@ -343,145 +343,25 @@ class RememberWhen extends Table
     
     function argGiveCards()
     {
-		$me = self::getCurrentPlayerId();
-		$players = self::loadPlayersBasicInfos();	
-		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
-		$player_name = $players[ $player_id ]['player_name'];
+	
+        $players = self::loadPlayersBasicInfos();   
+        $player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $player_name = $players[ $player_id ]['player_name'];
 
-		if ($me == $player_id) {
-			$direction = clienttranslate('you');
-		} else {
-			$direction = $players[ $player_id ]['player_name'];
-		}
-			
-
+        $player_color = $players[ $player_id ]['player_color'];
+        $direction = $player_name;
+        
+        self::trace('argGiveCards $direction='.$direction);
         return array(
             "i18n" => array( 'direction'),
+         "player_color" => $player_color,
             "direction" => $direction
         );
-    }
-
-
     
-    // Play a card from player hand
-    function playCard( $card_id )
-    {
-        self::checkAction( "playCard" );
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Get all cards in player hand
-        // (note: we must get ALL cards in player's hand in order to check if the card played is correct)
-        
-        $playerhands = $this->cards->getCardsInLocation( 'hand', $player_id );
-
-        $bFirstCard = ( count( $playerhands ) == 13 );
-                
-        $currentTrickColor = self::getGameStateValue( 'trickColor' ) ;
-                
-        // Check that the card is in this hand
-        $bIsInHand = false;
-        $currentCard = null;
-        $bAtLeastOneCardOfCurrentTrickColor = false;
-        $bAtLeastOneCardWithoutPoints = false;
-        $bAtLeastOneCardNotHeart = false;
-        foreach( $playerhands as $card )
-        {
-            if( $card['id'] == $card_id )
-            {
-                $bIsInHand = true;
-                $currentCard = $card;
-            }
-            
-            if( $card['type'] == $currentTrickColor )
-                $bAtLeastOneCardOfCurrentTrickColor = true;
-
-            if( $card['type'] != 2 )
-                $bAtLeastOneCardNotHeart = true;
-                
-            if( $card['type'] == 2 || ( $card['type'] == 1 && $card['type_arg'] == 12  ) )
-            {
-                // This is a card with point
-            }
-            else
-                $bAtLeastOneCardWithoutPoints = true;
-        }
-        if( ! $bIsInHand )
-            throw new feException( "This card is not in your hand" );
-            
-        if( $this->cards->countCardInLocation( 'hand' ) == 52 )
-        {
-            // If this is the first card of the hand, it must be 2-club
-            // Note: first card of the hand <=> cards on hands == 52
-
-            if( $currentCard['type'] != 3 || $currentCard['type_arg'] != 2 ) // Club 2
-                throw new feException( self::_("You must play the Club-2"), true );                
-        }
-        else if( $currentTrickColor == 0 )
-        {
-            // Otherwise, if this is the first card of the trick, any cards can be played
-            // except a Heart if:
-            // _ no heart has been played, and
-            // _ player has at least one non-heart
-            if( self::getGameStateValue( 'alreadyPlayedHearts')==0
-             && $currentCard['type'] == 2   // this is a heart
-             && $bAtLeastOneCardNotHeart )
-            {
-                throw new feException( self::_("You can't play a heart to start the trick if no heart has been played before"), true );
-            }
-        }
-        else
-        {
-            // The trick started before => we must check the color
-            if( $bAtLeastOneCardOfCurrentTrickColor )
-            {
-                if( $currentCard['type'] != $currentTrickColor )
-                    throw new feException( sprintf( self::_("You must play a %s"), $this->colors[ $currentTrickColor ]['nametr'] ), true );
-            }
-            else
-            {
-                // The player has no card of current trick color => he can plays what he want to
-                
-                if( $bFirstCard && $bAtLeastOneCardWithoutPoints )
-                {
-                    // ...except if it is the first card played by this player during this hand
-                    // (it is forbidden to play card with points during the first trick)
-                    // (note: if player has only cards with points, this does not apply)
-                    
-                    if( $currentCard['type'] == 2 || ( $currentCard['type'] == 1 && $currentCard['type_arg'] == 12  ) )
-                    {
-                        // This is a card with point                  
-                        throw new feException( self::_("You can't play cards with points during the first trick"), true );
-                    }
-                }
-            }
-        }
-        
-        // Checks are done! now we can play our card
-        $this->cards->moveCard( $card_id, 'cardsontable', $player_id );
-        
-        // Set the trick color if it hasn't been set yet
-        if( $currentTrickColor == 0 )
-            self::setGameStateValue( 'trickColor', $currentCard['type'] );
-        
-        if( $currentCard['type'] == 2 )
-            self::setGameStateValue( 'alreadyPlayedHearts', 1 );
-        
-        // And notify
-        self::notifyAllPlayers( 'playCard', clienttranslate('${player_name} plays ${value_displayed} ${color_displayed}'), array(
-            'i18n' => array( 'color_displayed', 'value_displayed' ),
-            'card_id' => $card_id,
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'value' => $currentCard['type_arg'],
-            'value_displayed' => $this->values_label[ $currentCard['type_arg'] ],
-            'color' => $currentCard['type'],
-            'color_displayed' => $this->colors[ $currentCard['type'] ]['name']
-        ) );
-        
-        // Next player
-        $this->gamestate->nextState( 'playCard' );
     }
+
+
+
     
     // Give some cards (before the hands begin)
     function chooseRandomObject( $choice )
@@ -617,6 +497,13 @@ class RememberWhen extends Table
 		$card_id = $params[1];
 		$card_pos = $params[2];
 
+        // make sure noone else has submitted this card $type
+        $count = self::getUniqueValueFromDB("select count(p.contribution) from card c JOIN player p
+  ON p.contribution = c.card_type  WHERE c.card_id='$card_id'");
+        if ($count > 0) {
+            throw new BgaUserException( self::_("Sorry! Someone submitted this card type before you.") );
+        }
+    
 		
 		// get object card
 		$card = $this->cards->getCard( $card_id );
@@ -704,7 +591,7 @@ class RememberWhen extends Table
         //save vote
              $sql = "
                 UPDATE  player
-                SET     contribution = $choice
+                SET     vote = $choice
                 WHERE   player_id =  $current_player_id
             ";
         self::DbQuery( $sql );
@@ -751,22 +638,20 @@ class RememberWhen extends Table
             
         }
         //throw new BgaSystemException ( "Choices: ".$description);
-        
+        $players = self::loadPlayersBasicInfos();	
         // score points
         foreach ($contributions as $player) {
             if ($player['contribution'] == 0)  continue; // this player did not make a contribution this round
             $actual_choice = $choices[strval($player['contribution'])];
             $prediction = $player['guess'];
+            $current_player_name = $players[ $player['id'] ]['player_name'];
+            $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+            $active_player_name = $players[ $active_player_id ]['player_name'];
             if ($actual_choice == $prediction) {
-                // add to player score
+                 // add to player score
                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
-                 
-                // notify everyone
-                 $players = self::loadPlayersBasicInfos();	
-                 $current_player_name = $players[ $player['id'] ]['player_name'];
-                $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
-                $active_player_name = $players[ $active_player_id ]['player_name'];
                 $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                // notify everyone
                  self::notifyAllPlayers( 
                     'score', 
                     clienttranslate('${current_player_name} correctly guessed ${color_displayed} ${active_player_name} did what they did and scores a point.'), 
@@ -777,11 +662,41 @@ class RememberWhen extends Table
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
-                        'score' => $score
+                        'score' => $score,
+                        'choice' => $prediction
+                    ) 
+                );
+            } else {
+                $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                // notify everyone
+                 self::notifyAllPlayers( 
+                    'score', 
+                    clienttranslate('${current_player_name} made an incorrect guess and does not score this round.'), 
+                    array(
+                        'i18n' => array( 'color_displayed', 'value_displayed' ),
+                        'player_id' => $player['id'],
+                        'current_player_name' => $current_player_name,
+                        'active_player_name' => $active_player_name,
+                        'color' => $player['contribution'],
+                        'color_displayed' => $this->colors[$player['contribution'] ]['name'],
+                        'score' => $score,
+                        'choice' => $prediction
                     ) 
                 );
             }
         }
+        //notify card rotations
+        // And notify
+            self::notifyAllPlayers( 
+                'revealCurrentSentence', 
+                clienttranslate("It is time to vote! "), 
+                array(
+                    
+                    'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
+                    'contributions' => $this->getContributionMap()
+                    
+                ) 
+            );  
         
         
         // Continue
@@ -820,6 +735,8 @@ class RememberWhen extends Table
         $players = self::loadPlayersBasicInfos();	
 
         self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
+        $this->setGameStateInitialValue( 'role', 0 );
+        
 
         self::notifyAllPlayers('newRound', 'Beginning round ${round} of ${roundCount}. it is ${player_name}\'s turn to reminisce.', array(
                 'round' => self::getGameStateValue( 'currentRound'),
@@ -828,6 +745,16 @@ class RememberWhen extends Table
                 'active_player' => self::getActivePlayerId()
 
             ) );
+
+        // clear all previous contributions
+            $sql = "
+            UPDATE  player
+            SET     contribution = 0,
+                    guess = 0,
+                    vote = 0,
+                    vote_type = 0
+        ";
+        self::DbQuery( $sql );
 
         // Create deck list based on number of $players
         $player_count = self::getPlayersNumber();
@@ -900,6 +827,7 @@ class RememberWhen extends Table
 		// (and keep the current sentence builder non-active)
 		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
         $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+
     }
     
 
@@ -911,8 +839,8 @@ class RememberWhen extends Table
         // clear all votes, guess = 1 means their vote will be counted
         $sql = "
                 UPDATE  player
-                SET     contribution = 0,
-                        guess = 1
+                SET     vote = 0,
+                        vote_type = 1
             ";
         self::DbQuery( $sql );
 
@@ -928,19 +856,19 @@ class RememberWhen extends Table
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 0
+                            vote_type = 0
                     WHERE player_id = $topSentenceBuilder
                 ";
             self::DbQuery( $sql );
         }
         // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
-        if ($playersVoting-1 % 2 != 0  ) {
+        if (($playersVoting-1) % 2 != 0  ) {
             $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
             // mark not voting
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 0
+                            vote_type = 0
                     WHERE player_id = $currentSentenceBuilder
                 ";
             self::DbQuery( $sql );
@@ -949,22 +877,12 @@ class RememberWhen extends Table
             $sql = "
                     UPDATE  player
                     SET     
-                            guess = 2
+                            vote_type = 2
                     WHERE player_id = $currentSentenceBuilder
                 ";
             self::DbQuery( $sql );            
         }
-        //notify card rotations
-        // And notify
-            self::notifyAllPlayers( 
-                'revealCurrentSentence', 
-                clienttranslate("It is time to vote! "), 
-                array(
-                    
-                    'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
-                    
-                ) 
-            );  
+        
     }
     
     
@@ -1038,21 +956,21 @@ class RememberWhen extends Table
     function stCountVotes()
     {
 
-        // total votes for top sentence (contribution = 1)
+        // total votes for top sentence (vote = 1)
             $sql = "
                     SELECT count(*)  
                     FROM player    
                            
-                    WHERE guess = 1 and contribution = 1
+                    WHERE vote_type = 1 and vote = 1
                 ";
         $top_sentence_votes = self::getUniqueValueFromDB( $sql );
         
-        // total votes for current sentence (contribution = 2)
+        // total votes for current sentence (vote = 2)
             $sql = "
                     SELECT count(*)  
                     FROM player    
                            
-                    WHERE guess = 1 and contribution = 2
+                    WHERE vote_type = 1 and vote = 2
                 ";
         $current_sentence_votes = self::getUniqueValueFromDB( $sql );
 
@@ -1063,9 +981,9 @@ class RememberWhen extends Table
            $winner = 2;
         } else { //tie
             $sql = "
-                        SELECT contribution  
+                        SELECT vote  
                         FROM player    
-                        WHERE guess = 2 
+                        WHERE vote_type = 2 
                     ";
             $winner = self::getUniqueValueFromDB( $sql );
             $tiebreaker = true;
@@ -1085,16 +1003,27 @@ class RememberWhen extends Table
         if ($winner == 1) { // Top memory won!!
             self::trace('Top memory won!');
             $winnerName = $topMemoryName;
+            // clear out current sentence
+            $old = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
+            $this->cards->moveCards($old, 'discard');
+            
         } else {  // current sentence won!!
             self::trace('Current memory won!');
            $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
             $this->cards->moveCards($old, 'discard');
-            $new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
-            foreach ($new as $card) {
-                $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
-            }
+            $sql = "
+                UPDATE  card
+                SET     card_location = 'top_sentence'
+                WHERE   card_location = 'current_sentence'
+            ";
+            self::DbQuery( $sql );
+            //$new = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
+            //foreach ($new as $card) {
+            //    self::dump("card:", implode(' ',$card));
+            //    $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
+            //}
             self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
             
         }
@@ -1112,7 +1041,7 @@ class RememberWhen extends Table
         $table[] = $firstRow;
 
         // get vote data
-        $data = self::getCollectionFromDB( "SELECT player_id id, contribution vote, guess mode FROM player" );
+        $data = self::getCollectionFromDB( "SELECT player_id id, vote vote, vote_type mode FROM player" );
 
         
         // Previous Champion Votes
@@ -1174,6 +1103,12 @@ class RememberWhen extends Table
                     "topSentence" => $this->populateCards($this->cards->getCardsInLocation('top_sentence'))
                 ) ); 
         }
+
+        // before changing the active player, restore the current active player's hand
+        self::notifyPlayer(  $currentSentenceBuilder, 'newCard', '', array( 
+            'cards' => $this->populateCards($this->cards->getCardsInLocation('hand', $currentSentenceBuilder)),
+            ) 
+        );
         // change Active Player
         self::activeNextPlayer();
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());

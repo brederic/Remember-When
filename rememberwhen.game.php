@@ -861,9 +861,11 @@ class RememberWhen extends Table
                 ";
             self::DbQuery( $sql );
         }
-        // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
+        // the active player will not be voting now
+        $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
+        // But if there are an even number of players voting, the active player may have to break a tie
         if (($playersVoting-1) % 2 != 0  ) {
-            $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
+            
             // mark not voting
             $sql = "
                     UPDATE  player
@@ -882,6 +884,12 @@ class RememberWhen extends Table
                 ";
             self::DbQuery( $sql );            
         }
+        
+    }
+    
+    function stTieBreak()
+    {    
+       // all preparation for this vote has already been done
         
     }
     
@@ -974,6 +982,17 @@ class RememberWhen extends Table
                 ";
         $current_sentence_votes = self::getUniqueValueFromDB( $sql );
 
+        $players = self::loadPlayersBasicInfos();	
+        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
+        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
+		$currentMemoryName = $players[ $currentSentenceBuilder ]['player_name'];
+        if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
+		    $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
+        } else {
+            $topMemoryName = "Random Memory";
+        }
+        
+        //Handle possible tiebreak
         $tiebreaker = false;
         if ($top_sentence_votes > $current_sentence_votes) {
            $winner = 1;
@@ -986,18 +1005,18 @@ class RememberWhen extends Table
                         WHERE vote_type = 2 
                     ";
             $winner = self::getUniqueValueFromDB( $sql );
+            if ($winner == 0) {  // the active player will have to vote
+                $this->gamestate->nextState("tieBreak");
+                // notify
+                self::notifyAllPlayers( "tieBreak", clienttranslate( 'There is a tie. ${player_name} will have to break the tie.' ), array(
+                    'player_name' => $currentMemoryName,
+                    
+                ) );
+                return;
+            }
             $tiebreaker = true;
         }
 
-        $players = self::loadPlayersBasicInfos();	
-        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
-        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
-		$currentMemoryName = $players[ $currentSentenceBuilder ]['player_name'];
-        if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
-		    $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
-        } else {
-            $topMemoryName = "Random Memory";
-        }
 		
 
         if ($winner == 1) { // Top memory won!!

@@ -341,11 +341,12 @@ define([
                               this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
                             break;
                          case 'vote':
+                         case 'tieBreak':
                               this.addActionButton('1', 'Top Sentence', 'onVote'); 
                               this.addActionButton('2', 'Current Sentence', 'onVote'); 
 
                             break;
-
+                        
                     }
                 }
             },

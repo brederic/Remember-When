@@ -615,6 +615,34 @@ class RememberWhen extends Table
         $this->gamestate->setPlayerNonMultiactive( $current_player_id, "vote" );
         
     }
+
+    function buildSentence($cards) {
+        $sentence = "Remember When... ";
+        foreach($cards as $card) {
+            
+            $sentence .= $card['text_'.$card['location_arg']];
+            // add stuff after
+            switch ($card['type']) {
+            case 1:
+                $sentence .= ', ';
+                break;
+            case 3:
+            case 6:
+                $sentence .= ' ';
+                break;
+            case 2:
+                $sentence .= ', I ';
+                break;
+            case 4:
+                $sentence .= ' the ';
+                break;
+            case 7:
+                $sentence .= ' because ';
+                break;
+            }
+        }
+        return $sentence;
+    }
     
 	
     // Active player has finished arranging the sentence
@@ -647,6 +675,8 @@ class RememberWhen extends Table
             $current_player_name = $players[ $player['id'] ]['player_name'];
             $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
             $active_player_name = $players[ $active_player_id ]['player_name'];
+            $top_player_id = self::getGameStateValue( 'topSentenceBuilder' );
+            $top_player_name = $players[ $top_player_id ]['player_name'];
             if ($actual_choice == $prediction) {
                  // add to player score
                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
@@ -689,12 +719,40 @@ class RememberWhen extends Table
         // And notify
             self::notifyAllPlayers( 
                 'revealCurrentSentence', 
-                clienttranslate("It is time to vote! "), 
+                clienttranslate("It is time to vote! Which is best? "), 
                 array(
                     
                     'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
                     'contributions' => $this->getContributionMap()
                     
+                ) 
+            );   
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate('${player_name}\'s champion memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' => $top_player_name
+   
+                ) 
+            );  
+             
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate(' OR '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' => $top_player_name
+   
+                ) 
+            );  
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate('${player_name}\'s challenger memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('current_sentence'))),
+                     'player_name' => $active_player_name
+   
                 ) 
             );  
         

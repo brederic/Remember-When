@@ -823,8 +823,6 @@ define([
                 dojo.subscribe('dealing', this, "notif_deal");
                 dojo.subscribe('newCard', this, "notif_newCard");
                 dojo.subscribe('considerActions', this, "notif_considerActions");
-                dojo.subscribe('trickWin', this, "notif_trickWin");
-                this.notifqueue.setSynchronous('trickWin', 1000);
                 dojo.subscribe('giveAllCardsToPlayer', this, "notif_giveAllCardsToPlayer");
                 dojo.subscribe('giveCards', this, "notif_giveCards");
                 dojo.subscribe('cardGiven', this, "notif_cardGiven");
@@ -832,9 +830,11 @@ define([
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
+                this.notifqueue.setSynchronous( 'voteSentence', 2000 );   // Wait 500 milliseconds after executing the playDisc handler
 
                 dojo.subscribe('revealCurrentSentence', this, "notif_revealCurrentSentence");
-
+                this.notifqueue.setSynchronous( 'revealCurrentSentence', 2000 );   // Wait 500 milliseconds after executing the playDisc handler
+    
                 dojo.subscribe('newTop', this, "notif_newTopSentence");
 
 

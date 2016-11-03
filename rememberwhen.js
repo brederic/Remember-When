@@ -830,7 +830,9 @@ define([
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
-                this.notifqueue.setSynchronous( 'voteSentence', 2000 );   // Wait 500 milliseconds after executing the playDisc handler
+                this.notifqueue.setSynchronous( 'score', 1000 );   // Wait 500 milliseconds after executing the playDisc handler
+
+                this.notifqueue.setSynchronous( 'voteSentence', 3000 );   // Wait 500 milliseconds after executing the playDisc handler
 
                 dojo.subscribe('revealCurrentSentence', this, "notif_revealCurrentSentence");
                 this.notifqueue.setSynchronous( 'revealCurrentSentence', 2000 );   // Wait 500 milliseconds after executing the playDisc handler

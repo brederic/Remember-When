@@ -828,6 +828,7 @@ define([
                 dojo.subscribe('cardGiven', this, "notif_cardGiven");
                 dojo.subscribe('takeCards', this, "notif_takeCards");
                 dojo.subscribe('addCardToSentence', this, "notif_addCardToSentence");
+                this.notifqueue.setSynchronous( 'addCardToSentence', 1000 );
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
                 this.notifqueue.setSynchronous( 'score', 1000 );   // Wait 500 milliseconds after executing the playDisc handler

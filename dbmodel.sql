@@ -49,17 +49,10 @@ CREATE TABLE IF NOT EXISTS `card` (
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-CREATE TABLE IF NOT EXISTS `rw_card` (
-  `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `card_type` varchar(16) NOT NULL,
-  `card_type_arg` int(11) NOT NULL,
-  `card_word_1` varchar(50) NOT NULL,
-  `card_word_2` varchar(50) NOT NULL,
-  `card_word_3` varchar(50) NOT NULL,
-  `card_word_4` varchar(50) NOT NULL,
-  `card_rotation` int(4) NOT NULL,
-  `card_location` varchar(16) NOT NULL,
-  `card_location_arg` int(11) NOT NULL,
-  PRIMARY KEY (`card_id`)
+CREATE TABLE IF NOT EXISTS `data` (
+  `data_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `verb` varchar(250) DEFAULT '',
+  `object` varchar(250) DEFAULT '',
+  PRIMARY KEY (`data_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

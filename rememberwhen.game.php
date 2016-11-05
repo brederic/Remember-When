@@ -396,7 +396,7 @@ class RememberWhen extends Table
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} recalls an exploit that involved a ${value_displayed}.'), 
+			clienttranslate('${player_name} recalls an exploit that involved a ${html}${value_displayed}${endHtml}.'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
@@ -407,8 +407,9 @@ class RememberWhen extends Table
                 'choice' => $choice,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
-                'card' => $card
-			) 
+                'card' => $card,
+                 'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"			) 
 		);
 
 		
@@ -492,7 +493,7 @@ class RememberWhen extends Table
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} vaguely remembers, "I ${verbed} the ${object}." But when? where? why? how?'), 
+			clienttranslate('${player_name} vaguely remembers, "I ${html}${verbed}${endHtml} the ${object}." But when? where? why? how?'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
@@ -504,7 +505,9 @@ class RememberWhen extends Table
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'card' => $card,
-                'object' => $object
+                'object' => $object,
+                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"
 			) 
 		);
 
@@ -582,11 +585,11 @@ class RememberWhen extends Table
             case 2:
             case 3:
             case 8:
-                $message = '${current_player_name} guessed ${color_displayed} ${active_player_name} ${verb} the ${object}. ';
+                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object}. ';
                 break;
             case 5:
             case 6:
-                $message = '${current_player_name} guessed ${color_displayed} ${object} ${active_player_name} ${verb}. ';
+                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb}. ';
                 break;
         }
        
@@ -600,12 +603,14 @@ class RememberWhen extends Table
 				'card_id' => $card['id'],
                 'card' => $this->populateCard($card),
 				'player_id' => $current_player_id,
-				'current_player_name' => $current_player_name,
+				'player_name' => $current_player_name,
 				'active_player_name' => $active_player_name,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'verb' => $data['verb'],
-                'object' => $data['object']
+                'object' => $data['object'],
+                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"
 			) 
 		);
 
@@ -644,10 +649,10 @@ class RememberWhen extends Table
         // And notify
         self::notifyAllPlayers( 
 			'status', 
-			clienttranslate('${current_player_name} has voted. '), 
+			clienttranslate('${player_name} has voted. '), 
 			array(
 				
-				'current_player_name' => $current_player_name,
+				'player_name' => $current_player_name,
 				
 			) 
 		);
@@ -730,16 +735,16 @@ class RememberWhen extends Table
                 // notify everyone
                 $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
                 $message='ERROR with message';
-                switch ($card['type']) {
+                switch ($player['contribution']) {
                     case 1:
                     case 2:
                     case 3:
                     case 8:
-                        $message = '${current_player_name} correctly guessed ${color_displayed} ${active_player_name} ${verb} the ${object} and scores a point. ';
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object} and scores a point. ';
                         break;
                     case 5:
                     case 6:
-                        $message = '${current_player_name} correctly guessed ${color_displayed} ${object} ${active_player_name} ${verb} and scores a point. ';
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb} and scores a point. ';
                         break;
                 }
        
@@ -749,14 +754,18 @@ class RememberWhen extends Table
                     array(
                         'i18n' => array( 'color_displayed', 'value_displayed' ),
                         'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
+                        'player_name' => $current_player_name,
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
                         'score' => $score,
                         'choice' => $prediction,
                         'verb' => $data['verb'],
-                        'object' => $data['object']
+                        'object' => $data['object'],
+                        'html' => "<span class='role_icon_".$player['contribution']."'><strong>",
+                        'endHtml' => "</strong></span>"
+                        
+                                
 
                     ) 
                 );
@@ -765,11 +774,11 @@ class RememberWhen extends Table
                 // notify everyone
                  self::notifyAllPlayers( 
                     'score', 
-                    clienttranslate('${current_player_name} made an incorrect guess and does not score this round.'), 
+                    clienttranslate('${player_name} made an incorrect guess and does not score this round.'), 
                     array(
                         'i18n' => array( 'color_displayed', 'value_displayed' ),
                         'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
+                        'player_name' => $current_player_name,
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
@@ -1051,11 +1060,11 @@ class RememberWhen extends Table
                             case 2:
                             case 3:
                             case 8:
-                                $message = '${current_player_name} will have to recall ${color_displayed} they ${verb} the ${object} without help. ';
+                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} they ${verb} the ${object} without help. ';
                                 break;
                             case 5:
                             case 6:
-                                $message = '${current_player_name} will have to recall ${color_displayed} ${object} they ${verb} without help. ';
+                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} ${object} they ${verb} without help. ';
                                 break;
                         }
        	
@@ -1069,11 +1078,13 @@ class RememberWhen extends Table
                                 'card_id' => $card['id'],
                                 'card' => $this->populateCard($card),
                                 'player_id' => $current_player_id,
-                                'current_player_name' => $current_player_name,
+                                'player_name' => $current_player_name,
                                 'color' => $card['type'],
                                 'color_displayed' => $this->colors[ $card['type'] ]['name'],
                                 'verb' => $data['verb'],
-                                'object' => $data['object']
+                                'object' => $data['object'],
+                                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                                'endHtml' => "</strong></span>"
                             ) 
                         );  
 

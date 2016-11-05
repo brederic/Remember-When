@@ -71,9 +71,9 @@ class RememberWhen extends Table
         self::DbQuery( $sql ); 
 
         // Set the colors of the players with HTML color code
-        // The default below is red/green/blue/orange/brown
-        // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $default_colors = array( "ff0000", "00ff00", "0000ff", "888800", "008888", "880088" );
+        // The default below is red/green/blue/yellow/orange/brown
+        // The number of colors defined here must correspond to the maximum number of players allowed for the game
+        $default_colors = array( "ff0000", "008000", "0000ff", "ffff00", "ffa500", "a52a2a");
 
  
         // Create players

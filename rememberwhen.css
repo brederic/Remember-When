@@ -326,7 +326,7 @@ ul.tab li a:focus, .active {color: #ccc;}
     position: relative;
     width: 150px;
     height: 150px;
-	color: blue;
+	background-color: blue;
 	border: 1px;
 	background-size: 1200px 150px ;
     background-image: url('img/fronts-sm.png'); 

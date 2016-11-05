@@ -1164,6 +1164,12 @@ class RememberWhen extends Table
                 ) );
                 return;
             }
+            // add the tiebreak vote to the totals
+            if ($winner == 1)  {
+                $top_sentence_votes++; 
+            } else if ($winner == 2) {
+                $current_sentence_votes++;
+            }
             $tiebreaker = true;
         }
 

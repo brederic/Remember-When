@@ -190,9 +190,18 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCountVotes",
-        "transitions" => array( "newHand" => 20 , "gameOver" => 99 )
+        "transitions" => array( "tieBreak" => 52, "newHand" => 20 , "gameOver" => 99 )
     ),    
    
+	52 => array(
+        "name" => "tieBreak",
+        "description" => clienttranslate('${actplayer} must vote for the best memory.'),
+        "descriptionmyturn" => clienttranslate('${you} must vote for the best memory.'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "vote" ),
+        "transitions" => array( "vote" => 51 )
+    ), 	
+
     // Final state.
     // Please do not modify.
     99 => array(

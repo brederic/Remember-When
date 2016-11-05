@@ -90,6 +90,11 @@ class RememberWhen extends Table
         self::reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
+        // create round data record
+        $sql = "INSERT INTO data (verb, object) VALUES ('','')";
+        self::DbQuery( $sql );
+         
+        
 
         // Init global values with their initial values
         $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
@@ -377,26 +382,34 @@ class RememberWhen extends Table
 		// get object card
 		$card = $this->cards->pickCardForLocation('deck-7', 'current_sentence', $choice);
         $card = $this->populateCard($card);
+        $object = $card['text_'.$choice];
 
-        // TODO: save choice to player data??
+        // save choice to round data
+         $sql = "
+                UPDATE  data
+                SET     object = '$object'
+                    
+            ";
+        self::DbQuery( $sql );
 	
 
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} randomly adds ${value_displayed} ${color_displayed} to the sentence.'), 
+			clienttranslate('${player_name} recalls an exploit that involved a ${html}${value_displayed}${endHtml}.'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
-				'value_displayed' => $card['text_'.$choice],
+				'value_displayed' => $object,
                 'choice' => $choice,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
-                'card' => $card
-			) 
+                'card' => $card,
+                 'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"			) 
 		);
 
 		
@@ -455,7 +468,6 @@ class RememberWhen extends Table
         // Here we have to get active player 
         $player_id = self::getActivePlayerId();
 		
-		// TODO: save card_pos to player data
 		
 		// get object card
 		$card = $this->populateCard($this->cards->getCard( $card_id ));
@@ -465,21 +477,37 @@ class RememberWhen extends Table
         foreach ($discards as $discard) {
             $this->cards->playCard($discard['id']);
         }
+
+        // save to round data
+        $verb = $card['text_'.$card_pos];
+        $sql = "
+            UPDATE  data
+            SET     verb = '$verb'
+                
+        ";
+        self::DbQuery( $sql );
+
+        $object = self::getUniqueValueFromDB("select object from data where data_id = 1");
+        
+        
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} vaguely remembers doing ${value_displayed} ${color_displayed} to the object.  But when? where? why? how?'), 
+			clienttranslate('${player_name} vaguely remembers, "I ${html}${verbed}${endHtml} the ${object}." But when? where? why? how?'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
-				'value_displayed' => $card['text_'.$card_pos],
+				'verbed' => $verb,
                 'choice' => $card_pos,
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
-                'card' => $card
+                'card' => $card,
+                'object' => $object,
+                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"
 			) 
 		);
 
@@ -550,20 +578,39 @@ class RememberWhen extends Table
                 WHERE   player_id =  $current_player_id
             ";
         self::DbQuery( $sql );
+        $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+        $message='ERROR with message';
+        switch ($card['type']) {
+            case 1:
+            case 2:
+            case 3:
+            case 8:
+                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object}. ';
+                break;
+            case 5:
+            case 6:
+                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb}. ';
+                break;
+        }
+       
         
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${current_player_name} guessed ${color_displayed} ${active_player_name} did what they did. '), 
+			clienttranslate($message), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
                 'card' => $this->populateCard($card),
 				'player_id' => $current_player_id,
-				'current_player_name' => $current_player_name,
+				'player_name' => $current_player_name,
 				'active_player_name' => $active_player_name,
 				'color' => $card['type'],
-				'color_displayed' => $this->colors[ $card['type'] ]['name']
+				'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                'verb' => $data['verb'],
+                'object' => $data['object'],
+                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                'endHtml' => "</strong></span>"
 			) 
 		);
 
@@ -602,10 +649,10 @@ class RememberWhen extends Table
         // And notify
         self::notifyAllPlayers( 
 			'status', 
-			clienttranslate('${current_player_name} has voted. '), 
+			clienttranslate('${player_name} has voted. '), 
 			array(
 				
-				'current_player_name' => $current_player_name,
+				'player_name' => $current_player_name,
 				
 			) 
 		);
@@ -614,6 +661,34 @@ class RememberWhen extends Table
         // (and tell the machine state to use transtion "giveCards" if all players are now unactive
         $this->gamestate->setPlayerNonMultiactive( $current_player_id, "vote" );
         
+    }
+
+    function buildSentence($cards) {
+        $sentence = "Remember When... ";
+        foreach($cards as $card) {
+            
+            $sentence .= $card['text_'.$card['location_arg']];
+            // add stuff after
+            switch ($card['type']) {
+            case 1:
+                $sentence .= ', ';
+                break;
+            case 3:
+            case 6:
+                $sentence .= ' ';
+                break;
+            case 2:
+                $sentence .= ', I ';
+                break;
+            case 4:
+                $sentence .= ' the ';
+                break;
+            case 7:
+                $sentence .= ' because ';
+                break;
+            }
+        }
+        return $sentence;
     }
     
 	
@@ -647,23 +722,51 @@ class RememberWhen extends Table
             $current_player_name = $players[ $player['id'] ]['player_name'];
             $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
             $active_player_name = $players[ $active_player_id ]['player_name'];
+            $top_player_id = self::getGameStateValue( 'topSentenceBuilder' );
+            if ($top_player_id == 0) {
+                $top_player_name = "Random";
+            } else {
+                $top_player_name = $players[ $top_player_id ]['player_name'];
+            }
             if ($actual_choice == $prediction) {
                  // add to player score
                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
                 $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
                 // notify everyone
+                $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+                $message='ERROR with message';
+                switch ($player['contribution']) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 8:
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object} and scores a point. ';
+                        break;
+                    case 5:
+                    case 6:
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb} and scores a point. ';
+                        break;
+                }
+       
                  self::notifyAllPlayers( 
                     'score', 
-                    clienttranslate('${current_player_name} correctly guessed ${color_displayed} ${active_player_name} did what they did and scores a point.'), 
+                    clienttranslate($message), 
                     array(
                         'i18n' => array( 'color_displayed', 'value_displayed' ),
                         'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
+                        'player_name' => $current_player_name,
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
                         'score' => $score,
-                        'choice' => $prediction
+                        'choice' => $prediction,
+                        'verb' => $data['verb'],
+                        'object' => $data['object'],
+                        'html' => "<span class='role_icon_".$player['contribution']."'><strong>",
+                        'endHtml' => "</strong></span>"
+                        
+                                
+
                     ) 
                 );
             } else {
@@ -671,11 +774,11 @@ class RememberWhen extends Table
                 // notify everyone
                  self::notifyAllPlayers( 
                     'score', 
-                    clienttranslate('${current_player_name} made an incorrect guess and does not score this round.'), 
+                    clienttranslate('${player_name} made an incorrect guess and does not score this round.'), 
                     array(
                         'i18n' => array( 'color_displayed', 'value_displayed' ),
                         'player_id' => $player['id'],
-                        'current_player_name' => $current_player_name,
+                        'player_name' => $current_player_name,
                         'active_player_name' => $active_player_name,
                         'color' => $player['contribution'],
                         'color_displayed' => $this->colors[$player['contribution'] ]['name'],
@@ -689,12 +792,40 @@ class RememberWhen extends Table
         // And notify
             self::notifyAllPlayers( 
                 'revealCurrentSentence', 
-                clienttranslate("It is time to vote! "), 
+                clienttranslate("It is time to vote! Which is best? "), 
                 array(
                     
                     'cards' => $this->populateCards($this->cards->getCardsInLocation('current_sentence')),
                     'contributions' => $this->getContributionMap()
                     
+                ) 
+            );   
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate('${player_name}\'s champion memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' => $top_player_name
+   
+                ) 
+            );  
+             
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate(' OR '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' => $top_player_name
+   
+                ) 
+            );  
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate('${player_name}\'s challenger memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('current_sentence'))),
+                     'player_name' => $active_player_name
+   
                 ) 
             );  
         
@@ -861,9 +992,11 @@ class RememberWhen extends Table
                 ";
             self::DbQuery( $sql );
         }
-        // if there are an odd number of players voting, there will never be a tie, so de-activate active player also
+        // the active player will not be voting now
+        $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
+        // But if there are an even number of players voting, the active player may have to break a tie
         if (($playersVoting-1) % 2 != 0  ) {
-            $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
+            
             // mark not voting
             $sql = "
                     UPDATE  player
@@ -882,6 +1015,12 @@ class RememberWhen extends Table
                 ";
             self::DbQuery( $sql );            
         }
+        
+    }
+    
+    function stTieBreak()
+    {    
+       // all preparation for this vote has already been done
         
     }
     
@@ -913,20 +1052,39 @@ class RememberWhen extends Table
                     if ($card['type'] == $type) {
                       
                         // add card to sentence
-                        $this->cards->moveCard($card['id'], 'current_sentence', $current_player_id);		
+                        $this->cards->moveCard($card['id'], 'current_sentence', $current_player_id);	
+                        $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+                        $message='ERROR with message';
+                        switch ($card['type']) {
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 8:
+                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} they ${verb} the ${object} without help. ';
+                                break;
+                            case 5:
+                            case 6:
+                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} ${object} they ${verb} without help. ';
+                                break;
+                        }
+       	
                         
                         // And notify
                         self::notifyAllPlayers( 
                             'addCardToSentence', 
-                            clienttranslate('${current_player_name} added a ${color_displayed} card to the sentence. '), 
+                            clienttranslate($message), 
                             array(
                                 'i18n' => array( 'color_displayed', 'value_displayed' ),
                                 'card_id' => $card['id'],
                                 'card' => $this->populateCard($card),
                                 'player_id' => $current_player_id,
-                                'current_player_name' => $current_player_name,
+                                'player_name' => $current_player_name,
                                 'color' => $card['type'],
-                                'color_displayed' => $this->colors[ $card['type'] ]['name']
+                                'color_displayed' => $this->colors[ $card['type'] ]['name'],
+                                'verb' => $data['verb'],
+                                'object' => $data['object'],
+                                'html' => "<span class='role_icon_".$card['type']."'><strong>",
+                                'endHtml' => "</strong></span>"
                             ) 
                         );  
 
@@ -974,6 +1132,17 @@ class RememberWhen extends Table
                 ";
         $current_sentence_votes = self::getUniqueValueFromDB( $sql );
 
+        $players = self::loadPlayersBasicInfos();	
+        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
+        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
+		$currentMemoryName = $players[ $currentSentenceBuilder ]['player_name'];
+        if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
+		    $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
+        } else {
+            $topMemoryName = "Random Memory";
+        }
+        
+        //Handle possible tiebreak
         $tiebreaker = false;
         if ($top_sentence_votes > $current_sentence_votes) {
            $winner = 1;
@@ -986,18 +1155,18 @@ class RememberWhen extends Table
                         WHERE vote_type = 2 
                     ";
             $winner = self::getUniqueValueFromDB( $sql );
+            if ($winner == 0) {  // the active player will have to vote
+                $this->gamestate->nextState("tieBreak");
+                // notify
+                self::notifyAllPlayers( "tieBreak", clienttranslate( 'There is a tie. ${player_name} will have to break the tie.' ), array(
+                    'player_name' => $currentMemoryName,
+                    
+                ) );
+                return;
+            }
             $tiebreaker = true;
         }
 
-        $players = self::loadPlayersBasicInfos();	
-        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
-        $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
-		$currentMemoryName = $players[ $currentSentenceBuilder ]['player_name'];
-        if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
-		    $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
-        } else {
-            $topMemoryName = "Random Memory";
-        }
 		
 
         if ($winner == 1) { // Top memory won!!

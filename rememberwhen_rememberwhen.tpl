@@ -95,6 +95,27 @@ var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="$
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
 
 var jstpl_role = '<div id="role_icon_p${player}" class="role_icon role_icon_${color}">${role}</div>';
+
+var jstpl_card_table = '<div class="divTable" id="tip_${id}">\
+	<div class="divTableBody tip_${pos}">\
+		<div id="row_1" class="divTableRow">\
+			<div class="divTableCell">&nbsp;1</div>\
+			<div class="divTableCell">&nbsp;${text_1}</div>\
+		</div>\
+		<div class="divTableRow">\
+			<div class="divTableCell">&nbsp;2</div>\
+			<div class="divTableCell">&nbsp;${text_2}</div>\
+		</div>\
+		<div class="divTableRow">\
+			<div class="divTableCell">&nbsp;3</div>\
+			<div class="divTableCell">&nbsp;${text_3}</div>\
+		</div>\
+		<div class="divTableRow">\
+			<div class="divTableCell">&nbsp;4</div>\
+			<div class="divTableCell">&nbsp;${text_4}</div>\
+		</div>\
+	</div>\
+</div>';
     
 </script>  
 

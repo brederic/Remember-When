@@ -79,19 +79,25 @@ define([
 
                     if (pid == this.sentenceBuilder) {     
                         // Setting up players boards if needed
+                    
                         var player_board_div = $('player_board_'+this.sentenceBuilder);
                         if (this.gamedatas.role ==1) {
                             color = 'H';
+                            role = _('Hero');
                         } else if (this.gamedatas.role ==2 ) {
                             color = 'V';
+                            role = _('Villain');
                         } else {
                             color = 'A';
+                            role = _('Active Player');
+
                         }
-                        dojo.place( this.format_block('jstpl_role', {
+                        block =  this.format_block('jstpl_role', {
                                 player: this.sentenceBuilder,
                                 color: color,
                                 role: ''
-                            }    ), player_board_div );
+                            }    );
+                        dojo.place(block, player_board_div );
                     } else {
                         data = {
                                 player: pid,
@@ -221,6 +227,24 @@ define([
             ///////////////////////////////////////////////////
             //// Game & client states
 
+            setStandardTooltips: function () {
+                
+                this.addTooltipToClass('role_icon_V', _('Villain'), '');
+                this.addTooltipToClass('role_icon_H', _('Hero'), '');
+                this.addTooltipToClass('role_icon_A', _('Active Player'), '');
+                this.addTooltipToClass('role_icon_1', _('Contributed green card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_2', _('Contributed brown card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_3', _('Contributed purple card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_4', _('Contributed yellow card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_5', _('Contributed orange card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_6', _('Contributed blue card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_7', _('Contributed red card (# is this player\'s guess)'), '');
+                this.addTooltipToClass('role_icon_8', _('Contributed pink card (# is this player\'s guess)'), '');
+
+                //this.addTooltipToClass('rotatable', _(''), _("Rotate"));
+
+            },
+
             // onEnteringState: this method is called each time we are entering into a new game state.
             //                  You can use this method to perform some user interface changes at this moment.
             //
@@ -228,18 +252,28 @@ define([
                 console.log('Entering state: ' + stateName);
                 this.currentState = stateName;
 
+                this.setStandardTooltips();
+
+
+                
+
                 switch (stateName) {
-                    case 'playerTurn':
-                        this.addTooltip('myhand', _('Cards in my hand'), _('Play a card'));
+                    case 'chooseRandomObject':
                         break;
 
-                    case 'giveCards':
-                        this.addTooltip('myhand', _('Cards in my hand'), _('Select/Rotate a card'));
-                        break;
+                   
                     
                     case 'chooseAction':
+                        this.addTooltip('myhand', _('Available actions'), _('Select/Rotate a card'));
                         cards = dojo.query('div[id^="cardontable"]');
                         console.log(cards);
+
+                    case 'chooseRole':
+                        break;
+
+                     case 'giveCards':
+                        this.addTooltip('myhand', _('Cards in my hand'), _('Select/Rotate a card'));
+                        break;
                        
                     case 'vote':
                         // clear all connections
@@ -273,7 +307,7 @@ define([
                             }
                         }
                         
-                        
+                        this.setStandardTooltips();
 
                     case 'dummmy':
                         break;
@@ -315,36 +349,49 @@ define([
                         
                     case 'chooseRandomObject':
                         this.addActionButton( 'chooseRandomObject_button1', _('1'), 'onChooseRandomObject' ); 
+                        this.addTooltip('chooseRandomObject_button1', _(''), _('Choose this object'));
                         this.addActionButton( 'chooseRandomObject_button2', _('2'), 'onChooseRandomObject' ); 
+                        this.addTooltip('chooseRandomObject_button2', _(''), _('Choose this object'));
                         this.addActionButton( 'chooseRandomObject_button3', _('3'), 'onChooseRandomObject' ); 
+                        this.addTooltip('chooseRandomObject_button3', _(''), _('Choose this object'));
                         this.addActionButton( 'chooseRandomObject_button4', _('4'), 'onChooseRandomObject' ); 
+                        this.addTooltip('chooseRandomObject_button4', _(''), _('Choose this object'));
                         break;
                     
                         case 'chooseAction':
                            
                                 this.addActionButton('Select', 'Select', 'onChooseAction');
-
+                                this.addTooltip('Select', _(''), _('Choose selected action from hand'));
+                        
                            
 
                             break;
                         case 'chooseRole':
 
                                 this.addActionButton('1', 'Hero', 'onChooseRole');
+                                this.addTooltip('1', _(''), _('Choose this role'));
                                 this.addActionButton('2', 'Villain', 'onChooseRole');
-
+                                this.addTooltip('2', _(''), _('Choose this role'));
+                                
 
                             break;
                         case 'giveCards':
                               this.addActionButton('Select', 'Select', 'onGiveCard'); 
+                              this.addTooltip('Select', _(''), _('Choose selected card from hand'));
+                        
                             break;
                         case 'arrangeSentence':
                               this.addActionButton('Submit', 'Submit', 'onArrangeSentence'); 
+                              this.addTooltip('Submit', _(''), _('Send the memory you have assembled'));
+                        
                             break;
                          case 'vote':
                          case 'tieBreak':
                               this.addActionButton('1', 'Top Sentence', 'onVote'); 
+                              this.addTooltip('1', _(''), _('Vote for the top sentence'));
                               this.addActionButton('2', 'Current Sentence', 'onVote'); 
-
+                              this.addTooltip('2', _(''), _('Vote for the challenger\'s sentence'));
+                              
                             break;
                         
                     }
@@ -371,24 +418,51 @@ define([
                     self.connects[node.id] = [];
                 } else { // don't make duplicate connections
                     return;
-                }
+                } //
                 self.connects[ node.id ][idx] = dojo.connect( node, evt, function(evt) { 
-                        // 'this' is now the element clicked on (e.g. id="textDiv")
-                        var el = this; 
+                        console.log(evt.target);
+                        card_block = evt.target; // we may have to get more fancy than this
                         
-                        console.log('onClick ' + this.id  ); 
-        
+                        while (!dojo.hasClass(card_block, 'cardontable')){
+                            card_block = card_block.parentNode;
+                        }
                         
-                        if (dojo.hasClass(this.id, 'pos_1')) {
-                            dojo.replaceClass(this.id, 'pos_2', 'pos_1');
-                        } else if (dojo.hasClass(this.id, 'pos_2')) {
-                            dojo.replaceClass(this.id, 'pos_3', 'pos_2');
-                        } else if (dojo.hasClass(this.id, 'pos_3')) {
-                            dojo.replaceClass(this.id, 'pos_4', 'pos_3');
-                        } else if (dojo.hasClass(this.id, 'pos_4')) {
-                            dojo.replaceClass(this.id, 'pos_1', 'pos_4');
+                        var id = card_block.id;
+
+                        console.log('onClick ' + id  + dojo.getAttr(card_block, 'classes')); 
+
+                        newPos = 1;
+                        if (dojo.hasClass(id, 'pos_1')) {
+                            dojo.replaceClass(id, 'pos_2', 'pos_1');
+                            newPos = 2;
+                        } else if (dojo.hasClass(id, 'pos_2')) {
+                            dojo.replaceClass(id, 'pos_3', 'pos_2');
+                            newPos = 3;
+                        } else if (dojo.hasClass(id, 'pos_3')) {
+                            dojo.replaceClass(id, 'pos_4', 'pos_3');
+                            newPos = 4;
+                        } else if (dojo.hasClass(id, 'pos_4')) {
+                            dojo.replaceClass(id, 'pos_1', 'pos_4');
+                            newPos = 1;
                         } 
-                });
+                        query = 'div[id='+id+'] > div.text_';
+                        console.log(dojo.query(query+'1 > span'));
+                        console.log(dojo.query(query+'1 > span')[0]);
+                        console.log(dojo.query(query+'1 > span')[0].textContent);
+                        tooltip = self.format_block('jstpl_card_table', {
+                            id: id,
+                            pos: newPos,
+                            
+                            text_1: dojo.query(query+'1 > span')[0].textContent,
+                            text_2:  dojo.query(query+'2 > span')[0].textContent,
+                            text_3:  dojo.query(query+'3 > span')[0].textContent,
+                            text_4:  dojo.query(query+'4 > span')[0].textContent
+                        }); 
+                        
+                        self.removeTooltip( id );
+                    
+                        self.addTooltipHtml( id, tooltip );
+                }); 
             
             });
            
@@ -401,6 +475,7 @@ define([
                     console.log("onLoad executing...")
                     
                   // attach on click to id="textDiv"
+                  
                   var nodes = dojo.query('div[class*="rotatable"]');
                   nodes.forEach( function (node, idx) {
                      
@@ -447,22 +522,47 @@ define([
                 var y = event.clientY - rect.top;
                 console.log("x: " + x + " y: " + y);
             },
-             onCardClick: function (card_block) {
-         
-                	var id = dojo.getAttr(card_block, 'id');
-                    console.log('onClick ' + id  + dojo.getAttr(card_block, 'classes')); 
-    
-                	
-                    if (dojo.hasClass(id, 'pos_1')) {
-                        dojo.replaceClass(id, 'pos_2', 'pos_1');
-                    } else if (dojo.hasClass(id, 'pos_2')) {
-                        dojo.replaceClass(id, 'pos_3', 'pos_2');
-                    } else if (dojo.hasClass(id, 'pos_3')) {
-                        dojo.replaceClass(id, 'pos_4', 'pos_3');
-                    } else if (dojo.hasClass(id, 'pos_4')) {
-                        dojo.replaceClass(id, 'pos_1', 'pos_4');
-                    } 
-                  },
+             onCardClick: function (evt) {
+                 console.log(evt.target);
+                 card_block = evt.target; // we may have to get more fancy than this
+                 
+                var id = card_block.id;
+
+                console.log('onClick ' + id  + dojo.getAttr(card_block, 'classes')); 
+
+                newPos = 1;
+                if (dojo.hasClass(id, 'pos_1')) {
+                    dojo.replaceClass(id, 'pos_2', 'pos_1');
+                    newPos = 2;
+                } else if (dojo.hasClass(id, 'pos_2')) {
+                    dojo.replaceClass(id, 'pos_3', 'pos_2');
+                    newPos = 3;
+                } else if (dojo.hasClass(id, 'pos_3')) {
+                    dojo.replaceClass(id, 'pos_4', 'pos_3');
+                    newPos = 4;
+                } else if (dojo.hasClass(id, 'pos_4')) {
+                    dojo.replaceClass(id, 'pos_1', 'pos_4');
+                    newPos = 1;
+                } 
+                query = 'div[id='+id+'] > div.text_';
+                console.log(dojo.query(query+'1'));
+                console.log(dojo.query(query+'1')[0]);
+                console.log(dojo.query(query+'1')[0].textContent);
+                tooltip = this.format_block('jstpl_card_table', {
+                    id: id,
+                    pos: newPos,
+                    
+                    text_1: dojo.query(query+'1 > span')[0].textContent,
+                    text_2:  dojo.query(query+'2 > span')[0].textContent,
+                    text_3:  dojo.query(query+'3 > span')[0].textContent,
+                    text_4:  dojo.query(query+'4 > span')[0].textContent
+                }); 
+                
+                this.removeTooltip( id );
+            
+                this.addTooltipHtml( id, tooltip );
+                    //this.changeTooltipHighlight(id.split('_')[1], newPos);
+            },
 
             // Get card unique identifier based on its color and value
             getCardUniqueId: function (color, value) {
@@ -508,6 +608,16 @@ define([
                 }
                 dojo.place(card_block, div_id, "only");
                 dojo.addClass(card_name, 'pos_1');
+                tooltip = this.format_block('jstpl_card_table', {
+                    id: card.id,
+                    pos: "1",
+                    type: card.type,
+                    text_1: card.text_1,
+                    text_2: card.text_2,
+                    text_3: card.text_3,
+                    text_4: card.text_4
+                });
+                this.addTooltipHtml( card_name, tooltip );
                 
                 
             },
@@ -564,6 +674,18 @@ define([
                 }
                 if (klass == 'reverse') {
                     dojo.query('div[id='+card_name+'] > div').addClass('invisible');
+                } else {
+                    tooltip = this.format_block('jstpl_card_table', {
+                    id: card.id,
+                    pos: rotation,
+                    type: card.type,
+                    text_1: card.text_1,
+                    text_2: card.text_2,
+                    text_3: card.text_3,
+                    text_4: card.text_4
+                });
+                this.addTooltipHtml( card_name, tooltip );
+                
                 }
                 if (loc == 'top_sentence') {
                 //    dest = 'current_' + dest;
@@ -634,7 +756,7 @@ define([
         {
             console.log('onChooseAction');
             if (this.selectedCard == 0) {
-                this.showMessage("Please select an action card", "error");
+                this.showMessage("Please select an action card from your hand", "error");
                 return;
             }
             dojo.stopEvent( evt );
@@ -671,7 +793,7 @@ define([
         {
             console.log('onGiveCard');
             if (this.selectedCard == 0) {
-                this.showMessage("Please select a card", "error");
+                this.showMessage("Please select a card from your hand", "error");
                 return;
             }
             dojo.stopEvent( evt );
@@ -739,7 +861,8 @@ define([
 
                     if (card_node.id == this.selectedCard) { // the click was on the currently selected card
                         // rotate selected card
-                        this.onCardClick(card_node);
+                        var evt = {'target': card_node};
+                        this.onCardClick(evt);
                     } else { // we have a new selected card, it should be highlighted, not rotated
                         this.selectedCard = card_node.id;
                     }
@@ -750,7 +873,8 @@ define([
                     // get the currently selected card
                     card_block = $(this.selectedCard);
                     // rotate selected card
-                    this.onCardClick(card_block);
+                    var evt = {'target': card_block};
+                    this.onCardClick(evt);
                    
 
                 }
@@ -864,6 +988,8 @@ define([
                     dojo.addClass(card_block, 'pos_'+card.location_arg);
                 }
 
+                this.setStandardTooltips();
+
 
 
             },
@@ -883,6 +1009,7 @@ define([
 
                     
                 }
+                this.setStandardTooltips();
 
             },
             notif_newRound: function (notif) {
@@ -911,6 +1038,7 @@ define([
                     this.fadeOutAndDestroy(card);
                     
                 }
+                this.setStandardTooltips();
 
             },
             notif_newCard: function (notif) {
@@ -967,6 +1095,7 @@ define([
                 } else {
                     dojo.addClass(role_div, 'role_icon_V');
                 }
+                this.setStandardTooltips();
                 
                 
             },
@@ -1018,6 +1147,7 @@ define([
                 this.playCardOnTable(card, 'current_sentence', rotation, notif.args.player_id);
                 
                 this.hookupCardsOnLoad();
+                
 
                 console.log('state: '+ stateName);
                 
@@ -1045,6 +1175,7 @@ define([
                         break;
 
                 }
+                this.setStandardTooltips();
                 
             },
             

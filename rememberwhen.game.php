@@ -199,9 +199,42 @@ class RememberWhen extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $completedRounds = self::getGameStateValue( 'currentRound')-1;
+        $totalRounds = self::getGameStateValue( 'totalRounds');
+        $progressPerRound = 100/$totalRounds;
+        $progress = $completedRounds * $progressPerRound;
+        $stepsPerRound = 7;
+        $step = 0;
+        $progressPerStep = $progressPerRound/$stepsPerRound;
+        $state=$this->gamestate->state();
+        switch ($state['name']) {
+            case 'newHand':
+                $step = 1;
+                break;
+            case 'chooseRandomObject':
+                $step = 2;
+                break;
+            case 'chooseAction':
+                $step = 3;
+                break;
+            case 'chooseRole':
+                $step = 4;
+                break;
+            case 'giveCards':
+                $step = 5;
+                break;
+            case 'arrangeSentence':
+                $step = 6;
+                break;
+            case 'vote':
+                $step = 7;
+                break;
+            
 
-        return 0;
+        }
+
+        $progress += $step*$progressPerStep;
+        return intval($progress);
     }
 
 

@@ -369,6 +369,7 @@ define([
                            
                                 this.addActionButton('Select', 'Select', 'onChooseAction');
                                 this.addTooltip('Select', _(''), _('Choose selected action from hand'));
+                                this.selectedCard = 0;
                         
                            
 
@@ -385,6 +386,7 @@ define([
                         case 'giveCards':
                               this.addActionButton('Select', 'Select', 'onGiveCard'); 
                               this.addTooltip('Select', _(''), _('Choose selected card from hand'));
+                              this.selectedCard = 0;
                         
                             break;
                         case 'arrangeSentence':
@@ -761,7 +763,7 @@ define([
         },
         onChooseAction: function( evt)
         {
-            console.log('onChooseAction');
+            console.log('onChooseAction - ' + this.selectedCard);
             if (this.selectedCard == 0) {
                 this.showMessage("Please select an action card from your hand", "error");
                 return;
@@ -798,7 +800,7 @@ define([
         },    
         onGiveCard: function( evt)
         {
-            console.log('onGiveCard');
+            console.log('onGiveCard - ' + this.selectedCard);
             if (this.selectedCard == 0) {
                 this.showMessage("Please select a card from your hand", "error");
                 return;
@@ -844,7 +846,19 @@ define([
 
                     this.ajaxcall( "/rememberwhen/rememberwhen/arrangeSentence.html", { choices: choices, lock: true }, this, function( result ) {
                     }, function( is_error) { } );                
-                }   
+                }  
+                // clear all connections
+                        var nodes = dojo.query('div[class*="rotatable"]');
+                        var self = this;
+                        nodes.forEach( function (node, idx) {
+                            dojo.forEach( self.connects[node.id], function( handle ) {
+                                dojo.disconnect( handle );
+                            });
+                        });
+                            
+                        dojo.query('.reverse').removeClass('reverse');
+                        dojo.query('.rotatable').removeClass('rotatable');
+                        dojo.query('.invisible').removeClass('invisible'); 
             } 
             
                  

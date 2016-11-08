@@ -172,9 +172,16 @@ $machinestates = array(
         "possibleactions" => array( "vote" ),
         "transitions" => array( "vote" => 51 )
     ), 	
-
+    91 => array(
+        "name" => "calcStats",
+        "description" => clienttranslate("Calculating statistics"),
+        "type" => "game",
+        "action" => "stCalcStats"
+    ),
+    
     // Final state.
     // Please do not modify.
+
     99 => array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),

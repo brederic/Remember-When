@@ -101,6 +101,7 @@ class RememberWhen extends Table
         $this->setGameStateInitialValue( 'topSentenceBuilder', 0 );
         $this->setGameStateInitialValue( 'role', 0 );
         $this->setGameStateInitialValue( 'currentRound', 0 );
+        
         if (count($players) < 6) {
             $this->setGameStateInitialValue( 'totalRounds', count($players) *2 );
          } else {
@@ -111,6 +112,14 @@ class RememberWhen extends Table
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'table', 'rounds_number', 0 );
+        self::initStat( 'player', 'best_memory', FALSE);
+        self::initStat( 'player', 'votes_for', 0);
+        self::initStat( 'player', 'votes_against', 0);
+        self::initStat( 'player', 'votes_percent', 0);
+        self::initStat( 'player', 'elections_won', 0);
+        self::initStat( 'player', 'total_elections', 0);
+
 
         // TODO: setup the initial game situation here
         // Create cards
@@ -894,6 +903,10 @@ class RememberWhen extends Table
         //self::incStat( 1, "handNbr" );
     
         self::incGameStateValue( 'currentRound', 1);
+        
+        self::incStat( 1, 'rounds_number' );
+        self::getStat('rounds_number');
+        
 
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
@@ -1206,6 +1219,18 @@ class RememberWhen extends Table
             $tiebreaker = true;
         }
 
+        // track statistics
+        self::incStat($current_sentence_votes, 'votes_for', $currentSentenceBuilder);
+        self::incStat($top_sentence_votes, 'votes_against', $currentSentenceBuilder);
+        self::incStat(1, 'total_elections', $currentSentenceBuilder);
+       if (self::getGameStateValue( 'topSentenceBuilder' ) != 0) {
+		    self::incStat($top_sentence_votes, 'votes_for', $topSentenceBuilder);
+            self::incStat($current_sentence_votes, 'votes_against', $topSentenceBuilder);
+            self::incStat(1, 'total_elections', $topSentenceBuilder);   
+
+        }
+        
+
 		
 
         if ($winner == 1) { // Top memory won!!
@@ -1214,10 +1239,12 @@ class RememberWhen extends Table
             // clear out current sentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
             $this->cards->moveCards($old, 'discard');
-            
+            self::incStat(1, 'elections_won', $topSentenceBuilder);
+         
         } else {  // current sentence won!!
             self::trace('Current memory won!');
-           $winnerName = $currentMemoryName;
+             self::incStat(1, 'elections_won', $currentSentenceBuilder);
+          $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
             $this->cards->moveCards($old, 'discard');
@@ -1327,6 +1354,25 @@ class RememberWhen extends Table
              $this->gamestate->nextState("gameOver");
         }
  
+    }
+    function stCalcStats()
+    {
+        self::setStat(TRUE, 'best_memory', self::getGameStateValue('topSentenceBuilder'));
+        // calculate percentage stats for each doesPlayerHaveCardType
+        $players = self::loadPlayersBasicInfos();	
+        
+        foreach( $players as $player_id => $player )
+        {
+            // calculate vote stat
+            $votes_for = floatval(self::getStat('votes_for', $player_id));
+            $votes_against = floatval(self::getStat('votes_against', $player_id));
+            self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
+            $elections_won = floatval(self::getStat('elections_won', $player_id));
+            $elections_count = floatval(self::getStat('total_elections', $player_id));
+            self::setStat($elections_won/elections_count, 'election_percent', $player_id);
+         }
+            
+        
     }
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

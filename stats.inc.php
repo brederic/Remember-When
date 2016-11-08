@@ -52,8 +52,8 @@ $stats_type = array(
     // Statistics global to table
     "table" => array(
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
+        "rounds_number" => array("id"=> 10,
+                    "name" => totranslate("Number of rounds"),
                     "type" => "int" ),
 
 /*
@@ -73,10 +73,33 @@ $stats_type = array(
     // Statistics existing for each player
     "player" => array(
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
+        "best_memory" => array("id"=> 10,
+                    "name" => totranslate("Best memory"),
+                    "type" => "bool" ),
+        "votes_for" => array("id"=> 11,
+                    "name" => totranslate("Votes received"),
                     "type" => "int" ),
-    
+        "votes_against" => array("id"=> 12,
+                    "name" => totranslate("Votes received by opponents"),
+                    "type" => "int" ),
+         "votes_percent" => array("id"=> 13,
+                    "name" => totranslate("% Vote received"),
+                    "type" => "float" ),
+ 
+        "elections_won" => array("id"=> 14,
+                    "name" => totranslate("Votes won by your memories"),
+                    "type" => "int" ),
+        "total_elections" => array("id"=> 15,
+                    "name" => totranslate("Number of times your memories were voted on"),
+                    "type" => "int" ),
+        "election_percent" => array("id"=> 16,
+                    "name" => totranslate("% of your challenges won"),
+                    "type" => "float" ),
+                                       /*
+        "order_average"  => array("id"=> 17,
+                    "name" => totranslate("% of players that submitted a card after you"),
+                    "type" => "float" ),
+                    */
 /*
         Examples:    
         

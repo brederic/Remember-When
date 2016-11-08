@@ -50,52 +50,6 @@
 	border: 2px solid red ! important;
 }
 
-/** Table layout **/
-/**
-#playertables {
-    position: relative;
-    width: 710px;
-    height: 340px;
-}
-
-.playertablename {
-    font-weight: bold;
-}
-
-.playertable {
-    position: absolute;
-    text-align: center;
-    width: 180px;
-    height: 130px;
-}
-
-.playertable_N {
-    left: 50%;
-    top: 0px;
-    margin-left: -90px; 
-}
-.playertable_S {
-    left: 50%;
-    bottom: 0px;
-    margin-left: -90px; 
-}
-.playertable_W {
-    left: 0px;
-    top: 50%;
-    margin-top: -55px; 
-}
-.playertable_E {
-    right: 0px;
-    top: 50%;
-    margin-top: -55px; 
-}
-.playertablecard {
-    display: inline-block;
-    position: relative;
-    margin-top: 5px;
-    width: 150px;
-    height: 150px;
-} **/
 .invisible {
 	display: none;
 }
@@ -126,14 +80,19 @@ ul.tab li a {
     padding: 14px 16px;
     text-decoration: none;
     transition: 0.3s;
-    font-size: 17px;
+    font-size: 12px;
 }
 
 /* Change background color of links on hover */
-ul.tab li a:hover {color: #ddd;}
+ul.tab li a:hover {background-color: rgb(255,243,209);
+	
+	}
 
 /* Create an active/current tablink class */
-ul.tab li a:focus, .active {color: #ccc;}
+ul.tab li a:focus, .active {background-color: #ebd5bd;
+	border: 2px solid #ab957d;
+    
+		}
 
 /* Style the tab content */
 .tabcontent {
@@ -247,15 +206,15 @@ ul.tab li a:focus, .active {color: #ccc;}
 	}
 .role_icon_A {width: 15px;
     height: 15px;
-	color: gray; 
+	background-color: gray; 
 	}
 .role_icon_H {width: 15px;
     height: 15px;
-	color: white; 
+	background-color: white; 
 	}
 .role_icon_V {width: 15px;
     height: 15px;
-	color: black; 
+	background-color: black; 
 	}
 /** card icons **/
 .role_icon_0 {
@@ -326,7 +285,7 @@ ul.tab li a:focus, .active {color: #ccc;}
     position: relative;
     width: 150px;
     height: 150px;
-	color: blue;
+	background-color: blue;
 	border: 1px;
 	background-size: 1200px 150px ;
     background-image: url('img/fronts-sm.png'); 
@@ -339,6 +298,7 @@ ul.tab li a:focus, .active {color: #ccc;}
 
 .rotatable {
 	border: 2px solid red !important;
+
 }
 
 
@@ -409,3 +369,60 @@ ul.tab li a:focus, .active {color: #ccc;}
 	transform: rotate(180deg);
 }
 
+/* DivTable.com */
+.divTable{
+	display: table;
+	width: 100%;
+}
+.divTableRow {
+	display: table-row;
+}
+.divTableHeading {
+	background-color: #EEE;
+	display: table-header-group;
+}
+.divTableCell, .divTableHead {
+	border: 1px solid #999999;
+	display: table-cell;
+	padding: 3px 10px;
+}
+.divTableHeading {
+	background-color: #EEE;
+	display: table-header-group;
+	font-weight: bold;
+}
+.divTableFoot {
+	background-color: #EEE;
+	display: table-footer-group;
+	font-weight: bold;
+}
+.divTableBody {
+	display: table-row-group;
+}
+
+.highlighted  {
+	background-color: yellow;
+}
+
+
+.tip_1 {}
+
+[class*="tip_1"]>div:nth-child(1) {
+	background-color: yellow;
+}
+
+.tip_2 {}
+
+[class*="tip_2"]>div:nth-child(2) {
+	background-color: yellow;
+}
+.tip_3 {}
+
+[class*="tip_3"]>div:nth-child(3) {
+	background-color: yellow;
+}
+.tip_4 {}
+
+[class*="tip_4"]>div:nth-child(4) {
+	background-color: yellow;
+}

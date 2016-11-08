@@ -163,7 +163,7 @@ class RememberWhen extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_name name, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
@@ -181,6 +181,7 @@ class RememberWhen extends Table
         
          // Active Player
         $result['sentence_builder'] = self::getGameStateValue( 'playerBuildingSentence' );
+        $result['champion'] = self::getGameStateValue( 'topSentenceBuilder' );
         $result['role'] = self::getGameStateValue( 'role' );
 
         if ($current_player_id == self::getGameStateValue( 'playerBuildingSentence' )) {
@@ -1339,7 +1340,7 @@ class RememberWhen extends Table
                 ) ); 
 
         self::notifyAllPlayers( 
-                            'message', 
+                            'winner', 
                             clienttranslate($message ), 
                             array(
                                 'i18n' => array( 'color_displayed', 'value_displayed' ),

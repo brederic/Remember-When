@@ -213,6 +213,14 @@ define([
                     console.log('Hand:')
                     console.log($('myhand'));
                 }
+
+                // Put names on sentence board tabs
+                if (gamedatas.champion == 0) {
+                    $('top_tab').textContent = 'Random Memory';
+                } else {
+                    $('top_tab').textContent = gamedatas.players[gamedatas.champion].name +"'s Champion Memory";
+                }
+                 $('current_tab').textContent = gamedatas.players[this.sentenceBuilder].name +"'s Challenger Memory";
                 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
@@ -976,6 +984,7 @@ define([
                 this.notifqueue.setSynchronous( 'addCardToSentence', 1000 );
                 dojo.subscribe('chooseRole', this, "notif_chooseRole");
                 dojo.subscribe('score', this, "notif_updateScore");
+                dojo.subscribe('winner', this, "notif_winner");
                 this.notifqueue.setSynchronous( 'score', 1000 );   // Wait 500 milliseconds after executing the playDisc handler
 
                 this.notifqueue.setSynchronous( 'voteSentence', 3000 );   // Wait 500 milliseconds after executing the playDisc handler
@@ -1049,7 +1058,7 @@ define([
                         dojo.addClass(role_icon_id, 'role_icon_0');
                     }
                 }
-
+                $('current_tab').textContent = notif.player_name +"'s Challenger Memory";   
                 // clear current sentence
                 console.log('Clear Current sentence:');
                 cards = dojo.query('div[id=current_sentence] div[id^=current_sentence_]');
@@ -1086,6 +1095,11 @@ define([
                 var color = card.type;
                 var value = card.type_arg;
                 this.playerHand.removeFromStockById(this.getCardUniqueId(color, value));
+                
+            },
+            notif_winner: function (notif) {
+                console.log('notifications winner');
+                $('top_tab').textContent = notif.player_name +"'s Champion Memory";
                 
             },
             notif_considerActions: function (notif) {

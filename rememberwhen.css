@@ -50,52 +50,6 @@
 	border: 2px solid red ! important;
 }
 
-/** Table layout **/
-/**
-#playertables {
-    position: relative;
-    width: 710px;
-    height: 340px;
-}
-
-.playertablename {
-    font-weight: bold;
-}
-
-.playertable {
-    position: absolute;
-    text-align: center;
-    width: 180px;
-    height: 130px;
-}
-
-.playertable_N {
-    left: 50%;
-    top: 0px;
-    margin-left: -90px; 
-}
-.playertable_S {
-    left: 50%;
-    bottom: 0px;
-    margin-left: -90px; 
-}
-.playertable_W {
-    left: 0px;
-    top: 50%;
-    margin-top: -55px; 
-}
-.playertable_E {
-    right: 0px;
-    top: 50%;
-    margin-top: -55px; 
-}
-.playertablecard {
-    display: inline-block;
-    position: relative;
-    margin-top: 5px;
-    width: 150px;
-    height: 150px;
-} **/
 .invisible {
 	display: none;
 }
@@ -126,14 +80,19 @@ ul.tab li a {
     padding: 14px 16px;
     text-decoration: none;
     transition: 0.3s;
-    font-size: 17px;
+    font-size: 12px;
 }
 
 /* Change background color of links on hover */
-ul.tab li a:hover {color: #ddd;}
+ul.tab li a:hover {background-color: rgb(255,243,209);
+	
+	}
 
 /* Create an active/current tablink class */
-ul.tab li a:focus, .active {color: #ccc;}
+ul.tab li a:focus, .active {background-color: #ebd5bd;
+	border: 2px solid #ab957d;
+    
+		}
 
 /* Style the tab content */
 .tabcontent {

@@ -193,7 +193,7 @@ define([
                 this.currentSentence = gamedatas.current_sentence;
                 //start with current sentence visible 
                 dojo.addOnLoad( function() {
-                    target = $('firstTab');
+                    target = $('current_tab');
                     var evt = { currentTarget: target};
                     showSentence(evt,'current_sentence');
                     });
@@ -240,6 +240,13 @@ define([
                 this.addTooltipToClass('role_icon_6', _('Contributed blue card (# is this player\'s guess)'), '');
                 this.addTooltipToClass('role_icon_7', _('Contributed red card (# is this player\'s guess)'), '');
                 this.addTooltipToClass('role_icon_8', _('Contributed pink card (# is this player\'s guess)'), '');
+
+                this.addTooltip('top_tab', '', _('Show the champion\'s memory'));
+                this.addTooltip('current_tab', '', _('Show the challenger\'s memory'));
+                this.addTooltip('top_sentence', _('In the first round, this is a random memory. At the end of each round, the memory that wins the vote becomes the new champion memory.'),'');
+                this.addTooltip('current_sentence', _('Each round, the active player builds a memory here. The other players help with their cards.  At the end of the round, there is a vote to see if it can beat the champion memory.'), '');
+                
+
 
                 //this.addTooltipToClass('rotatable', _(''), _("Rotate"));
 

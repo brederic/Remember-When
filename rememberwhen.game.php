@@ -1364,11 +1364,11 @@ class RememberWhen extends Table
         foreach( $players as $player_id => $player )
         {
             // calculate vote stat
-            $votes_for = floatval(self::getStat('votes_for', $player_id));
-            $votes_against = floatval(self::getStat('votes_against', $player_id));
+            $votes_for = self::getStat('votes_for', $player_id);
+            $votes_against = self::getStat('votes_against', $player_id);
             self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
-            $elections_won = floatval(self::getStat('elections_won', $player_id));
-            $elections_count = floatval(self::getStat('total_elections', $player_id));
+            $elections_won = self::getStat('elections_won', $player_id);
+            $elections_count = self::getStat('total_elections', $player_id);
             self::setStat($elections_won/elections_count, 'election_percent', $player_id);
          }
             

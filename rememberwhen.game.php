@@ -1240,6 +1240,9 @@ class RememberWhen extends Table
             $old = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
             $this->cards->moveCards($old, 'discard');
             self::incStat(1, 'elections_won', $topSentenceBuilder);
+            $win=$top_sentence_votes;
+            $lose=$current_sentence_votes;
+            $message = '${player_name}\'s memory was voted the best, ${win}-${lose}. ${player_name} remains the champion. Congratulations!'; 
          
         } else {  // current sentence won!!
             self::trace('Current memory won!');
@@ -1261,6 +1264,9 @@ class RememberWhen extends Table
             //}
             self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
             
+            $win=$current_sentence_votes;
+            $lose=$top_sentence_votes;
+            $message = '${player_name}\'s memory was voted the best, ${win}-${lose}. ${player_name} is the new champion. Congratulations!'; 
         }
         // And notify
         $table = array();
@@ -1331,6 +1337,20 @@ class RememberWhen extends Table
                     "footer" => '<div>T = tie-break vote</div>',
                     "closing" =>clienttranslate( 'Continue')
                 ) ); 
+
+        self::notifyAllPlayers( 
+                            'message', 
+                            clienttranslate($message ), 
+                            array(
+                                'i18n' => array( 'color_displayed', 'value_displayed' ),
+                                
+                                'player_name' => $winnerName,
+                                'win' => $win,
+                                'lose' => $lose,
+                                
+                            ) 
+                        );  
+        
         
         if ($winner == 2) {
             $this->notifyAllPlayers( "newTop", '', array(

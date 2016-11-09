@@ -1456,12 +1456,12 @@ class RememberWhen extends Table
             self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
             $elections_won = self::getStat('elections_won', $player_id);
             $elections_count = self::getStat('total_elections', $player_id);
-            self::setStat($elections_won/elections_count, 'election_percent', $player_id);
+            self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
          }
         // And notify
             self::notifyAllPlayers( 
                 'finalScore', 
-                clienttranslate("${playerName} created the best memory for this game.  Congratulations!!  Let's hear it one more time:"), 
+                clienttranslate('${player_name} created the best memory for this game.  Congratulations!!  Let\'s hear it one more time:'), 
                 array(
                     
                     'player_name' => $topMemoryName
@@ -1479,14 +1479,14 @@ class RememberWhen extends Table
             ); 
             self::notifyAllPlayers( 
                 'finalScore', 
-                clienttranslate("Once again, congratulations to ${playerName}!"), 
+                clienttranslate('Once again, congratulations to ${player_name}!'), 
                 array(
                     
                     'player_name' => $topMemoryName
                     
                 ) 
             );
-             $this->gamestate->nextState("gameOver");
+             $this->gamestate->nextState("gameover");
         
     }
 //////////////////////////////////////////////////////////////////////////////

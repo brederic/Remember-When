@@ -454,7 +454,7 @@ class RememberWhen extends Table
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
-                'articcle' => $article,
+                'article' => $article,
 				'value_displayed' => $object,
                 'choice' => $choice,
 				'color' => $card['type'],

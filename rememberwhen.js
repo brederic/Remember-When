@@ -216,11 +216,13 @@ define([
 
                 // Put names on sentence board tabs
                 if (gamedatas.champion == 0) {
-                    $('top_tab').textContent = 'Random Memory';
+                    dojo.place('<span>Random Memory</span>',$('top_tab'),'only');
                 } else {
-                    $('top_tab').textContent = gamedatas.players[gamedatas.champion].name +"'s Champion Memory";
+                    dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[gamedatas.champion].color+';">'+ 
+                        gamedatas.players[gamedatas.champion].name +'</span>\'s Champion Memory</span>', $('top_tab'), 'only');
                 }
-                 $('current_tab').textContent = gamedatas.players[this.sentenceBuilder].name +"'s Challenger Memory";
+                dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[this.sentenceBuilder].color+';">'+ 
+                    gamedatas.players[this.sentenceBuilder].name +'</span>\'s Challenger Memory</span>', $('current_tab'), 'only');
                 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
@@ -993,7 +995,8 @@ define([
                 this.notifqueue.setSynchronous( 'revealCurrentSentence', 2000 );   // Wait 500 milliseconds after executing the playDisc handler
     
                 dojo.subscribe('newTop', this, "notif_newTopSentence");
-
+                this.notifqueue.setSynchronous( 'finalScore', 3000 );   // Wait 500 milliseconds after executing the playDisc handler
+    
 
             },
 
@@ -1057,8 +1060,8 @@ define([
                     } else {
                         dojo.addClass(role_icon_id, 'role_icon_0');
                     }
-                }
-                $('current_tab').textContent = notif.player_name +"'s Challenger Memory";   
+                }  
+                dojo.place("<span>"+notif.args.player_name +"'s Challenger Memory</span>", $('current_tab'), "only"); 
                 // clear current sentence
                 console.log('Clear Current sentence:');
                 cards = dojo.query('div[id=current_sentence] div[id^=current_sentence_]');
@@ -1099,7 +1102,7 @@ define([
             },
             notif_winner: function (notif) {
                 console.log('notifications winner');
-                $('top_tab').textContent = notif.player_name +"'s Champion Memory";
+                dojo.place("<span>" + notif.args.player_name +"'s Champion Memory</span>", $('top_tab'),"only");
                 
             },
             notif_considerActions: function (notif) {

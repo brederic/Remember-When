@@ -163,7 +163,7 @@ class RememberWhen extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_name name, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_name name, player_color color, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
@@ -1378,9 +1378,13 @@ class RememberWhen extends Table
     }
     function stCalcStats()
     {
+
         self::setStat(TRUE, 'best_memory', self::getGameStateValue('topSentenceBuilder'));
         // calculate percentage stats for each doesPlayerHaveCardType
         $players = self::loadPlayersBasicInfos();	
+        $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
+        $topMemoryName = $players[ $topSentenceBuilder ]['player_name'];
+       
         
         foreach( $players as $player_id => $player )
         {
@@ -1392,7 +1396,34 @@ class RememberWhen extends Table
             $elections_count = self::getStat('total_elections', $player_id);
             self::setStat($elections_won/elections_count, 'election_percent', $player_id);
          }
-            
+        // And notify
+            self::notifyAllPlayers( 
+                'finalScore', 
+                clienttranslate("${playerName} created the best memory for this game.  Congratulations!!  Let's hear it one more time:"), 
+                array(
+                    
+                    'player_name' => $topMemoryName
+                    
+                ) 
+            );   
+            self::notifyAllPlayers( 
+                'finalScore', 
+                clienttranslate('${player_name}\'s champion memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' => $topMemoryName
+   
+                ) 
+            ); 
+            self::notifyAllPlayers( 
+                'finalScore', 
+                clienttranslate("Once again, congratulations to ${playerName}!☺"), 
+                array(
+                    
+                    'player_name' => $topMemoryName
+                    
+                ) 
+            );
         
     }
 //////////////////////////////////////////////////////////////////////////////

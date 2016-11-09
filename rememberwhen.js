@@ -440,7 +440,8 @@ define([
                 } //
                 self.connects[ node.id ][idx] = dojo.connect( node, evt, function(evt) { 
                         console.log(evt.target);
-                        card_block = evt.target; // we may have to get more fancy than this
+                        card_block = evt.target; 
+                        if (card_block == null) return;
                         
                         while (!dojo.hasClass(card_block, 'cardontable')){
                             card_block = card_block.parentNode;
@@ -543,8 +544,12 @@ define([
             },
              onCardClick: function (evt) {
                  console.log(evt.target);
-                 card_block = evt.target; // we may have to get more fancy than this
-                 
+                 card_block = evt.target; 
+                 if (card_block == null) return;
+                while (!dojo.hasClass(card_block, 'cardontable')){
+                    card_block = card_block.parentNode;
+                }
+                
                 var id = card_block.id;
 
                 console.log('onClick ' + id  + dojo.getAttr(card_block, 'classes')); 
@@ -876,50 +881,56 @@ define([
        
 
             onPlayerHandSelectionChanged: function (evt) {
+                try {    
+                    // get the cards that the stock thinks are highlighted                
+                    var items = this.playerHand.getSelectedItems();
 
-                // get the cards that the stock thinks are highlighted                
-                var items = this.playerHand.getSelectedItems();
+                    if (items.length > 0) { // a card was clicked 
+                    
+                        console.log('chooseAction with selection');
+                        console.log(items[0]);
+                        var id = items[0]['id'];
 
-                if (items.length > 0) { // a card was clicked 
-                   
-                    console.log('chooseAction with selection');
-                    console.log(items[0]);
-                    var id = items[0]['id'];
+                        // get the card block
+                        card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
+                        console.log(card_node);
 
-                    // get the card block
-                    card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
-                    console.log(card_node);
+                        if (card_node.id == this.selectedCard) { // the click was on the currently selected card
+                            // rotate selected card
+                            var evt = {'target': card_node};
+                            this.onCardClick(evt);
+                        } else { // we have a new selected card, it should be highlighted, not rotated
+                            this.selectedCard = card_node.id;
+                        }
+                        
 
-                    if (card_node.id == this.selectedCard) { // the click was on the currently selected card
+
+                    } else { // the same card was clicked (the stock interprets this as a deselect)
+                        // get the currently selected card
+                        card_block = $(this.selectedCard);
                         // rotate selected card
-                        var evt = {'target': card_node};
+                        var evt = {'target': card_block};
                         this.onCardClick(evt);
-                    } else { // we have a new selected card, it should be highlighted, not rotated
-                        this.selectedCard = card_node.id;
-                    }
                     
 
-
-                } else { // the same card was click (the stock interpret this as a deselect)
-                    // get the currently selected card
-                    card_block = $(this.selectedCard);
-                    // rotate selected card
-                    var evt = {'target': card_block};
-                    this.onCardClick(evt);
-                   
-
-                }
-                // update selection styles
-                console.log('fixing classes on hand stock');
-                items = dojo.query('div[id^=hand_]');//this.playerHand.getAllItems();
-                console.log(items);
-                console.log('selected:' +this.selectedCard);
-                items.forEach( function (item) {
-                    console.log(item.id);
-                    dojo.removeClass(item, 'myitem_selected');
                     }
-                );
-                dojo.addClass(this.selectedCard, 'myitem_selected');
+                    // update selection styles
+                    console.log('fixing classes on hand stock');
+                    items = dojo.query('div[id^=hand_]');//this.playerHand.getAllItems();
+                    console.log(items);
+                    console.log('selected:' +this.selectedCard);
+                    items.forEach( function (item) {
+                        console.log(item.id);
+                        dojo.removeClass(item, 'myitem_selected');
+                        }
+                    );
+                    if (_('this.selectedCard')!= null) {
+                        dojo.addClass(this.selectedCard, 'myitem_selected');
+                    }
+                } catch (err) {
+                    console.log("Error in onPlayerHandSelectionChanged");
+                    console.error(err);
+                }
             },
 
 

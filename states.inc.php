@@ -161,7 +161,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCountVotes",
-        "transitions" => array( "tieBreak" => 52, "newHand" => 20 , "gameOver" => 99 )
+        "transitions" => array( "tieBreak" => 52, "newHand" => 20 , "stats" => 91 )
     ),    
    
 	52 => array(
@@ -176,7 +176,8 @@ $machinestates = array(
         "name" => "calcStats",
         "description" => clienttranslate("Calculating statistics"),
         "type" => "game",
-        "action" => "stCalcStats"
+        "action" => "stCalcStats",
+        "transitions" => array( "gameover" => 99 )
     ),
     
     // Final state.

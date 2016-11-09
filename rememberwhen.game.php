@@ -1434,7 +1434,7 @@ class RememberWhen extends Table
         if ( self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {
             $this->gamestate->nextState("newHand");
         } else {
-             $this->gamestate->nextState("gameOver");
+             $this->gamestate->nextState("stats");
         }
  
     }
@@ -1479,13 +1479,14 @@ class RememberWhen extends Table
             ); 
             self::notifyAllPlayers( 
                 'finalScore', 
-                clienttranslate("Once again, congratulations to ${playerName}!☺"), 
+                clienttranslate("Once again, congratulations to ${playerName}!"), 
                 array(
                     
                     'player_name' => $topMemoryName
                     
                 ) 
             );
+             $this->gamestate->nextState("gameOver");
         
     }
 //////////////////////////////////////////////////////////////////////////////

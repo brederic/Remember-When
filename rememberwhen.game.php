@@ -434,18 +434,27 @@ class RememberWhen extends Table
                     
             ";
         self::DbQuery( $sql );
+        // handle (MY) cards
+        if (preg_match('/^\(MY\)/', $object)) {
+            $array = explode(" ", $object);
+            $object = array_pop($array);
+            $article = clienttranslate('their');
+        } else {
+            $article = clienttranslate('a');
+        }
 	
 
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} recalls an exploit that involved a ${html}${value_displayed}${endHtml}.'), 
+			clienttranslate('${player_name} recalls an exploit that involved ${article} ${html}${value_displayed}${endHtml}.'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'value' => $card['type_arg'],
+                'articcle' => $article,
 				'value_displayed' => $object,
                 'choice' => $choice,
 				'color' => $card['type'],
@@ -531,12 +540,21 @@ class RememberWhen extends Table
         self::DbQuery( $sql );
 
         $object = self::getUniqueValueFromDB("select object from data where data_id = 1");
+        // handle (MY) cards
+        if (preg_match('/^\(MY\)/', $object)) {
+            $array = explode(" ", $object);
+            $object = array_pop($array);
+            $article = clienttranslate('my');
+        } else {
+            $article = clienttranslate('the');
+        }
+	
         
         
         // And notify
         self::notifyAllPlayers( 
 			'addCardToSentence', 
-			clienttranslate('${player_name} vaguely remembers, "I ${html}${verbed}${endHtml} the ${object}." But when? where? why? how?'), 
+			clienttranslate('${player_name} vaguely remembers, "I ${html}${verbed}${endHtml} ${article} ${object}." But when? where? why? how?'), 
 			array(
 				'i18n' => array( 'color_displayed', 'value_displayed' ),
 				'card_id' => $card['id'],
@@ -548,6 +566,7 @@ class RememberWhen extends Table
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'card' => $card,
+                'article'=> $article,
                 'object' => $object,
                 'html' => "<span class='role_icon_".$card['type']."'><strong>",
                 'endHtml' => "</strong></span>"
@@ -622,13 +641,23 @@ class RememberWhen extends Table
             ";
         self::DbQuery( $sql );
         $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+        $object = $data['object'];
+         // handle (MY) cards
+        if (preg_match('/^\(MY\)/', $object)) {
+            $array = explode(" ", $object);
+            $object = array_pop($array);
+            $article = clienttranslate('their');
+        } else {
+            $article = clienttranslate('the');
+        }
+	
         $message='ERROR with message';
         switch ($card['type']) {
             case 1:
             case 2:
             case 3:
             case 8:
-                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object}. ';
+                $message = '${player_name} guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} ${article} ${object}. ';
                 break;
             case 5:
             case 6:
@@ -651,7 +680,8 @@ class RememberWhen extends Table
 				'color' => $card['type'],
 				'color_displayed' => $this->colors[ $card['type'] ]['name'],
                 'verb' => $data['verb'],
-                'object' => $data['object'],
+                'article' => $article,
+                'object' => $object,
                 'html' => "<span class='role_icon_".$card['type']."'><strong>",
                 'endHtml' => "</strong></span>"
 			) 
@@ -709,8 +739,19 @@ class RememberWhen extends Table
     function buildSentence($cards) {
         $sentence = "Remember When... ";
         foreach($cards as $card) {
+            if ($card['type'] == 7) {// object
             
-            $sentence .= $card['text_'.$card['location_arg']];
+                $object = $card['text_'.$card['location_arg']];
+                // handle (MY) cards
+                if (preg_match('/^\(MY\)/', $object)) {
+                    $array = explode(" ", $object);
+                    $object = array_pop($array);
+                    $sentence = str_replace('the', 'my', $sentence);
+                } 
+                $sentence .= $object;
+            } else {
+                $sentence .= $card['text_'.$card['location_arg']];
+            }
             // add stuff after
             switch ($card['type']) {
             case 1:
@@ -724,7 +765,7 @@ class RememberWhen extends Table
                 $sentence .= ', I ';
                 break;
             case 4:
-                $sentence .= ' the ';
+                $sentence .= " the ";
                 break;
             case 7:
                 $sentence .= ' because ';
@@ -777,13 +818,22 @@ class RememberWhen extends Table
                 $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
                 // notify everyone
                 $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+                 // handle (MY) cards
+                 $object= $data['object'];
+                if (preg_match('/^\(MY\)/', $object)) {
+                    $array = explode(" ", $object);
+                    $object = array_pop($array);
+                    $article = clienttranslate('their');
+                } else {
+                    $article = clienttranslate('the');
+                }
                 $message='ERROR with message';
                 switch ($player['contribution']) {
                     case 1:
                     case 2:
                     case 3:
                     case 8:
-                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} the ${object} and scores a point. ';
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} ${article} ${object} and scores a point. ';
                         break;
                     case 5:
                     case 6:
@@ -804,7 +854,8 @@ class RememberWhen extends Table
                         'score' => $score,
                         'choice' => $prediction,
                         'verb' => $data['verb'],
-                        'object' => $data['object'],
+                        'article' => $article,
+                        'object' => $object,
                         'html' => "<span class='role_icon_".$player['contribution']."'><strong>",
                         'endHtml' => "</strong></span>"
                         
@@ -1093,6 +1144,7 @@ class RememberWhen extends Table
                     break;
                 }
             }
+            
             // card types not found will be supplied from active players hand
             if (!$found) {
                 foreach ($current_player_hand as $card) {
@@ -1101,13 +1153,22 @@ class RememberWhen extends Table
                         // add card to sentence
                         $this->cards->moveCard($card['id'], 'current_sentence', $current_player_id);	
                         $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
+                         // handle (MY) cards
+                         $object = $data['object'];
+                        if (preg_match('/^\(MY\)/', $object)) {
+                            $array = explode(" ", $object);
+                            $object = array_pop($array);
+                            $article = clienttranslate('their');
+                        } else {
+                            $article = clienttranslate('the');
+                        }
                         $message='ERROR with message';
                         switch ($card['type']) {
                             case 1:
                             case 2:
                             case 3:
                             case 8:
-                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} they ${verb} the ${object} without help. ';
+                                $message = '${player_name} will have to recall ${html}${color_displayed}${endHtml} they ${verb} ${article} ${object} without help. ';
                                 break;
                             case 5:
                             case 6:
@@ -1129,7 +1190,8 @@ class RememberWhen extends Table
                                 'color' => $card['type'],
                                 'color_displayed' => $this->colors[ $card['type'] ]['name'],
                                 'verb' => $data['verb'],
-                                'object' => $data['object'],
+                                'article' => $article,
+                                'object' => $object,
                                 'html' => "<span class='role_icon_".$card['type']."'><strong>",
                                 'endHtml' => "</strong></span>"
                             ) 

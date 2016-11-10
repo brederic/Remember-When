@@ -1131,6 +1131,7 @@ class RememberWhen extends Table
         $sentence = $this->cards->getCardsInLocation('current_sentence');
         $players = self::loadPlayersBasicInfos();	
 		$current_player_name = $players[ $current_player_id ]['player_name'];
+        $this-> giveExtraTime( $current_player_id);
 		
         // find any card types not already in the current sentence
         foreach( $this->colors as  $type => $color ) // spade, heart, diamond, club

@@ -37,7 +37,7 @@
 
 <!--</div> -->
 
-<div id="sentence_board" class="floatL whiteblock ">
+<div id="sentence_board" class="floatC whiteblock ">
 	<ul class="tab">
 	  <li><a href="#" class="tablinks" id="top_tab" onclick="showSentence(event, 'top_sentence')">Top Memory</a></li>
 	  <li><a href="#" class="tablinks active" id="current_tab" onclick="showSentence(event, 'current_sentence')">Current Memory</a></li>
@@ -86,7 +86,7 @@ function showSentence(evt, cityName) {
     }
 
     // Show the current tab, and add an "active" class to the link that opened the tab
-    document.getElementById(cityName).style.display = "block";
+    document.getElementById(cityName).style.display = "inline-block";
     evt.currentTarget.className += " active";
 }
  
@@ -94,7 +94,7 @@ var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="$
 						
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
 
-var jstpl_role = '<div id="role_icon_p${player}" class="role_icon role_icon_${color}">${role}</div>';
+var jstpl_role = '<div class="boardblock"><div id="role_icon_p${player}" class="role_icon role_icon_${color}">${role}</div></div>';
 
 var jstpl_card_table = '<div class="divTable" id="tip_${id}">\
 	<div class="divTableBody tip_${pos}">\

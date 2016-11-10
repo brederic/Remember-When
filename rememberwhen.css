@@ -54,12 +54,16 @@
 	display: none;
 }
 
-.floatL {
-	float: left;
-	height: 500px;
+.floatC {
+	
+	height: 475px;
+	align-content: center;
+	justify-content: center;
+	text-align: center;
+    
 }
 
-/* Style the list */
+/* Tab Row */
 ul.tab {
     list-style-type: none;
     margin: 0;
@@ -98,92 +102,95 @@ ul.tab li a:focus, .active {background-color: #ebd5bd;
 .tabcontent {
     display: none;
     padding: 6px 12px;
-    border: 1px solid #ccc;
+    
     border-top: none;
 }	
 /*** sentence on table ***/
 .sentenceboard {
-	float: left;
+	align-content: center;
+	position: relative;
     width: 750px;
-    height: 380px; 
+    height: 388px; 
+	margin: 10px;
    
     /**height: 762px; **/
 	background-size: 750px 400px;
- background-image: url('img/sentence.png'); 
+ background-image: url('img/sentence.png');
+ background-position: center; 
+ background-repeat: no-repeat;
 
 }
 .hand {
 	clear: both;
 }
 #spot_1 {
-	top: 140px;
+	top: 61px;
 	left: 59px;
 }
 #spot_2 {
-	top: 140px;
+	top: 61px;
 	left: 221px;
 }
 #spot_3 {
-	top: 140px;
+	top: 61px;
 	left: 396px;
 }
 #spot_4 {
-	top: 140px;
+	top: 61px;
 	left: 558px;
 }
 #spot_5 {
-	top: 302px;
+	top: 223px;
 	left: 34px;
 }
 
 #spot_6 {
-	top: 302px;
+	top: 223px;
 	left: 200px;
 }
 
 #spot_7 {
-	top: 302px;
+	top: 223px;
 	left: 367px;
 }
 
 #spot_8 {
-	top: 302px;
+	top: 223px;
 	left: 586px;
 }
-
 .spot_1 {
-	top: 140px;
+	top: 61px;
 	left: 59px;
 }
 .spot_2 {
-	top: 140px;
+	top: 61px;
 	left: 221px;
 }
 .spot_3 {
-	top: 140px;
+	top: 61px;
 	left: 396px;
 }
 .spot_4 {
-	top: 140px;
+	top: 61px;
 	left: 558px;
 }
 .spot_5 {
-	top: 302px;
+	top: 223px;
 	left: 34px;
 }
 
 .spot_6 {
-	top: 302px;
+	top: 223px;
 	left: 200px;
 }
 
 .spot_7 {
-	top: 302px;
+	top: 223px;
 	left: 367px;
 }
 
 .spot_8 {
-	top: 302px;
+	top: 223px;
 	left: 586px;
 }
 

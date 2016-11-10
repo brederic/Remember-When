@@ -157,6 +157,7 @@ class RememberWhen extends Table
     */
     protected function getAllDatas() 
     {
+        
         $result = array( 'players' => array() );
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!

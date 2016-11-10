@@ -75,6 +75,9 @@
         }
         
         */
+        // Display a translated version of "My hand" at the place of the variable in the template
+        $this->tpl['MY_HAND'] = self::_("My hand");
+
 
 
 

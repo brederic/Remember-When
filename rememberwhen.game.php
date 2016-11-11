@@ -926,7 +926,7 @@ class RememberWhen extends Table
         
         
         // Continue
-        $this->gamestate->nextState( "" );
+        $this->gamestate->nextState( "arrangeSentence" );
     }
     
 
@@ -963,8 +963,9 @@ class RememberWhen extends Table
 
         // Make sure each player has one card  of each card type
         $players = self::loadPlayersBasicInfos();	
+        $active_player_id =  self::getActivePlayerId();
 
-        self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
+        self::setGameStateValue( 'playerBuildingSentence', $active_player_id);
         $this->setGameStateInitialValue( 'role', 0 );
         
 
@@ -972,9 +973,30 @@ class RememberWhen extends Table
                 'round' => self::getGameStateValue( 'currentRound'),
                 'roundCount' => self::getGameStateValue( 'totalRounds'),
                 'player_name' => self::getActivePlayerName(),
-                'active_player' => self::getActivePlayerId()
+                'active_player' => $active_player_id
 
             ) );
+         $sql = "
+            SELECT  player_zombie
+            FROM    player
+            WHERE     player_id = '$active_player_id'
+        ";
+        $zombie = self::getUniqueValueFromDB( $sql );
+        if ($zombie == 1) {
+             self::notifyAllPlayers('message', '${player_name} has dropped out and will pass this round.', array(
+                'round' => self::getGameStateValue( 'currentRound'),
+                'roundCount' => self::getGameStateValue( 'totalRounds'),
+                'player_name' => self::getActivePlayerName(),
+                'active_player' => $active_player_id
+
+            ) );
+            
+            self::activeNextPlayer();
+        
+            $this->gamestate->nextState( "zombiePass" );
+            return;
+
+        }
 
         // clear all previous contributions
             $sql = "
@@ -1026,7 +1048,7 @@ class RememberWhen extends Table
         
         //self::setGameStateValue( 'alreadyPlayedHearts', 0 );
 
-        $this->gamestate->nextState( "" );
+        $this->gamestate->nextState( "chooseObject" );
     } 
     
     function stDrawActions()
@@ -1209,7 +1231,7 @@ class RememberWhen extends Table
             }
 			
 		}
-        $this->gamestate->nextState("");
+        $this->gamestate->nextState("completeSentence");
  
     }
 
@@ -1267,6 +1289,14 @@ class RememberWhen extends Table
                     ";
             $winner = self::getUniqueValueFromDB( $sql );
             if ($winner == 0) {  // the active player will have to vote
+                // mark guess = 2 for tiebreaker only
+                $sql = "
+                        UPDATE  player
+                        SET     
+                                vote_type = 2
+                        WHERE player_id = $currentSentenceBuilder
+                    ";
+                self::DbQuery( $sql );
                 $this->gamestate->nextState("tieBreak");
                 // notify
                 self::notifyAllPlayers( "tieBreak", clienttranslate( 'There is a tie. ${player_name} will have to break the tie.' ), array(
@@ -1455,10 +1485,12 @@ class RememberWhen extends Table
             // calculate vote stat
             $votes_for = self::getStat('votes_for', $player_id);
             $votes_against = self::getStat('votes_against', $player_id);
-            self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
+            if ($votes_for+$votes_against > 0)
+                self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
             $elections_won = self::getStat('elections_won', $player_id);
             $elections_count = self::getStat('total_elections', $player_id);
-            self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
+            if ($elections_count > 0)
+                self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
          }
         // And notify
             self::notifyAllPlayers( 
@@ -1510,6 +1542,9 @@ class RememberWhen extends Table
         if ($state['type'] == "activeplayer") {
             switch ($statename) {
                 default:
+                    // change Active Player
+                    self::activeNextPlayer();
+        
                     $this->gamestate->nextState( "zombiePass" );
                 	break;
             }
@@ -1527,6 +1562,7 @@ class RememberWhen extends Table
             self::DbQuery( $sql );
 
             $this->gamestate->updateMultiactiveOrNextState( '' );
+            
             return;
         }
 

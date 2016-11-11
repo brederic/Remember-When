@@ -67,7 +67,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "stNewHand",
         "updateGameProgression" => true,   
-        "transitions" => array( "" => 21 )
+        "transitions" => array( "chooseObject" => 21, "zombiePass" => 20 )
     ),  
 	
 	21 => array(
@@ -77,7 +77,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRandomObject" ),
-        "transitions" => array( "chooseRandomObject" => 28 )
+        "transitions" => array( "chooseRandomObject" => 28, "zombiePass"  => 20)
     ), 	 
     28 => array(
         "name" => "drawActions",
@@ -93,7 +93,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseAction" ),
-        "transitions" => array( "chooseAction" => 22 )
+        "transitions" => array( "chooseAction" => 22, "zombiePass"  => 20 )
     ), 	
     22 => array(
         "name" => "chooseRole",
@@ -102,7 +102,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRole" ),
-        "transitions" => array( "chooseRole" => 30 )
+        "transitions" => array( "chooseRole" => 30, "zombiePass"  => 20 )
     ), 	
 
     30 => array(       
@@ -122,7 +122,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCompleteSentence",
-        "transitions" => array( "" => 32)
+        "transitions" => array( "completeSentence" => 32)
     ),  
 
 	32 => array(
@@ -132,17 +132,10 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "arrangeSentence" ),
-        "transitions" => array( "arrangeSentence" => 50 )
+        "transitions" => array( "arrangeSentence" => 50, "zombiePass"  => 20 )
     ), 	
 
-    
-    40 => array(
-        "name" => "scoreSentence",
-        "description" => "",
-        "type" => "game",
-        "action" => "stScoreSentence",
-        "transitions" => array( "" => 50  )
-    ),        
+   
 
     
     50 => array(       
@@ -170,7 +163,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must vote for the best memory.'),
         "type" => "activeplayer",
         "possibleactions" => array( "vote" ),
-        "transitions" => array( "vote" => 51 )
+        "transitions" => array( "vote" => 51, "zombiePass"  => 20 )
     ), 	
     91 => array(
         "name" => "calcStats",

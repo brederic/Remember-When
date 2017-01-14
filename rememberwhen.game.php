@@ -22,7 +22,7 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 class RememberWhen extends Table
 {
-	function RememberWhen( )
+	function __construct( )
 	{
         	
  
@@ -1328,7 +1328,7 @@ class RememberWhen extends Table
             self::trace('Current memory won!');
             if ($currentSentenceBuilder != 0) {
                 self::incStat(1, 'elections_won', $currentSentenceBuilder);
-            }
+            } 
             $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));

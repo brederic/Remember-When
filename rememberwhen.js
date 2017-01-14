@@ -216,7 +216,7 @@ define([
 
                 // Put names on sentence board tabs
                 if (gamedatas.champion == 0) {
-                    dojo.place('<span>Random Memory</span>',$('top_tab'),'only');
+                    dojo.place('<span>Random Champion Memory</span>',$('top_tab'),'only');
                 } else {
                     dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[gamedatas.champion].color+';">'+ 
                         gamedatas.players[gamedatas.champion].name +'</span>\'s Champion Memory</span>', $('top_tab'), 'only');
@@ -406,10 +406,10 @@ define([
                             break;
                          case 'vote':
                          case 'tieBreak':
-                              this.addActionButton('1', 'Top Sentence', 'onVote'); 
-                              this.addTooltip('1', _(''), _('Vote for the top sentence'));
-                              this.addActionButton('2', 'Current Sentence', 'onVote'); 
-                              this.addTooltip('2', _(''), _('Vote for the challenger\'s sentence'));
+                              this.addActionButton('1', 'Champion Memory', 'onVote'); 
+                              this.addTooltip('1', _(''), _('Vote for the champion\'s memory'));
+                              this.addActionButton('2', 'Challenger Memory', 'onVote'); 
+                              this.addTooltip('2', _(''), _('Vote for the challenger\'s memory'));
                               
                             break;
                         

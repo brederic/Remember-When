@@ -747,8 +747,10 @@ class RememberWhen extends Table
                 if (preg_match('/^\(MY\)/', $object)) {
                     $array = explode(" ", $object);
                     $object = array_pop($array);
-                    $sentence = str_replace('the', 'my', $sentence);
-                } 
+                    $sentence = str_replace('THE', 'my', $sentence);
+                } else {  // otherwise use normal 'the'
+                    $sentence = str_replace('THE', 'the', $sentence);
+                }
                 $sentence .= $object;
             } else {
                 $sentence .= $card['text_'.$card['location_arg']];
@@ -766,7 +768,7 @@ class RememberWhen extends Table
                 $sentence .= ', I ';
                 break;
             case 4:
-                $sentence .= " the ";
+                $sentence .= " THE "; // marker that may be replaced with a (MY) object
                 break;
             case 7:
                 $sentence .= ' because ';

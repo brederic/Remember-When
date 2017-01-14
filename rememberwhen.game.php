@@ -885,6 +885,8 @@ class RememberWhen extends Table
         }
         //notify card rotations
         // And notify
+            $this-> giveExtraTime( $active_player_id);
+
             self::notifyAllPlayers( 
                 'revealCurrentSentence', 
                 clienttranslate("It is time to vote! Which is best? "), 
@@ -1055,8 +1057,17 @@ class RememberWhen extends Table
         // Active all players (everyone has to choose 1 cards to give)
         $this->gamestate->setAllPlayersMultiactive();
 		// (and keep the current sentence builder non-active)
-		$player_id = self::getGameStateValue( 'playerBuildingSentence' );
-        $this->gamestate->setPlayerNonMultiactive( $player_id , "giveCards" );
+		$active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
+        $this->gamestate->setPlayerNonMultiactive( $active_player_id , "giveCards" );
+        $players = self::loadPlayersBasicInfos();	
+        // give everybody except the active player time to choose cards   
+        foreach( $players as $player_id => $player ) {
+
+            if ($player_id != $active_player_id) {
+                    $this-> giveExtraTime( $player_id);
+                
+            }
+        }
 
     }
     
@@ -1304,15 +1315,19 @@ class RememberWhen extends Table
             // clear out current sentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('current_sentence'));
             $this->cards->moveCards($old, 'discard');
-            self::incStat(1, 'elections_won', $topSentenceBuilder);
+            if ($topSentenceBuilder != 0) {
+                self::incStat(1, 'elections_won', $topSentenceBuilder);
+            }
             $win=$top_sentence_votes;
             $lose=$current_sentence_votes;
             $message = '${player_name}\'s memory was voted the best, ${win}-${lose}. ${player_name} remains the champion. Congratulations!'; 
          
         } else {  // current sentence won!!
             self::trace('Current memory won!');
-             self::incStat(1, 'elections_won', $currentSentenceBuilder);
-          $winnerName = $currentMemoryName;
+            if ($currentSentenceBuilder != 0) {
+                self::incStat(1, 'elections_won', $currentSentenceBuilder);
+            }
+            $winnerName = $currentMemoryName;
             // clear out top sentence and replace it with current stCompleteSentence
             $old = $this->getCardIds($this->cards->getCardsInLocation('top_sentence'));
             $this->cards->moveCards($old, 'discard');

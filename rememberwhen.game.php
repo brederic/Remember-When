@@ -22,7 +22,7 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 class RememberWhen extends Table
 {
-	function __construct( )
+	function __construct( ) 
 	{
         	
  
@@ -817,8 +817,10 @@ class RememberWhen extends Table
             }
             if ($actual_choice == $prediction) {
                  // add to player score
-               self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
+                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$player['id']."'" );
+                self::DbQuery( "UPDATE player SET player_score=player_score+1 WHERE player_id='".$active_player_id."'" );
                 $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$player['id']."'");
+                $score_active = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$active_player_id."'");
                 // notify everyone
                 $data = self::getNonEmptyObjectFromDB( 'SELECT verb, object from data where data_id = 1');
                  // handle (MY) cards
@@ -836,11 +838,11 @@ class RememberWhen extends Table
                     case 2:
                     case 3:
                     case 8:
-                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} ${article} ${object} and scores a point. ';
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${active_player_name} ${verb} ${article} ${object} and scores a point for themselves and for ${active_player_name}. ';
                         break;
                     case 5:
                     case 6:
-                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb} and scores a point. ';
+                        $message = '${player_name} correctly guessed ${html}${color_displayed}${endHtml} ${object} ${active_player_name} ${verb} and scores a point for themselves and for ${active_player_name}. ';
                         break;
                 }
        
@@ -861,6 +863,19 @@ class RememberWhen extends Table
                         'object' => $object,
                         'html' => "<span class='role_icon_".$player['contribution']."'><strong>",
                         'endHtml' => "</strong></span>"
+                        
+                                
+
+                    ) 
+                );
+                
+                 self::notifyAllPlayers( 
+                    'score', 
+                    "", 
+                    array(
+                        'i18n' => array( 'color_displayed', 'value_displayed' ),
+                        'player_id' => $active_player_id,
+                        'score' => $score_active,
                         
                                 
 
@@ -1477,13 +1492,20 @@ class RememberWhen extends Table
             $elections_count = self::getStat('total_elections', $player_id);
             self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
          }
+        self::DbQuery( "UPDATE player SET player_score=player_score+2 WHERE player_id='".$topSentenceBuilder."'" );
+        $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$topSentenceBuilder."'");
+
         // And notify
+
             self::notifyAllPlayers( 
-                'finalScore', 
-                clienttranslate('${player_name} created the best memory for this game.  Congratulations!!  Let\'s hear it one more time:'), 
+                'score', 
+                clienttranslate('${player_name} created the best memory for this game and scores two bonus points.  Congratulations!!  Let\'s hear it one more time:'), 
                 array(
                     
-                    'player_name' => $topMemoryName
+                    'player_name' => $topMemoryName,
+                    'player_id' => $topSentenceBuilder,
+                    'score' => $score
+                
                     
                 ) 
             );   

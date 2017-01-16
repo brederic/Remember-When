@@ -253,8 +253,8 @@ define([
 
                 this.addTooltip('top_tab', '', _('Show the champion\'s memory'));
                 this.addTooltip('current_tab', '', _('Show the challenger\'s memory'));
-                this.addTooltip('top_sentence', _('In the first round, this is a random memory. At the end of each round, the memory that wins the vote becomes the new champion memory.'),'');
-                this.addTooltip('current_sentence', _('Each round, the active player builds a memory here. The other players help with their cards.  At the end of the round, there is a vote to see if it can beat the champion memory.'), '');
+                //this.addTooltip('top_sentence', _('In the first round, this is a random memory. At the end of each round, the memory that wins the vote becomes the new champion memory.'),'');
+                //this.addTooltip('current_sentence', _('Each round, the active player builds a memory here. The other players help with their cards.  At the end of the round, there is a vote to see if it can beat the champion memory.'), '');
                 
 
 
@@ -281,7 +281,7 @@ define([
                    
                     
                     case 'chooseAction':
-                        this.addTooltip('myhand', _('Available actions'), _('Select/Rotate a card'));
+                        //this.addTooltip('myhand', _('Available actions'), _('Select/Rotate a card'));
                         cards = dojo.query('div[id^="cardontable"]');
                         console.log(cards);
 
@@ -289,7 +289,7 @@ define([
                         break;
 
                      case 'giveCards':
-                        this.addTooltip('myhand', _('Cards in my hand'), _('Select/Rotate a card'));
+                        //this.addTooltip('myhand', _('Cards in my hand'), _('Select/Rotate a card'));
                         break;
                        
                     case 'vote':
@@ -894,6 +894,9 @@ define([
                         // get the card block
                         card_node = dojo.query('div[id=myhand_item_'+id+ '] > div')[0];
                         console.log(card_node);
+                        if (dojo.hasClass('myhand_item_'+id, 'invisible')) {
+                            return;
+                        }
 
                         if (card_node.id == this.selectedCard) { // the click was on the currently selected card
                             // rotate selected card
@@ -1235,10 +1238,12 @@ define([
 
                 this.scoreCtrl[ notif.args.player_id ].setValue( notif.args.score );
                  // also display guess
-                role_icon_id = 'role_icon_p'+ notif.args.player_id;
-                require(["dojo/html"], function(html){
-                    html.set(role_icon_id, notif.args.choice);
-                });
+                if (notif.args.choice) {
+                    role_icon_id = 'role_icon_p'+ notif.args.player_id;
+                    require(["dojo/html"], function(html){
+                        html.set(role_icon_id, notif.args.choice);
+                    });
+                }
             }
 
 

@@ -72,5 +72,5 @@ $gameinfos = array(
 // Games categories
 //  You can attribute any number of "tags" to your game.
 //  Each tag has a specific ID (ex: 22 for the category "Prototype", 101 for the tag "Science-fiction theme game")
-'tags' => array( 1 )
+'tags' => array( 2, 11, 22, 103, 200 )
 );

@@ -679,7 +679,7 @@ $this->values_label = array(
 
 		),
     3 => array( 
-		2 => "casually",
+2 => "casually",
 3 => "respectfully",
 4 => "justifiably",
 5 => "diplomatically",
@@ -888,7 +888,7 @@ $this->values_label = array(
 
 		),
     4 => array( 
-		2 => "caught",
+2 => "caught",
 3 => "scared",
 4 => "polished",
 5 => "plucked",
@@ -1519,7 +1519,7 @@ $this->values_label = array(
 
 		),
     6 => array( 
-		2 => "defiant",
+2 => "defiant",
 3 => "curved",
 4 => "wide",
 5 => "lean",
@@ -1926,7 +1926,7 @@ $this->values_label = array(
 
 		),
     7 => array( 
-		2 => "princess",
+2 => "princess",
 3 => "pit bull",
 4 => "glass",
 5 => "receptionist",
@@ -2437,7 +2437,7 @@ $this->values_label = array(
 
 		),
     8 => array( 
-		2 => "I had to get those voices out of my head.",
+2 => "I had to get those voices out of my head.",
 3 => "I wanted to wield it in battle.",
 4 => "I was crying out for attention.",
 5 => "I wanted to be part of that world.",

@@ -438,7 +438,8 @@ class RememberWhen extends Table
         // handle (MY) cards
         if (preg_match('/^\(MY\)/', $object)) {
             $array = explode(" ", $object);
-            $object = array_pop($array);
+            array_shift($array); // drop off (MY)
+            $object = implode(" ", $array);
             $article = clienttranslate('their');
         } else {
             $article = clienttranslate('a');
@@ -544,7 +545,8 @@ class RememberWhen extends Table
         // handle (MY) cards
         if (preg_match('/^\(MY\)/', $object)) {
             $array = explode(" ", $object);
-            $object = array_pop($array);
+            array_shift($array); // drop off (MY)
+            $object = implode(" ", $array);
             $article = clienttranslate('my');
         } else {
             $article = clienttranslate('the');
@@ -646,7 +648,8 @@ class RememberWhen extends Table
          // handle (MY) cards
         if (preg_match('/^\(MY\)/', $object)) {
             $array = explode(" ", $object);
-            $object = array_pop($array);
+            array_shift($array); // drop off (MY)
+            $object = implode(" ", $array);
             $article = clienttranslate('their');
         } else {
             $article = clienttranslate('the');
@@ -746,7 +749,8 @@ class RememberWhen extends Table
                 // handle (MY) cards
                 if (preg_match('/^\(MY\)/', $object)) {
                     $array = explode(" ", $object);
-                    $object = array_pop($array);
+                    array_shift($array); // drop off (MY)
+                    $object = implode(" ", $array);
                     $sentence = str_replace('THE', 'my', $sentence);
                 } else {  // otherwise use normal 'the'
                     $sentence = str_replace('THE', 'the', $sentence);
@@ -827,7 +831,8 @@ class RememberWhen extends Table
                  $object= $data['object'];
                 if (preg_match('/^\(MY\)/', $object)) {
                     $array = explode(" ", $object);
-                    $object = array_pop($array);
+                    array_shift($array); // drop off (MY)
+                    $object = implode(" ", $array);
                     $article = clienttranslate('their');
                 } else {
                     $article = clienttranslate('the');
@@ -1187,7 +1192,8 @@ class RememberWhen extends Table
                          $object = $data['object'];
                         if (preg_match('/^\(MY\)/', $object)) {
                             $array = explode(" ", $object);
-                            $object = array_pop($array);
+                            array_shift($array); // drop off (MY)
+                            $object = implode(" ", $array);
                             $article = clienttranslate('their');
                         } else {
                             $article = clienttranslate('the');

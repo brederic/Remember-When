@@ -302,6 +302,41 @@ define([
                             });
                         });
                             
+                        // tooltips to reversed cards
+                        var nodes = dojo.query('div[class*="reverse"]');
+                        var self = this;
+                        nodes.forEach( function (node, idx) {
+                            //console.log("Vote card cleanup:");
+                            //console.log(node);
+                            if (dojo.hasClass(node, "pos_1")) {
+                                position = 1;
+                            }if (dojo.hasClass(node, "pos_2")) {
+                                position = 2;
+                            }if (dojo.hasClass(node, "pos_3")) {
+                                position = 3;
+                            }if (dojo.hasClass(node, "pos_4")) {
+                                position = 4;
+                            }
+                            id=node['id'];
+                            //console.log("Position:" + position);
+                            //console.log("Id:" + id);
+
+                            query = 'div[id='+id+'] > div.text_';
+                        
+                            tooltip = self.format_block('jstpl_card_table', {
+                            id: id,
+                            pos: position,
+                            
+                            text_1: dojo.query(query+'1 > span')[0].textContent,
+                            text_2:  dojo.query(query+'2 > span')[0].textContent,
+                            text_3:  dojo.query(query+'3 > span')[0].textContent,
+                            text_4:  dojo.query(query+'4 > span')[0].textContent
+                            }); 
+                            self.addTooltipHtml( id, tooltip );
+                            
+                        });
+
+
                         dojo.query('.reverse').removeClass('reverse');
                         dojo.query('.rotatable').removeClass('rotatable');
                         dojo.query('.invisible').removeClass('invisible');
@@ -658,6 +693,8 @@ define([
                             //play face down
                             klass ='reverse';
                         }
+                    } else {
+                        klass='';
                     }
                 } else {
                     klass ='';
@@ -668,7 +705,7 @@ define([
                 
                 card_name = loc + '_' + card.id; 
                 
-                //console.log('playCardOnTable(' + card_name + ', ' + color + ', ' + card_id + ', ' + loc + ')');
+                console.log('playCardOnTable(' + card_name + ', ' + color + ', ' + card_id + ', ' + loc + ', ' + klass + ')');
                 //console.log(card);
                 
                 card_block = this.format_block('jstpl_cardontable', {
@@ -707,8 +744,9 @@ define([
                     text_2: card.text_2,
                     text_3: card.text_3,
                     text_4: card.text_4
-                });
-                this.addTooltipHtml( card_name, tooltip );
+                    });
+                    console.log("Adding tooltip to " + card_name + " in " + loc);
+                    this.addTooltipHtml( card_name, tooltip );
                 
                 }
                 if (loc == 'top_sentence') {
@@ -1033,6 +1071,24 @@ define([
                     card_block = $('current_sentence_' + card.id);
                     dojo.removeClass(card_block, 'pos_1 pos_2 pos_3 pos_4');
                     dojo.addClass(card_block, 'pos_'+card.location_arg);
+                    id = 'current_sentence_' + card.id;
+                    query = 'div[id='+id+'] > div.text_';
+                    console.log(dojo.query(query+'1 > span'));
+                    console.log(dojo.query(query+'1 > span')[0]);
+                    console.log(dojo.query(query+'1 > span')[0].textContent);
+                    tooltip = self.format_block('jstpl_card_table', {
+                        id: id,
+                        pos: newPos,
+                        
+                        text_1: dojo.query(query+'1 > span')[0].textContent,
+                        text_2:  dojo.query(query+'2 > span')[0].textContent,
+                        text_3:  dojo.query(query+'3 > span')[0].textContent,
+                        text_4:  dojo.query(query+'4 > span')[0].textContent
+                    }); 
+                    
+                    self.removeTooltip( id );
+                
+                    self.addTooltipHtml( id, tooltip );
                 }
 
                 this.setStandardTooltips();

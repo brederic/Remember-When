@@ -431,7 +431,7 @@ define([
                         case 'giveCards':
                               this.addActionButton('Select', 'Select', 'onGiveCard'); 
                               this.addTooltip('Select', _(''), _('Choose selected card from hand'));
-                              this.selectedCard = 0;
+                              //this.selectedCard = 0;
                         
                             break;
                         case 'arrangeSentence':
@@ -555,7 +555,9 @@ define([
 					var matchingCard = c;
                     // check if this card is currently selected and unselect it
                     if (dojo.getAttr(card_block, 'id') == this.selectedCard) {
+                        console.log("Deselecting cards in hand...");
 						this.playerHand.unselectAll();
+                        this.selectedCard = 0;
 					}
 					var id = 'myhand_item_'+matchingCard['id'];
 					console.log( 'Make invisible card of id: '+ c['id']+ ', type: ' + type );
@@ -961,7 +963,7 @@ define([
                     console.log(items);
                     console.log('selected:' +this.selectedCard);
                     items.forEach( function (item) {
-                        console.log(item.id);
+                        //console.log(item.id);
                         dojo.removeClass(item, 'myitem_selected');
                         }
                     );

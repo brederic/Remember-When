@@ -1468,7 +1468,14 @@ class RememberWhen extends Table
             ) 
         );
         // change Active Player
-        self::activeNextPlayer();
+        while (TRUE) {
+            self::activeNextPlayer();
+            if (self::isCurrentPlayerZombie()) {
+                self::incGameStateValue( 'currentRound', 1);
+            } else {
+                break;
+            }
+        }
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());
             
         if ( self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {

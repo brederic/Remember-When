@@ -1078,9 +1078,9 @@ define([
                     console.log(dojo.query(query+'1 > span'));
                     console.log(dojo.query(query+'1 > span')[0]);
                     console.log(dojo.query(query+'1 > span')[0].textContent);
-                    tooltip = self.format_block('jstpl_card_table', {
+                    tooltip = this.format_block('jstpl_card_table', {
                         id: id,
-                        pos: newPos,
+                        pos: card.location_arg,
                         
                         text_1: dojo.query(query+'1 > span')[0].textContent,
                         text_2:  dojo.query(query+'2 > span')[0].textContent,
@@ -1088,9 +1088,9 @@ define([
                         text_4:  dojo.query(query+'4 > span')[0].textContent
                     }); 
                     
-                    self.removeTooltip( id );
+                    this.removeTooltip( id );
                 
-                    self.addTooltipHtml( id, tooltip );
+                    this.addTooltipHtml( id, tooltip );
                 }
 
                 this.setStandardTooltips();

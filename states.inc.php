@@ -93,7 +93,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseAction" ),
-        "transitions" => array( "chooseAction" => 22 )
+        "transitions" => array( "chooseAction" => 22 , "zombiePass" => 53 )
     ), 	
     22 => array(
         "name" => "chooseRole",
@@ -102,7 +102,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRole" ),
-        "transitions" => array( "chooseRole" => 30 )
+        "transitions" => array( "chooseRole" => 30 , "zombiePass" => 53 )
     ), 	
 
     30 => array(       
@@ -132,7 +132,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "arrangeSentence" ),
-        "transitions" => array( "arrangeSentence" => 50 )
+        "transitions" => array( "arrangeSentence" => 50  , "zombiePass" => 53)
     ), 	
 
     
@@ -171,7 +171,7 @@ $machinestates = array(
         "type" => "activeplayer",
         "action" => "stTieBreak",
         "possibleactions" => array( "vote" ),
-        "transitions" => array( "vote" => 51 )
+        "transitions" => array( "vote" => 51 , "zombiePass" => 53 )
     ), 	
     
     53 => array(

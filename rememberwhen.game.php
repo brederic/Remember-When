@@ -972,7 +972,7 @@ class RememberWhen extends Table
         
         
         // Continue
-        $this->gamestate->nextState( "" );
+        $this->gamestate->nextState( "arrangeSentence" );
     }
     
 

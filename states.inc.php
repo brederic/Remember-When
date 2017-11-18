@@ -77,7 +77,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRandomObject" ),
-        "transitions" => array( "chooseRandomObject" => 28 )
+        "transitions" => array( "chooseRandomObject" => 28 , "zombiePass" => 53 )
     ), 	 
     28 => array(
         "name" => "drawActions",
@@ -161,7 +161,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCountVotes",
-        "transitions" => array( "tieBreak" => 52, "newHand" => 20 , "stats" => 91 )
+        "transitions" => array( "tieBreak" => 52, "endHand" => 53 , "stats" => 91 )
     ),    
    
 	52 => array(
@@ -172,6 +172,14 @@ $machinestates = array(
         "possibleactions" => array( "vote" ),
         "transitions" => array( "vote" => 51 )
     ), 	
+    
+    53 => array(
+        "name" => "endHand",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndHand",
+        "transitions" => array(  "newHand" => 20 , "stats" => 91 )
+    ),  
     91 => array(
         "name" => "calcStats",
         "description" => clienttranslate("Calculating statistics"),

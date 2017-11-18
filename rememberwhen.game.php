@@ -256,6 +256,12 @@ class RememberWhen extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+
+    //self::isZombie(self::getActivePlayerId()) // true if the active player is zombie, else false
+    
+    function isZombie($player_id) {
+       return self::getUniqueValueFromDB("SELECT player_zombie FROM player WHERE player_id=".$player_id);
+    }
 	
 		function doesPlayerHaveCardType($playerId, $cardType)
 	{
@@ -1104,6 +1110,14 @@ class RememberWhen extends Table
 
         // Who is NOT voting?
         $playersVoting = self::getPlayersNumber();
+        // adjust player count for zombies
+        $players = self::loadPlayersBasicInfos();	
+        foreach( $players as $player_id => $player ) {
+            if (self::isZombie($player_id)) {
+                $playersVoting--;
+            }
+        }
+            
         $topSentenceBuilder = self::getGameStateValue( 'topSentenceBuilder' );
         $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
         if ($topSentenceBuilder != 0 && $topSentenceBuilder != $currentSentenceBuilder) {
@@ -1461,6 +1475,10 @@ class RememberWhen extends Table
             'cards' => $this->populateCards($this->cards->getCardsInLocation('hand', $currentSentenceBuilder)),
             ) 
         );
+        $this->gamestate->nextState("endHand");
+    }
+ function stEndHand()
+        {
         // change Active Player
         self::activeNextPlayer();
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());
@@ -1484,14 +1502,16 @@ class RememberWhen extends Table
         
         foreach( $players as $player_id => $player )
         {
-            // calculate vote stat
-            $votes_for = self::getStat('votes_for', $player_id);
-            $votes_against = self::getStat('votes_against', $player_id);
-            self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
-            $elections_won = self::getStat('elections_won', $player_id);
-            $elections_count = self::getStat('total_elections', $player_id);
-            self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
-         }
+            if (!self::isZombie($player_id)) {
+                // calculate vote stat
+                $votes_for = self::getStat('votes_for', $player_id);
+                $votes_against = self::getStat('votes_against', $player_id);
+                self::setStat($votes_for/($votes_for+$votes_against), 'votes_percent', $player_id);
+                $elections_won = self::getStat('elections_won', $player_id);
+                $elections_count = self::getStat('total_elections', $player_id);
+                self::setStat($elections_won/$elections_count, 'election_percent', $player_id);
+            }
+        }
         self::DbQuery( "UPDATE player SET player_score=player_score+2 WHERE player_id='".$topSentenceBuilder."'" );
         $score = self::getUniqueValueFromDB("select player_score from player WHERE player_id='".$topSentenceBuilder."'");
 

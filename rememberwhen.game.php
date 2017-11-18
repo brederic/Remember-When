@@ -38,6 +38,7 @@ class RememberWhen extends Table
              "role" => 14, // 0 = Undecided,  1 = Hero, 2 = Villain
              "currentRound" => 15,
              "totalRounds" => 16,
+             "championRole" => 17, // 0 = Undecided,  1 = Hero, 2 = Villain
         
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
@@ -99,8 +100,9 @@ class RememberWhen extends Table
         // Init global values with their initial values
         $this->setGameStateInitialValue( 'playerBuildingSentence', 0 );
         $this->setGameStateInitialValue( 'topSentenceBuilder', 0 );
-        $this->setGameStateInitialValue( 'role', 0 );
+        $this->setGameStateInitialValue( 'role', 0 ); // 1 = Hero, 2 = Villain
         $this->setGameStateInitialValue( 'currentRound', 0 );
+        $this->setGameStateInitialValue( 'championRole', 0 ); // 1 = Hero, 2 = Villain
         
         if (count($players) < 6) {
             $this->setGameStateInitialValue( 'totalRounds', count($players) *2 );
@@ -816,12 +818,27 @@ class RememberWhen extends Table
             $active_player_id = self::getGameStateValue( 'playerBuildingSentence' );
             $active_player_name = $players[ $active_player_id ]['player_name'];
             $top_player_id = self::getGameStateValue( 'topSentenceBuilder' );
+            $champion_role_text = "";
             if ($top_player_id == 0) {
                 $top_player_name = "Random";
                 $champion_sentence_announcement='Random memory: ${sentence} ';
             } else {
                 $top_player_name = $players[ $top_player_id ]['player_name'];
-                $champion_sentence_announcement='${player_name}\'s champion memory: ${sentence} ';
+                $champion_sentence_announcement='${player_name}\'s ${champion_role_text} champion memory: ${sentence} ';
+                $champion_role = self::getGameStateValue( 'championRole' );
+                if ( $champion_role == 1) {
+                    $champion_role_text = "heroic";
+                } else if ( $champion_role == 2) {
+                    $champion_role_text = "villainous";
+                } 
+            }
+            $challenger_role = self::getGameStateValue( 'role' );
+            if ( $challenger_role == 1) {
+                $challenger_role_text = "heroic";
+            } else if ( $challenger_role == 2) {
+                $challenger_role_text = "villainous";
+            } else {
+                $challenger_role_text = "";
             }
             if ($actual_choice == $prediction) {
                  // add to player score
@@ -927,7 +944,8 @@ class RememberWhen extends Table
                 clienttranslate($champion_sentence_announcement), 
                 array(
                     'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
-                    'player_name' => $top_player_name
+                    'player_name' => $top_player_name,
+                    'champion_role_text' => $champion_role_text
    
                 ) 
             );  
@@ -943,10 +961,11 @@ class RememberWhen extends Table
             );  
             self::notifyAllPlayers( 
                 'voteSentence', 
-                clienttranslate('${player_name}\'s challenger memory: ${sentence} '), 
+                clienttranslate('${player_name}\'s ${challenger_role_text} challenger memory: ${sentence} '), 
                 array(
                     'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('current_sentence'))),
-                     'player_name' => $active_player_name
+                     'player_name' => $active_player_name,
+                     'challenger_role_text' => $challenger_role_text
    
                 ) 
             );  
@@ -1366,7 +1385,12 @@ class RememberWhen extends Table
             }
             $win=$top_sentence_votes;
             $lose=$current_sentence_votes;
-            $message = '${player_name}\'s memory was voted the best, ${win}-${lose}. ${player_name} remains the champion. Congratulations!'; 
+            if ($topMemoryName == "Random Memory") {
+                $message = 'The random memory was voted the best, ${win}-${lose}. Who can defeat the well-shuffled deck?'; 
+                
+            } else {
+                $message = '${player_name}\'s memory was voted the best, ${win}-${lose}. ${player_name} remains the champion. Congratulations!'; 
+            }
          
         } else {  // current sentence won!!
             self::trace('Current memory won!');
@@ -1389,6 +1413,8 @@ class RememberWhen extends Table
             //    $this->cards->moveCard($card, 'top_sentence', $card['location_arg']);
             //}
             self::setGameStateValue('topSentenceBuilder', $currentSentenceBuilder);
+            self::setGameStateValue('championRole', self::getGameStateValue('role'));
+            
             
             $win=$current_sentence_votes;
             $lose=$top_sentence_votes;

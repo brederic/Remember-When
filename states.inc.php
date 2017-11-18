@@ -169,6 +169,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must vote for the best memory.'),
         "descriptionmyturn" => clienttranslate('${you} must vote for the best memory.'),
         "type" => "activeplayer",
+        "action" => "stTieBreak",
         "possibleactions" => array( "vote" ),
         "transitions" => array( "vote" => 51 )
     ), 	

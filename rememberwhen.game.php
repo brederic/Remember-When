@@ -818,8 +818,10 @@ class RememberWhen extends Table
             $top_player_id = self::getGameStateValue( 'topSentenceBuilder' );
             if ($top_player_id == 0) {
                 $top_player_name = "Random";
+                $champion_sentence_announcement='Random memory: ${sentence} ';
             } else {
                 $top_player_name = $players[ $top_player_id ]['player_name'];
+                $champion_sentence_announcement='${player_name}\'s champion memory: ${sentence} ';
             }
             if ($actual_choice == $prediction) {
                  // add to player score
@@ -922,7 +924,7 @@ class RememberWhen extends Table
             );   
             self::notifyAllPlayers( 
                 'voteSentence', 
-                clienttranslate('${player_name}\'s champion memory: ${sentence} '), 
+                clienttranslate($champion_sentence_announcement), 
                 array(
                     'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
                     'player_name' => $top_player_name
@@ -983,7 +985,9 @@ class RememberWhen extends Table
         self::incGameStateValue( 'currentRound', 1);
         
         self::incStat( 1, 'rounds_number' );
-        self::getStat('rounds_number');
+        $round = self::getGameStateValue( 'currentRound');
+
+
         
 
         // Make sure each player has one card  of each card type
@@ -991,15 +995,29 @@ class RememberWhen extends Table
 
         self::setGameStateValue( 'playerBuildingSentence', self::getActivePlayerId() );
         $this->setGameStateInitialValue( 'role', 0 );
-        
+
+
+        $player_name = self::getActivePlayerName();
 
         self::notifyAllPlayers('newRound', 'Beginning round ${round} of ${roundCount}. it is ${player_name}\'s turn to reminisce.', array(
-                'round' => self::getGameStateValue( 'currentRound'),
+                'round' => $round,
                 'roundCount' => self::getGameStateValue( 'totalRounds'),
-                'player_name' => self::getActivePlayerName(),
+                'player_name' =>  $player_name,
                 'active_player' => self::getActivePlayerId()
 
             ) );
+        
+        if ($round == 1) { // first round, announce random sentence
+            self::notifyAllPlayers( 
+                'voteSentence', 
+                clienttranslate('${player_name} will be trying to beat a random memory: ${sentence} '), 
+                array(
+                    'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
+                    'player_name' =>  $player_name
+   
+                ) 
+            );              
+        }
 
         // clear all previous contributions
             $sql = "
@@ -1134,34 +1152,31 @@ class RememberWhen extends Table
             self::DbQuery( $sql );
         }
         // the active player will not be voting now
-        $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder , "vote" );
-        // But if there are an even number of players voting, the active player may have to break a tie
-        if (($playersVoting-1) % 2 != 0  ) {
-            
-            // mark not voting
-            $sql = "
-                    UPDATE  player
-                    SET     
-                            vote_type = 0
-                    WHERE player_id = $currentSentenceBuilder
-                ";
-            self::DbQuery( $sql );
-        } else {
-            // mark guess = 2 for tiebreaker only
-            $sql = "
-                    UPDATE  player
-                    SET     
-                            vote_type = 2
-                    WHERE player_id = $currentSentenceBuilder
-                ";
-            self::DbQuery( $sql );            
-        }
+        $this->gamestate->setPlayerNonMultiactive( $currentSentenceBuilder, "vote" );
+
+        // mark not voting
+        $sql = "
+                UPDATE  player
+                SET     
+                        vote_type = 0
+                WHERE player_id = $currentSentenceBuilder
+            ";
+        self::DbQuery( $sql );
+       
         
     }
     
     function stTieBreak()
     {    
-       // all preparation for this vote has already been done
+       // set the active player as the tiebreaking vote
+       $currentSentenceBuilder = self::getGameStateValue( 'playerBuildingSentence' );
+       $sql = "
+       UPDATE  player
+       SET     
+               vote_type = 2
+       WHERE player_id = $currentSentenceBuilder
+        ";
+        self::DbQuery( $sql );   
         
     }
     

@@ -264,6 +264,10 @@ class RememberWhen extends Table
     function isZombie($player_id) {
        return self::getUniqueValueFromDB("SELECT player_zombie FROM player WHERE player_id=".$player_id);
     }
+
+    function countZombies() {
+        return self::getUniqueValueFromDB("SELECT count(*) FROM player WHERE player_zombie=TRUE");
+     }
 	
 		function doesPlayerHaveCardType($playerId, $cardType)
 	{
@@ -1523,8 +1527,10 @@ class RememberWhen extends Table
         // change Active Player
         self::activeNextPlayer();
         self::setGameStateValue('playerBuildingSentence', self::getActivePlayerId());
+
+        $non_zombie_players = self::getPlayerCount() - self::countZombies();
             
-        if ( self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {
+        if ($non_zombie_players >=3 && self::getGameStateValue( 'currentRound' ) < self::getGameStateValue( 'totalRounds' ) ) {
             $this->gamestate->nextState("newHand");
         } else {
              $this->gamestate->nextState("stats");

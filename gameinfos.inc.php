@@ -7,7 +7,7 @@ $gameinfos = array(
 'designer' => 'Eric Bridge',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => '',         
+'artist' => 'Matthew Moeller',         
 
 // Year of FIRST publication of this game. Can be negative.
 'year' => 2016,                 
@@ -50,7 +50,7 @@ $gameinfos = array(
 
 
 // Game is "beta". A game MUST set is_beta=1 when published on BGA for the first time, and must remains like this until all bugs are fixed.
-'is_beta' => 1,                     
+'is_beta' => 0,                     
 
 // Is this game cooperative (all players wins together or loose together)
 'is_coop' => 0, 

@@ -56,7 +56,6 @@
 
 .floatC {
 	
-	height: 475px;
 	align-content: center;
 	justify-content: center;
 	text-align: center;
@@ -110,11 +109,11 @@ ul.tab li a:focus, .active {background-color: #ebd5bd;
 	align-content: center;
 	position: relative;
     width: 750px;
-    height: 388px; 
+    height: 553px; 
 	margin: 10px;
    
     /**height: 762px; **/
-	background-size: 750px 400px;
+	background-size: 750px 553px;
  background-image: url('img/sentence.png');
  background-position: center; 
  background-repeat: no-repeat;
@@ -124,81 +123,80 @@ ul.tab li a:focus, .active {background-color: #ebd5bd;
 	clear: both;
 }
 #spot_1 {
-	top: 61px;
-	left: 59px;
+	top: 143px;
+	left: 46px;
 }
 #spot_2 {
-	top: 61px;
-	left: 221px;
+	top: 143px;
+	left: 224px;
 }
 #spot_3 {
-	top: 61px;
-	left: 396px;
+	top: 143px;
+	left: 403px;
 }
 #spot_4 {
-	top: 61px;
-	left: 558px;
+	top: 143px;
+	left: 580px;
 }
 #spot_5 {
-	top: 223px;
+	top: 343px;
 	left: 34px;
 }
 
 #spot_6 {
-	top: 223px;
-	left: 200px;
+	top: 343px;
+	left: 198px;
 }
 
 #spot_7 {
-	top: 223px;
-	left: 367px;
+	top: 343px;
+	left: 374px;
 }
 
 #spot_8 {
-	top: 223px;
-	left: 586px;
+	top: 343px;
+	left: 606px;
 }
 .spot_1 {
-	top: 61px;
-	left: 59px;
+	top: 143px;
+	left: 46px;
 }
 .spot_2 {
-	top: 61px;
-	left: 221px;
+	top: 143px;
+	left: 224px;
 }
 .spot_3 {
-	top: 61px;
-	left: 396px;
+	top: 143px;
+	left: 403px;
 }
 .spot_4 {
-	top: 61px;
-	left: 558px;
+	top: 143px;
+	left: 580px;
 }
 .spot_5 {
-	top: 223px;
+	top: 343px;
 	left: 34px;
 }
 
 .spot_6 {
-	top: 223px;
-	left: 200px;
+	top: 343px;
+	left: 198px;
 }
 
 .spot_7 {
-	top: 223px;
-	left: 367px;
+	top: 343px;
+	left: 374px;
 }
 
 .spot_8 {
-	top: 223px;
-	left: 586px;
+	top: 343px;
+	left: 606px;
 }
-
 .spot  {
     position: absolute;
 	/*border: 1px solid red;*/
-	width: 150px;
-    height: 150px;
+	width: 100px;
+    height: 100px;
 	/**color: blue; **/
 }
 

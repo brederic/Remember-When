@@ -187,7 +187,7 @@ define([
                 }
 
                 console.log('Current Sentence:');
-                console.log(this.gamedatas.current_sentence);
+                console.log(gamedatas.current_sentence);
 
                 // Cards in current sentence
                 this.currentSentence = gamedatas.current_sentence;
@@ -197,10 +197,12 @@ define([
                     var evt = { currentTarget: target};
                     showSentence(evt,'current_sentence');
                     });
+
                 for (var i in this.gamedatas.current_sentence) {
                     
                     var card = this.gamedatas.current_sentence[i];
-                    var id = 'game_' + this.getCardUniqueId(color, value);
+                    console.log(card);
+                    var id = 'game_' + this.getCardUniqueId(card.type, card.type_arg);
 
                     // verb and object are fixed
                     if (card.location_arg <= 4) {
@@ -221,9 +223,12 @@ define([
                     dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[gamedatas.champion].color+';">'+ 
                         gamedatas.players[gamedatas.champion].name +'</span>\'s Champion Memory</span>', $('top_tab'), 'only');
                 }
-                dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[this.sentenceBuilder].color+';">'+ 
+                if (this.sentenceBuilder == 0) {
+                    dojo.place('<span>Challenger Memory</span>',$('current_tab'),'only');
+                } else {
+                    dojo.place('<span><span style="font-weight:bold;color:#'+gamedatas.players[this.sentenceBuilder].color+';">'+ 
                     gamedatas.players[this.sentenceBuilder].name +'</span>\'s Challenger Memory</span>', $('current_tab'), 'only');
-                
+                }
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 

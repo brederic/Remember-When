@@ -90,7 +90,7 @@ function showSentence(evt, cityName) {
     evt.currentTarget.className += " active";
 }
  
-var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="${type}" style="background-position:-${x}px -${y}px"><div class="text_1"><span class="text">${text_1}</span></div><div class="text_2"><span class="text">${text_2}</span></div><div class="text_3"><span class="text">${text_3}</span></div><div class="text_4"><span class="text">${text_4}</span></div></div>';
+var jstpl_cardontable = '<div class="cardontable spot" id="${player_id}" type="${type}" style="background-position:-${x}px -${y}px"><div id="${player_id}_text_1" class="text_1"><span class="text">${text_1}</span></div><div id="${player_id}_text_2" class="text_2"><span class="text">${text_2}</span></div><div id="${player_id}_text_3" class="text_3"><span class="text">${text_3}</span></div><div id="${player_id}_text_4" class="text_4"><span class="text">${text_4}</span></div></div>';
 						
 var jstpl_disc='<div class="disc disccolor_${color}" id="disc_${xy}"></div>';
 

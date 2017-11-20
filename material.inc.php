@@ -721,6 +721,7 @@ $this->values_label = array(
 		
 		),
     3 => array( 
+
 		2 => clienttranslate("casually"),
 		3 => clienttranslate("respectfully"),
 		4 => clienttranslate("justifiably"),
@@ -1620,6 +1621,7 @@ $this->values_label = array(
 		233 => clienttranslate("the Scarlet Pimpernel's"),
 				),
     6 => array( 
+
 		2 => clienttranslate("defiant"),
 		3 => clienttranslate("curved"),
 		4 => clienttranslate("wide"),
@@ -3058,6 +3060,7 @@ $this->values_label = array(
 		452 => clienttranslate("I didn't want to make a scene."),
 		453 => clienttranslate("I was in \"stealth mode\"."),
 				),
+
 
 );
 

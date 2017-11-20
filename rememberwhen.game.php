@@ -1588,14 +1588,20 @@ class RememberWhen extends Table
                 
                     
                 ) 
-            );   
+            );  
+            $champion_role = self::getGameStateValue( 'championRole' );
+            if ( $champion_role == 1) {
+                $champion_role_text = "heroic";
+            } else if ( $champion_role == 2) {
+                $champion_role_text = "villainous";
+            }  
             self::notifyAllPlayers( 
                 'finalScore', 
-                clienttranslate('${player_name}\'s champion memory: ${sentence} '), 
+                clienttranslate('${player_name}\'s ${player_role} champion memory: ${sentence} '), 
                 array(
                     'sentence' => $this->buildSentence($this->populateCards($this->cards->getCardsInLocation('top_sentence'))),
-                    'player_name' => $topMemoryName
-   
+                    'player_name' => $topMemoryName,
+                    'player_role' => $champion_role_text
                 ) 
             ); 
             self::notifyAllPlayers( 

@@ -13,13 +13,13 @@ $gameinfos = array(
 'year' => 2016,                 
 
 // Game publisher
-'publisher' => 'Ad Magic, Inc.',                     
+'publisher' => 'The Game Crafter, LLC',                     
 
 // Url of game publisher website
-'publisher_website' => 'http://www.admagic.com/',   
+'publisher_website' => 'http://www.thegamecrafter.com',   
 
 // Board Game Geek ID of the publisher
-'publisher_bgg_id' => 23584,
+'publisher_bgg_id' => 2456,
 
 // Board game geek if of the game
 'bgg_id' => 185769,

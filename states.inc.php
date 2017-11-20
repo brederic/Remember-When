@@ -77,7 +77,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRandomObject" ),
-        "transitions" => array( "chooseRandomObject" => 28 )
+        "transitions" => array( "chooseRandomObject" => 28 , "zombiePass" => 53 )
     ), 	 
     28 => array(
         "name" => "drawActions",
@@ -93,7 +93,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseAction" ),
-        "transitions" => array( "chooseAction" => 22 )
+        "transitions" => array( "chooseAction" => 22 , "zombiePass" => 53 )
     ), 	
     22 => array(
         "name" => "chooseRole",
@@ -102,7 +102,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "chooseRole" ),
-        "transitions" => array( "chooseRole" => 30 )
+        "transitions" => array( "chooseRole" => 30 , "zombiePass" => 53 )
     ), 	
 
     30 => array(       
@@ -132,7 +132,7 @@ $machinestates = array(
         "updateGameProgression" => true,   
         "type" => "activeplayer",
         "possibleactions" => array( "arrangeSentence" ),
-        "transitions" => array( "arrangeSentence" => 50 )
+        "transitions" => array( "arrangeSentence" => 50  , "zombiePass" => 53)
     ), 	
 
     
@@ -161,7 +161,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stCountVotes",
-        "transitions" => array( "tieBreak" => 52, "newHand" => 20 , "stats" => 91 )
+        "transitions" => array( "tieBreak" => 52, "endHand" => 53 , "stats" => 91 )
     ),    
    
 	52 => array(
@@ -169,9 +169,18 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must vote for the best memory.'),
         "descriptionmyturn" => clienttranslate('${you} must vote for the best memory.'),
         "type" => "activeplayer",
+        "action" => "stTieBreak",
         "possibleactions" => array( "vote" ),
-        "transitions" => array( "vote" => 51 )
+        "transitions" => array( "vote" => 51 , "zombiePass" => 53 )
     ), 	
+    
+    53 => array(
+        "name" => "endHand",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndHand",
+        "transitions" => array(  "newHand" => 20 , "stats" => 91 )
+    ),  
     91 => array(
         "name" => "calcStats",
         "description" => clienttranslate("Calculating statistics"),
